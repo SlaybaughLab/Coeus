@@ -1,0 +1,15 @@
+Population Size,18
+Initial Sampling Method,random
+Levy Fraction,1.0
+Discovery Fraction,0.59
+Elite Fraction,0.26
+Max Generations,2156
+Max Function Evaluations,2620
+Stall Convergence Tolerance,0.26
+Stall Iteration Limit,4665
+Optimal Fitness,236.56
+Optimal Convergence Tolerance,0.2
+Levy Alpha,0.5
+Levy Gamma,1.2
+Levy Indepentent Variables,10
+Step Size Scaling Factor,120.3

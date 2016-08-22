@@ -1,0 +1,39 @@
+Minimum Fissions,5.00E+08
+ETA Max Weight,100.263
+Source Strength, 1E15
+/
+TCC to ETA Distance,22
+Debris Shield Thickness,0.1
+ETA Wall Thickness,0.5
+Snout Distance,59.61
+ETA Back Cover Thickness, 0.8
+ETA to Snout Mount Thickness,1.68
+ETA Face Radius,3.64, 5.48
+ETA Cone Outer Radius,7.59
+ETA Cone Opening Angle,7.51
+/
+Debris Shield Material, Al
+ETA Structural Material,Aluminum
+ETA Void Fill Material,C
+Fissile Foil, U
+/
+NAS Thickness, 0.012
+NAS Radius, 2.5
+NAS Material, Fe
+/
+NAS Activation Foils, Be, B, C
+NAS Activation Foil Thickness, 0.2, 0.1, 0.4
+NAS Activation Foil Radius, 2.26
+TOAD Follows Material, B
+/
+TOAD Material, Fe
+TOAD Activation Foils, U, Au
+TOAD Activation Foil Thickness, 0.01 , 0.02
+TOAD Activation Foil Radius, 1.2
+/
+Holder Material, Al
+Holder Fill Material, Pb
+Holder Wall Thickness,3.0
+/
+Max Vertical Components,2
+Max Horizontal Components,5
