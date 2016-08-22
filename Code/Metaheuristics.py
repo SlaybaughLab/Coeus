@@ -271,7 +271,7 @@ def Cell_Levy_Flights(x,eta,S):
             if new_d[i*4+3] > 0.0:
                 lb.append(new_d[i*4+3])  
             else:
-                lb.append(0.0) 
+                lb.append(0.0000001) 
             ub.append(eta.snout_dist-eta.t_c-0.00001)
             ub.append(eta.snout_dist-eta.t_c-new_d[i*4+1])
             ub.append(eta.r_o)
