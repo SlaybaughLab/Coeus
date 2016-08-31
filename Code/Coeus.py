@@ -13,7 +13,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 18Aug16
+# Last Modified: 31Aug16
 #
 #######################################################################################################
 
@@ -91,8 +91,11 @@ start_time=time.time()     #Start Clock
 rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
     
 # Set logging options
-if os.path.isfile('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):
-    os.remove('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+if os.path.exists('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):    
+    if os.path.isfile('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):
+        os.remove('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+else:
+    os.mkdir(('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
 logger = logging.getLogger('Coeus')
 fh = logging.FileHandler('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
