@@ -761,6 +761,10 @@ class Timeline():
         for n in pop:
             module_logger.info("Parent ID # {} has fitness = {}".format(n.ident,n.fit))
         module_logger.info("\n".format(n.ident,n.fit))    
+        
+        # Check for results folders existence
+        if os.path.exists('{}/Results/History'.format(path))==False:    
+            os.mkdir(('{}/Results/History'.format(path))
     
         #Store history on timeline if new optimal design found
         path=os.path.abspath(os.path.join(os.getcwd(), os.pardir))
