@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 20Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 
@@ -570,16 +570,15 @@ def Build_Batch(lst,tasks,code,suf=""):
                 
             f.write("# Partition:\n")
             f.write("#SBATCH --partition=savio\n")
-            #if tasks*len(lst) <= 120 or code == 'advantg':
-            #    f.write("# QoS:\n")
-            #    f.write("#SBATCH --qos=nuclear_normal\n")
-            #    f.write("# Account:\n")
-            #    f.write("#SBATCH --account=co_nuclear\n")
-            #else:
             f.write("# QoS:\n")
-            f.write("#SBATCH --qos=savio_normal\n")
-            f.write("# Account:\n")
-            f.write("#SBATCH --account=fc_neutronics\n")
+            if (tasks <= 80 and tasks*len(lst) <= 200) or code == 'advantg':
+                f.write("#SBATCH --qos=nuclear_normal\n")
+                f.write("# Account:\n")
+                f.write("#SBATCH --account=co_nuclear\n")
+            else:
+                f.write("#SBATCH --qos=savio_normal\n")
+                f.write("# Account:\n")
+                f.write("#SBATCH --account=fc_neutronics\n")
             f.write("# Processors:\n")
             f.write("#SBATCH --ntasks={}\n".format(tasks))
 

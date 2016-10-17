@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 05May16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 """ NuclearData tests """
@@ -50,20 +50,20 @@ def test_strip_undesirables1():
     mats=Strip_Undesireables(mats,True,True,False)
     assert_equal(len(mats),l-14)
     mats=Strip_Undesireables(mats,True,True,True)
-    assert_equal(len(mats),l-33)
+    assert_equal(len(mats),l-35)
     
 def test_strip_undesirables2():
     mats=make_elements()
     l=len(mats)
     mats=Strip_Undesireables(mats,True,True,True)
     mats=Set_Density(mats)
-    assert_equal(len(mats),l-33)
+    assert_equal(len(mats),l-35)
     
 def test_build_matlib():
     mats=Build_Matlib(mat_path)
     assert_equal(mats['Cd'].density,8.65)
     assert_equal(mats['Pb'].density,11.34)
-    assert_equal(len(mats),53)
+    assert_equal(len(mats),51)
     
 def test_Moderating_Ratio():
     test=Moderating_Ratio("Pb",10.25,0.126)

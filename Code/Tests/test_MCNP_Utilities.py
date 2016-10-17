@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 """ MCNP-Utilities tests """
@@ -39,16 +39,17 @@ test_surf_repr='MCNP Surface(600, TRC, vx=1.0, vy=2.0, vz=3.0, hx=2.5, hy=23.6, 
 test_surf_str='700  px    2.00000  $test\n'
 test_cell_repr='MCNP Cell:(1, mat=10, units=atom, density=0.0422, booleam geom=500 -501, n imp=1, p_imp=0, comment=)'
 
-test_cell_str1='1  10  -4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n'
+test_cell_str1='1  10  4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n'
 test_cell_str2='1  10  -4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n'
 test_cell_str3='1  10            500 -501  imp:n=1 imp:p=0 $\n'
 test_cell_str4='1  10  -4.22300e-02  (500 -501):(502 -503):(504 -505):(506 -507):(508\n     -509):(509 -510)  imp:n=1 imp:p=0  $\n'
 
 mat_card="C name: Air (dry near sea level)\nC density = 0.0\nm?\n     6012 -1.2256e-04\n     6013 -1.4365e-06\n     7014 -7.5527e-01\n     8016 -2.3178e-01\n     18036 -3.8527e-05\n     18038 -7.6673e-06\n     18040 -1.2781e-02\n"
 
-test_geom_str1='MCNP geometry instance properties:\nMCNP Surfaces:\n509  TRC    1.00000   2.00000   3.00000    2.50000  23.60000  23.56000   \n     3.40000    1.00000  $one\n\n504  px    2.00000  $two\n\n505  Py   -2.00000  $three\n\nMCNP Cells:\n1  11  -4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\n2  12  -4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\n3  13  -4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\nMCNP Materials:\nAir (dry near sea level)\nAl\n' 
+test_geom_str1='MCNP geometry instance properties:\nMCNP Surfaces:\n509  TRC    1.00000   2.00000   3.00000    2.50000  23.60000  23.56000   \n     3.40000    1.00000  $one\n\n504  px    2.00000  $two\n\n505  Py   -2.00000  $three\n\nMCNP Cells:\n1  11  4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\n2  12  4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\n3  13  4.22000e-02  500 -501  imp:n=1 imp:p=0  $\n\nMCNP Materials:\nAir (dry near sea level)\nAl\n' 
 
 base_geom='MCNP geometry instance properties:\nMCNP Surfaces:\n500  TRC    0.00000   0.00000  16.12650    0.00000   0.00000  14.35147   \n     0.00001    5.16119  $inner debris cover\n\n501  TRC    0.00000   0.00000  15.24000    0.00000   0.00000  15.23797   \n     0.00001    5.48000  $outer debris cover\n\n502  TRC    0.00000   0.00000  30.77797    0.00000   0.00000  10.57235   \n     5.26908    9.07119  $inner cone\n\n503  TRC    0.00000   0.00000  30.47797    0.00000   0.00000  10.87235   \n     5.48000    9.39000  $outer cone\n\n504  RCC    0.00000   0.00000  41.35032    0.00000   0.00000   9.78968   \n     8.89000  $inner cylinder\n\n505  RCC    0.00000   0.00000  41.35032    0.00000   0.00000   9.78968   \n     9.39000  $outer cylinder\n\n506  RCC    0.00000   0.00000  51.14000    0.00000   0.00000   1.00000   \n     9.39000  $cover\n\n507  RCC    0.00000   0.00000  52.14000    0.00000   0.00000   2.40000   \n     5.63400  $adapter\n\nMCNP Cells:\n1   1  -2.70000e+00  500 -501  imp:n=1 imp:p=0  $\n\n2   1  -2.70000e+00  502 -503  imp:n=1 imp:p=0  $\n\n3   1  -2.70000e+00  504 -505  imp:n=1 imp:p=0  $\n\n4   1  -2.70000e+00  -506  imp:n=1 imp:p=0  $\n\n5   1  -2.70000e+00  -507  imp:n=1 imp:p=0  $\n\nMCNP Materials:\nAl\nZr\nZn\nIn\nTa\nAu\nPb\nFe\n'
+
 #-------------------------------------------------------------------------------------------------------------#     
 def test_mcnp_surface1():
     surf=MCNP_Surface(500,"SO",r=2.534,comment="test")

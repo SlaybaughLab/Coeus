@@ -7,7 +7,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 19Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 
@@ -609,7 +609,7 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
         
         # Check constraints
         weight=weight/1000         # conversion to kg
-        if fissions[0] == 0.0:
+        if fissions[0] == 0.0 and fissions[0] < min_fiss:
             module_logger.warning("WARNING: No fissions occured for the ETA design in parent #{}".format(i))
             tmp_fit+=1E15
         elif fissions[0] > 0 and fissions[0] < min_fiss:
@@ -763,11 +763,11 @@ class Timeline():
         module_logger.info("\n".format(n.ident,n.fit))    
         
         # Check for results folders existence
+        path=os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         if os.path.exists('{}/Results/History'.format(path))==False:    
-            os.mkdir(('{}/Results/History'.format(path))
+            os.mkdir('{}/Results/History'.format(path))
     
         #Store history on timeline if new optimal design found
-        path=os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         if len(self.tline)<1:
             self.tline.append(Event(0,feval,pop[0].fit,pop[0].rset.nps,pop[0].ident)) 
             self.write()
