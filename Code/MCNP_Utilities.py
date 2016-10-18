@@ -168,8 +168,10 @@ class MCNP_Settings:
         self.tally+="FC14 Fission Reaction Rate (Fissions per cm^3 per src particle)\n"
         self.tally+="F14:n {}\n".format(cell)
         self.tally+="FM14  (-1 {} -6)     $Flux * atom density of material {} * sigma f\n".format(mat,mat)
-        self.tally+="FC24 Uranium Flux Spectra (Number per cm^2 per src neutron)\n"
-        self.tally+="F24:n {}\n".format(cell) 
+        #self.tally+="FC24 Uranium Flux Spectra (Number per cm^2 per src neutron)\n"
+        #self.tally+="F24:n {}\n".format(cell) 
+        self.tally+="FC24 Flux Spectra (Number per cm^2 per src neutron)\n"
+        self.tally+="F24:n {}\n".format(4)
 
 #-------------------------------------------------------------------------------------------------------------#  
 class MCNP_Geometry:
