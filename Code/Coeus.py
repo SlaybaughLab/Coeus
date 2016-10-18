@@ -95,7 +95,7 @@ if os.path.exists('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspa
     if os.path.isfile('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):
         os.remove('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
 else:
-    os.mkdir('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+    os.mkdir('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))))
 logger = logging.getLogger('Coeus')
 fh = logging.FileHandler('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
