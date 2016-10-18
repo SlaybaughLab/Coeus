@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 20Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 
@@ -266,12 +266,12 @@ def Cell_Levy_Flights(x,eta,S):
                 new_d[i*4+4]=new_d[i*4+3]
                 new_d[i*4+3]=t
             lb.append(eta.tcc_dist+eta.t_ds)
-            lb.append(0.0000001)
-            lb.append(0.0000001)
-            if new_d[i*4+3] > 0.0:
+            lb.append(0.00001)
+            lb.append(0.00001)
+            if new_d[i*4+3] > 0.00001:
                 lb.append(new_d[i*4+3])  
             else:
-                lb.append(0.0000001) 
+                lb.append(0.00001) 
             ub.append(eta.snout_dist-eta.t_c-0.00001)
             ub.append(eta.snout_dist-eta.t_c-new_d[i*4+1])
             ub.append(eta.r_o)
@@ -283,7 +283,7 @@ def Cell_Levy_Flights(x,eta,S):
         ub.append(eta.snout_dist-eta.t_c)
         for i in range(-eta.max_horiz+1,0):
             new_d[i]=new_d[i]+new_d[i-1]
-            lb.append(0.0000001)
+            lb.append(0.00001)
             ub.append(eta.snout_dist-eta.t_c-new_d[i-1])
         lb=np.array(lb)
         module_logger.debug("Lower Bounds ={}\n".format(lb)) 
@@ -1019,12 +1019,12 @@ def Mutate(x,eta,S):
                 tmp[j,i*4+4]=tmp[j,i*4+3]
                 tmp[j,i*4+3]=t
             lb.append(eta.tcc_dist+eta.t_ds)
-            lb.append(0.0000001)
-            lb.append(0.0000001)
-            if tmp[j,i*4+3] > 0.0:
+            lb.append(0.00001)
+            lb.append(0.00001)
+            if tmp[j,i*4+3] > 0.00001:
                 lb.append(tmp[j,i*4+3])  
             else:
-                lb.append(0.0000001)   
+                lb.append(0.00001)   
             ub.append(eta.snout_dist-eta.t_c-0.00001)
             ub.append(eta.snout_dist-eta.t_c-tmp[j,i*4+1])
             ub.append(eta.r_o)
@@ -1035,7 +1035,7 @@ def Mutate(x,eta,S):
         ub.append(eta.snout_dist-eta.t_c)
         delta=tmp[j,-eta.max_horiz]
         for i in range(-eta.max_horiz+1,0):
-            lb.append(0.0000001)
+            lb.append(0.00001)
             ub.append(eta.snout_dist-eta.t_c-delta)
             delta+=tmp[j,i]
         lb=np.array(lb)

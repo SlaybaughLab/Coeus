@@ -8,7 +8,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 
@@ -165,7 +165,7 @@ def Strip_Undesireables(mat_lib, remove_gases, remove_liquids, remove_expensive)
                 module_logger.warning("{} not found in the materials library.".format(i))
     
     if remove_expensive==True:
-        lst=['B','Sc','Ge','As','Se','Rb','Pd','Ag','Ho','Tm','Yb','Lu','Re','Os','Ir','Rh','Pt','Tl','Th', 'U']
+        lst=['B','Ba','Sc','Ge','As','Se','Rb','Pd','Ag','Ho','Tm','Yb','Lu','Re','Os','Ir','Rh','Pt','Tl','Th', 'U']
         for i in lst:
             if i in mat_lib:
                 del mat_lib[i] 

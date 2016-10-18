@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 20Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 
@@ -801,7 +801,7 @@ class MCNP_Surface:
         
         # If specified surface typse is RCC, check for appropriate optional arguments
         elif self.s_type.lower() == "rcc":
-            surf="{:3d}  {}  {:9.5f} {:9.5f} {:11.7f}  {:9.5f} {:9.5f} {:11.7f}  {:11.7f}  ${}\n"\
+            surf="{:3d}  {}  {:9.5f} {:9.5f} {:9.5f}  {:9.5f} {:9.5f} {:9.5f}  {:9.5f}  ${}\n"\
                     .format(self.name, self.s_type, self.vx, \
                     self.vy, self.vz, self.hx, self.hy, self.hz, self.r, self.c)
             

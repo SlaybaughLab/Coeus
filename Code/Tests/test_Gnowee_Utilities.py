@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 """ Gnowee-Utilities tests """
@@ -146,15 +146,11 @@ def test_pop_update():
     assert_equal(old[0].rset.nps,100*mcnp.nps)
     
 def test_Rejection_Bounds():
+    gs=Gnowee_Settings(set_path)
     cur=np.array([0.25,0.35,0.45])
+    step=np.array([-1.5,2.0,3.0])
     new=np.array([-1.25,2.35,3.45])
     lb=np.array([0,0,0])
     ub=np.array([3,3,3])
-    new=Rejection_Bounds(cur,new,lb,ub,change_count=0)
-    np.testing.assert_equal(new,np.array([0.25,2.35,0.45]))
-    cur=[0.25,0.35,0.45]
-    new=[-1.25,2.35,3.45]
-    lb=[0,0,0]
-    ub=[3,3,3]
-    new=Rejection_Bounds(cur,new,lb,ub,change_count=0)
-    assert_equal(new,[0.25,2.35,0.45])
+    new=Rejection_Bounds(cur,new,step,lb,ub,gs,change_count=0)
+    np.testing.assert_almost_equal(new,np.array([ 0.0625,  2.35  ,  1.95  ]))

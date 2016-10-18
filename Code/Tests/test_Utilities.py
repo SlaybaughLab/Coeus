@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Aug16
+# Last Modified: 17Oct16
 #
 #######################################################################################################
 """ Utilities tests """
@@ -154,8 +154,8 @@ def test_Event():
     
 def test_Meta_Stats():
     test=Meta_Stats()
-    assert_equal(repr(test),'       0,0;               0,0;            0,0;             0,0;             0,0;            0,0;          0,0;       0,0;\n')
-    assert_equal(str(test),'Mat_Levy_Flights  Cell_Levy_Flights  Mutate_Mats  Partial_Inversion  A_Operator  Study_Operator  Three_opt  Discard\n       0,0;               0,0;            0,0;             0,0;             0,0;            0,0;          0,0;       0,0;\n\n')
-    test.update(mat_mut=(1,2),discard=(2,3))
-    assert_equal(repr(test),'       0,0;               0,0;            1,2;             0,0;             0,0;            0,0;          0,0;       2,3;\n')
+    assert_equal(repr(test),'       0,0;               0,0;            0,0;             0,0;             0,0;             0,0;            0,0;          0,0;       0,0;\n')
+    assert_equal(str(test),'Mat_Levy_Flights  Cell_Levy_Flights  Elite_Crossover  Partial_Inversion  Mutate  Two_opt  Crossover  Three_opt  Discard\n       0,0;               0,0;            0,0;             0,0;             0,0;              0,0;            0,0;          0,0;       0,0;\n\n')
+    test.update(elite_cross=(1,2),discard=(2,3))
+    assert_equal(repr(test),'       0,0;               0,0;            1,2;             0,0;             0,0;             0,0;            0,0;          0,0;       2,3;\n')
     test.write(header=True)
