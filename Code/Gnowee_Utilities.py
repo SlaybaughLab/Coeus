@@ -685,11 +685,11 @@ def Pop_Update(old, new, nps, eta=None, mats=None, run=None, rr=False):
             changes+=1
             old[ind]=cp.deepcopy(new[i])
             old[ind].ident=old_ident
-            if old[ind].fit <= 0.135 and old[ind].rset.nps<nps*100:
+            if old[ind].fit <= 1750 and old[ind].rset.nps<nps*100:
                 old[ind].rset.nps=nps*100
                 ids_1E8.append(old[ind].ident)
                 ind_1E8.append(ind)
-            elif old[ind].fit <= 0.5 and old[ind].rset.nps<nps*10:
+            elif old[ind].fit <= 2750 and old[ind].rset.nps<nps*10:
                 old[ind].rset.nps=nps*10
                 ids_1E7.append(old[ind].ident)
                 ind_1E7.append(ind)
