@@ -39,7 +39,30 @@ import os
 import sys
 sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
 
-#-------------------------------------------------------------------------------------------------------------#     
+#-------------------------------------------------------------------------------------------------------------#    
+def print_MCNP_input_files(new_pop, algo):
+    ids=[]
+    particles=[]
+    for i in range(0,len(new_pop)):
+        Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+        ids.append(new_pop[i].ident)
+        particles.append(new_pop[i].rset.nps)
+        for m in range(9,len(new_pop[i].geom.matls)):
+            if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
+                sys.exit()
+    logger.info('Gen {} ' + algo +' finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time)) 
+
+def run_MCNP_on_algo(algo, update_int):
+    if len(ids)>0:
+        Run_Transport(ids,particles,code='mcnp6.mpi')
+        logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
+    
+        # Calculate Fitness
+        Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
+        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, eta_params, mat_lib, Run_Transport, rr=False) 
+        pop=history.update(pop,0, update_int)
+        stats.update(algo,(changes, update_int + feval))
+
 def main(**kwargs):
     """
     Entry point for the Coeus program.  
@@ -336,207 +359,51 @@ def main(**kwargs):
         
         ######## Levy flight permutation of materials ########
         new_pop=Mat_Levy_Flights(pop, mat_lib, mod_rat, g_set, [eta_params.fissile_mat,'Au'])
+        print_MCNP_input_files(new_pop, "Levy flight permutation of materials")
+        # run_MCNP_on_algo("mat_levy", int(g_set.p*g_set.fl))
 
-        # Print MCNP input Files
-        ids=[]
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()
-        logger.info('Gen {} Levy flight permutation of materials finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
-        
-        # Run MCNP
-#        if len(ids)>0:
-#            Run_Transport_Threads(ids,code='mcnp6')
-#            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-
-            # Calculate Fitness
-#            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False)  
-#            pop=history.update(pop, 0, int(g_set.p*g_set.fl)+feval)
-#            stats.update(mat_levy=(changes,int(g_set.p*g_set.fl)+feval))
         
         ######## Levy flight permutation of cells ########
         new_pop=Cell_Levy_Flights(pop,eta_params,g_set)
+        print_MCNP_input_files(new_pop, "Levy flight permutation of cells")
+        # run_MCNP_on_algo("cell_levy", int(g_set.p*g_set.fl))
 
-        # Print MCNP input Files
-        ids=[] 
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()            
-        logger.info('Gen {} Levy flight permutation of cells finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
-        
-        # Run MCNP
-#        if len(ids)>0:
-#            Run_Transport_Threads(ids,code='mcnp6')
-#            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
-            # Calculate Fitness
-#            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
-#            pop=history.update(pop, 0, int(g_set.p*g_set.fl)+feval)
-#            stats.update(cell_levy=(changes,int(g_set.p*g_set.fl)+feval))
-        
-        
         ######## Elite_Crossover ########
         new_pop=Elite_Crossover(pop,mod_rat,eta_params,mat_lib,g_set,[eta_params.fissile_mat,'Au'])
-
-        # Print MCNP input Files
-        ids=[] 
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()       
-        logger.info('Gen {} Elite_Crossover finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
-        
-        # Run MCNP
-#        if len(ids)>0:
-#            Run_Transport_Threads(ids,code='mcnp6')
-#            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-
-            # Calculate Fitness
-#            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
-#            pop=history.update(pop, 0, 1+feval)
-#            stats.update(elite_cross=(changes,1+feval))    
+        print_MCNP_input_files(new_pop,"Elite_Crossover")
+        # run_MCNP_on_algo("elite_cross", 1) 
         
         
         ######## Mutate ########
         new_pop=Mutate(pop, eta_params, g_set)
-
-        # Print MCNP input Files
-        ids=[] 
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()
-        logger.info('Gen {} Mutation Operator finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
-     
-        # Run MCNP
-#        if len(ids)>0:
-#            Run_Transport_Threads(ids,code='mcnp6')
-#            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-
-            # Calculate Fitness
-#            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)   
-#            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False)  
-#            pop=history.update(pop, 0, int(g_set.p)+feval)
-#            stats.update(mutate=(changes,int(g_set.p)+feval))   
+        print_MCNP_input_files(new_pop, "Mutation Operator")
+        # run_MCNP_on_algo("mutate", int(g_set.p))
         
         
         ######## Crossover ########
         new_pop=Crossover(pop,g_set)
-
-        # Print MCNP input Files
-        ids=[] 
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()       
-        logger.info('Gen {} Crossover finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
+        print_MCNP_input_files(new_pop, "Crossover")
+        # run_MCNP_on_algo("crossover", int(g_set.p*g_set.fe))
         
-        # Run MCNP
-#        if len(ids)>0:
-#            Run_Transport_Threads(ids,code='mcnp6')
-#            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
-            # Calculate Fitness
-#            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
-#            pop=history.update(pop, 0, int(g_set.p*g_set.fe)+feval)
-#            stats.update(crossover=(changes,int(g_set.p*g_set.fe)+feval))
-            
-        
         ######## 2-opt ########
         if eta_params.max_horiz >= 4:
             new_pop=Two_opt(pop,g_set)
-
-            # Print MCNP input Files
-            ids=[] 
-            particles=[]
-            for i in range(0,len(new_pop)):
-                Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-                ids.append(new_pop[i].ident)
-                particles.append(new_pop[i].rset.nps)
-                for m in range(9,len(new_pop[i].geom.matls)):
-                    if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                        sys.exit()
-            logger.info('Gen {} 2-opt finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
-            
-            # Run MCNP
-#            if len(ids)>0:
-#                Run_Transport_Threads(ids,code='mcnp6')
-#                logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-
-                # Calculate Fitness
-#                Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#                (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
-#                pop=history.update(pop, 0, int(g_set.p)+feval)
-#                stats.update(two_opt=(changes,int(g_set.p)+feval))
+            print_MCNP_input_files(new_pop, "2-opt")
+            # run_MCNP_on_algo("two_opt", int(g_set.p*g_set.fe))
         
         
         ######## 3-opt ########
         if eta_params.max_horiz >= 6:
             new_pop=Three_opt(pop,g_set)
+            print_MCNP_input_files(new_pop, "3-opt")
+            # run_MCNP_on_algo("three_op", int(g_set.p))
 
-            # Print MCNP input Files
-            ids=[] 
-            particles=[]
-            for i in range(0,len(new_pop)):
-                Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-                ids.append(new_pop[i].ident)
-                particles.append(new_pop[i].rset.nps)
-                for m in range(9,len(new_pop[i].geom.matls)):
-                    if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                        sys.exit()
-            logger.info('Gen {} 3-Opt finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
 
-            # Run MCNP
-#            if len(ids)>0:
-#                Run_Transport_Threads(ids,code='mcnp6')
-#                logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-
-                # Calculate Fitness
-#                Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)  
-#                (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
-#                pop=history.update(pop, 0, int(g_set.p)+feval)
-#                stats.update(three_op=(changes,int(g_set.p)+feval))
-        
         ######## Discard Cells ########
         new_pop=Discard_Cells(pop,mat_lib,g_set)
-
-        # Print MCNP input Files
-        ids=[] 
-        particles=[]
-        for i in range(0,len(new_pop)):
-            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-            ids.append(new_pop[i].ident)
-            particles.append(new_pop[i].rset.nps)
-            for m in range(9,len(new_pop[i].geom.matls)):
-                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                    sys.exit()
-        logger.info('Gen {} Discard Cells finished at {} sec\n'.format(history.tline[-1].g,time.time() - start_time))
+        print_MCNP_input_files(new_pop, "Discard Cells")
        
         # Run MCNP
 #        if len(ids)>0:
@@ -550,7 +417,7 @@ def main(**kwargs):
 #            else:
 #                (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, rr=False) 
 #            pop=history.update(pop, 1, int(g_set.p*g_set.fd)+feval)
-#            stats.update(discard=(changes,int(g_set.p*g_set.fd)+feval))
+#            stats.update("discard",(changes,int(g_set.p*g_set.fd)+feval))
 #            stats.write()
       
         
