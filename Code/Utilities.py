@@ -863,16 +863,12 @@ class Meta_Stats():
     """
 
     def __init__(self, mat_levy=(0,0), cell_levy=(0,0), elite_cross=(0,0), part_inv=(0,0), mutate=(0,0), two_opt=(0,0), crossover=(0,0), three_op=(0,0), discard=(0,0), fname=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/Results/meta_stats.txt"):
-        self.mat_levy=mat_levy
-        self.cell_levy=cell_levy
-        self.elite_cross=elite_cross
-        self.part_inv=part_inv
-        self.mutate=mutate
-        self.two_opt=two_opt
-        self.crossover=crossover
-        self.three_op=three_op
-        self.discard=discard
-        self.fname=fname
+
+        self.algorithms = {"mat_levy": mat_levy, "cell_levy": cell_levy, 
+                    "elite_cross": elite_cross, "part_inv":part_inv, "mutate": mutate, 
+                    "two_opt":two_opt, "crossover":crossover,"three_op": three_op, 
+                    "discard": discard, "fname": fname}
+
         if os.path.isfile(self.fname)==True:
             os.remove(self.fname)
         
@@ -887,16 +883,8 @@ class Meta_Stats():
         s = header
         return s
     
-    def update(self, mat_levy=(0,0), cell_levy=(0,0), elite_cross=(0,0), part_inv=(0,0), mutate=(0,0), two_opt=(0,0), crossover=(0,0), three_op=(0,0), discard=(0,0)):
-        self.mat_levy=(self.mat_levy[0]+mat_levy[0],self.mat_levy[1]+mat_levy[1])
-        self.cell_levy=(self.cell_levy[0]+cell_levy[0],self.cell_levy[1]+cell_levy[1])
-        self.elite_cross=(self.elite_cross[0]+elite_cross[0],self.elite_cross[1]+elite_cross[1])
-        self.part_inv=(self.part_inv[0]+part_inv[0],self.part_inv[1]+part_inv[1])
-        self.mutate=(self.mutate[0]+mutate[0],self.mutate[1]+mutate[1])
-        self.two_opt=(self.two_opt[0]+two_opt[0],self.two_opt[1]+two_opt[1])
-        self.crossover=(self.crossover[0]+crossover[0],self.crossover[1]+crossover[1])
-        self.three_op=(self.three_op[0]+three_op[0],self.three_op[1]+three_op[1])
-        self.discard=(self.discard[0]+discard[0],self.discard[1]+discard[1])
+    def update(self, alg, val):
+        self.algorithms[alg] = (self.algorithms[alg][0]+val[0], self.algorithms[alg][1]+val[1])
     
     def write(self,header=False):
         # Create and open input file 
