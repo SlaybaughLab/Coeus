@@ -867,18 +867,19 @@ class Meta_Stats():
         self.algorithms = {"mat_levy": mat_levy, "cell_levy": cell_levy, 
                     "elite_cross": elite_cross, "part_inv":part_inv, "mutate": mutate, 
                     "two_opt":two_opt, "crossover":crossover,"three_op": three_op, 
-                    "discard": discard, "fname": fname}
+                    "discard": discard}
+        self.fname=fname
 
         if os.path.isfile(self.fname)==True:
             os.remove(self.fname)
         
     def __repr__(self):
-        return "{:8d},{};  {:14d},{};  {:11d},{};  {:12d},{};  {:12d},{};  {:12d},{};  {:11d},{};  {:9d},{};  {:6d},{};\n".format(self.mat_levy[0], self.mat_levy[1], self.cell_levy[0], self.cell_levy[1], self.elite_cross[0], self.elite_cross[1], self.part_inv[0], self.part_inv[1], self.mutate[0], self.mutate[1], self.two_opt[0], self.two_opt[1], self.crossover[0], self.crossover[1], self.three_op[0], self.three_op[1], self.discard[0], self.discard[1])
+        return "{:8d},{};  {:14d},{};  {:11d},{};  {:12d},{};  {:12d},{};  {:12d},{};  {:11d},{};  {:9d},{};  {:6d},{};\n".format(self.algorithms["mat_levy"][0], self.algorithms["mat_levy"][1], self.algorithms["cell_levy"][0], self.algorithms["cell_levy"][1], self.algorithms["elite_cross"][0], self.algorithms["elite_cross"][1], self.algorithms["part_inv"][0], self.algorithms["part_inv"][1], self.algorithms["mutate"][0], self.algorithms["mutate"][1], self.algorithms["two_opt"][0], self.algorithms["two_opt"][1], self.algorithms["crossover"][0], self.algorithms["crossover"][1], self.algorithms["three_op"][0], self.algorithms["three_op"][1], self.algorithms["discard"][0], self.algorithms["discard"][1])
     
     
     def __str__(self):
         header = ["Mat_Levy_Flights  Cell_Levy_Flights  Elite_Crossover  Partial_Inversion  Mutate  Two_opt  Crossover  Three_opt  Discard"]
-        header += ["{:8d},{};  {:14d},{};  {:11d},{};  {:12d},{};  {:12d},{};   {:12d},{};  {:11d},{};  {:9d},{};  {:6d},{};\n".format(self.mat_levy[0], self.mat_levy[1], self.cell_levy[0], self.cell_levy[1], self.elite_cross[0], self.elite_cross[1], self.part_inv[0], self.part_inv[1], self.mutate[0], self.mutate[1], self.two_opt[0], self.two_opt[1], self.crossover[0], self.crossover[1], self.three_op[0], self.three_op[1], self.discard[0], self.discard[1])]
+        header += repr(self)
         header ="\n".join(header)+"\n"
         s = header
         return s
