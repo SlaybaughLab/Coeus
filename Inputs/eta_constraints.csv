@@ -2,38 +2,38 @@ Minimum Fissions,1.00E9
 ETA Max Weight, 85
 Source Strength,1.5E15
 /
-TCC to ETA Distance,6.0
-Debris Shield Thickness,0.3
-ETA Wall Thickness,0.6
-Snout Distance,42.5
-ETA Back Cover Thickness, 1.2
-ETA to Snout Mount Thickness,1.8
-ETA Face Radius,2.19
-ETA Cone Outer Radius,14.0
-ETA Cone Opening Angle,38.85
+TCC to ETA Distance,10.0
+Debris Shield Thickness,1e-5
+ETA Wall Thickness,1e-5
+Snout Distance,45
+ETA Back Cover Thickness, 1
+ETA to Snout Mount Thickness,1e-5
+ETA Face Radius,6
+ETA Cone Outer Radius,10.0
+ETA Cone Opening Angle,30
 /
 Debris Shield Material,Stainless Steel 409
 ETA Structural Material,Aluminum alloy 6061-O
 ETA Void Fill Material,Vacuum
 Fissile Foil,HEU
 /
-NAS Thickness, 0.14
-NAS Radius, 2.654
+NAS Thickness, 1e-5
+NAS Radius, 1e-5
 NAS Material, Aluminum alloy 6061-O
 /
 NAS Activation Foils, Zr, Ni, In, Al, Ta
-NAS Activation Foil Thickness,0.1, 0.1, 0.1, 0.1, 0.01
-NAS Activation Foil Radius, 2.5
+NAS Activation Foil Thickness,1e-5, 1e-5, 1e-5, 1e-5, 1e-5
+NAS Activation Foil Radius, 1e-5
 TOAD Follows Material, In
 /
 TOAD Material, Aluminum alloy 6061-O
 TOAD Activation Foils,Al,Au,Al,HEU,Al
-TOAD Activation Foil Thickness,0.00254,0.0254,0.00254,0.00508,0.00254
-TOAD Activation Foil Radius,2.004
+TOAD Activation Foil Thickness,1e-5,1e-5,1e-5,1e-5,1e-5
+TOAD Activation Foil Radius,1e-5
 /
 Holder Material, Aluminum alloy 6061-O
 Holder Fill Material, Pb
-Holder Wall Thickness,0.2
+Holder Wall Thickness,1e-5
 /
 Max Vertical Components,3
 Max Horizontal Components,7
