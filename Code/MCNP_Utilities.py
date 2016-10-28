@@ -991,8 +991,9 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
                 str1=mats[key].mcnp()
                 str1=str1.split('\n')
                 str1[2]="m{}".format(i)
-                if mats[key].metadata['name'] == "Ta" or mats[key].metadata['name'] == "W":
-                    str1.pop(3)
+                for s in range(0,len(str1)):
+                    if str1[s][:9]=="     8018" or str1[s][:10]=="     73180" or str1[s][:10]=="     74180":
+                    str1.pop(s)
                 inp_file.write("{}".format('\n'.join("{}".format(i) for i in str1)))
                 i+=1
 
