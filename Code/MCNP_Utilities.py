@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Oct16
+# Last Modified: 31Oct16
 #
 #######################################################################################################
 
@@ -988,13 +988,13 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c ****************************************************************************\n")
             i=1
             for key in geom.matls:
-                str1=mats[key].mcnp()
-                str1=str1.split('\n')
+                str1=mats[key].mcnp().split('\n')
                 str1[2]="m{}".format(i)
+                str2=[]
                 for s in range(0,len(str1)):
-                    if str1[s][:9]=="     8018" or str1[s][:10]=="     73180" or str1[s][:10]=="     74180":
-                    str1.pop(s)
-                inp_file.write("{}".format('\n'.join("{}".format(i) for i in str1)))
+                    if str1[s][:9]!="     8018" and str1[s][:10]!="     73180" and str1[s][:10]!="     74180":
+                                str2.append(str1[s])
+                inp_file.write("{}".format('\n'.join("{}".format(i) for i in str2)))
                 i+=1
 
             # Calculate cos(theta)
