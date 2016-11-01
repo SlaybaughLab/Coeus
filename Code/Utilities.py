@@ -375,7 +375,7 @@ def Run_Transport_PP(lst,tasks=0,code='mcnp6'):
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
     
 #-------------------------------------------------------------------------------------------------------------#  
-def Run_Transport(lst,nps=[],code='mcnp6'):
+def Run_Transport(lst,nps=[],code='mcnp6', qos="nuclear_normal", account="co_nuclear", partition="savio"):
     """
     Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
    
@@ -456,14 +456,14 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
             
             # Build batch
             if (t < 20 and len(sub_lst)%2==0) or t >= 20:
-                run_files.append(Build_Batch(sub_lst,t,code))
+                run_files.append(Build_Batch(sub_lst,t,code, qos, account, partition))
             else:
-                run_files.append(Build_Batch(sub_lst[0:-1],t,code))
-                run_files.append(Build_Batch([sub_lst[-1]],t,code,suf="a"))
+                run_files.append(Build_Batch(sub_lst[0:-1],t,code, qos, account, partition))
+                run_files.append(Build_Batch([sub_lst[-1]],t,code, qos, account, partition,suf="a"))
                 
     elif code=="advantg":
         # Build batch
-        fname=Build_Batch(lst,20,code)
+        fname=Build_Batch(lst,20,code, qos, account, partition)
         
         # Copy files into correct run directory
         for i in lst:
@@ -514,7 +514,7 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
         
 #-------------------------------------------------------------------------------------------------------------#  
-def Build_Batch(lst,tasks,code,suf=""):
+def Build_Batch(lst,tasks,code, qos, account, partition, suf=""):
     """
     Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
    
@@ -569,16 +569,20 @@ def Build_Batch(lst,tasks,code,suf=""):
                 f.write("#SBATCH --job-name=adv{}\n".format(tasks))
                 
             f.write("# Partition:\n")
-            f.write("#SBATCH --partition=savio\n")
+            f.write("#SBATCH --partition=" + partition + "\n") # this
             f.write("# QoS:\n")
-            if (tasks <= 80 and tasks*len(lst) <= 200) or code == 'advantg':
-                f.write("#SBATCH --qos=nuclear_normal\n")
-                f.write("# Account:\n")
-                f.write("#SBATCH --account=co_nuclear\n")
-            else:
-                f.write("#SBATCH --qos=savio_normal\n")
-                f.write("# Account:\n")
-                f.write("#SBATCH --account=fc_neutronics\n")
+            # if (tasks <= 80 and tasks*len(lst) <= 200) or code == 'advantg':
+            #     f.write("#SBATCH --qos=nuclear_normal\n") # this
+            #     f.write("# Account:\n")
+            #     f.write("#SBATCH --account=co_nuclear\n")
+            # else:
+            #     f.write("#SBATCH --qos=savio_normal\n") # this
+            #     f.write("# Account:\n")
+            #     f.write("#SBATCH --account=fc_neutronics\n") # this
+            f.write("#SBATCH --qos=" + qos + "\n")
+            f.write("# Account:\n")
+            f.write("#SBATCH --account=" + account "\n")
+
             f.write("# Processors:\n")
             f.write("#SBATCH --ntasks={}\n".format(tasks))
 

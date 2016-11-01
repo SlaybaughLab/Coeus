@@ -58,11 +58,11 @@ def print_MCNP_input_files(step):
     return idents, run_particles
 
 # Run MCNP
-def run_MCNP_on_algo(algo, update_gen, update_feval):
+def run_MCNP_on_algo(args, algo, update_gen, update_feval):
     global ids, particles, pop
     
     if len(ids)>0:
-        Run_Transport(ids,particles,code='mcnp6.mpi')
+        Run_Transport(ids,particles,code='mcnp6.mpi', , qos=args.qos, account=args.account, partition=args.paritition)
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
     
         # Calculate Fitness
@@ -153,6 +153,11 @@ parser.add_argument('--adv', nargs='?', default=os.path.abspath(os.path.join(os.
 parser.add_argument('--mcnp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/mcnp_settings.csv',help='The name and path for the file containing the mcnp settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/mcnp_settings.csv]')
 parser.add_argument('--mat', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_materials_compendium.csv',help='The name and path for the file containing the materials to be included in the problem. The format is a comma delimited key word input file. [default = ../Inputs/eta_materials_compendium.csv]')
 parser.add_argument('--src', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/source.csv',help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
+parser.add_argument('--qos', nargs='?', default='nuclear_normal')
+parser.add_argument('--account', nargs='?', default='co_nuclear')
+parser.add_argument('--partition', nargs='?', default='savio')
+
+
 args = parser.parse_args()    
 
 # Assign optional inputs to variables:
@@ -264,13 +269,13 @@ for i in ids:
 logger.info('Finished printing initial input files at {} sec\n'.format(time.time() - start_time))
 
 # Run ADVANTG
-Run_Transport(ids,code='advantg')
+Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.paritition)
 logger.info('Finished running ADVANTG at {} sec\n'.format(time.time() - start_time))
 
 # Run MCNP
 for i in ids:
     Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
-Run_Transport(ids,particles,code='mcnp6.mpi')
+Run_Transport(ids,particles,code='mcnp6.mpi', qos=args.qos, account=args.account, partition=args.paritition)
 logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
 # Calculate Fitness
@@ -293,7 +298,7 @@ mod_rat=Calc_Moderating_Ratio(mat_lib)
 ######## Partial Inversion ########
 new_pop=Partial_Inversion(pop,mod_rat,mat_lib,g_set)
 (ids,particles)=print_MCNP_input_files('Partial Inversion')
-run_MCNP_on_algo("part_inv", 0, int(g_set.p))
+run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p))
 
         
 # Iterate until termination criterion met
@@ -305,51 +310,51 @@ while history.tline[-1].g <= g_set.gm and history.tline[-1].e <= g_set.em and co
     ######## Levy flight permutation of materials ########
     new_pop=Mat_Levy_Flights(pop, mat_lib, mod_rat, g_set, [eta_params.fissile_mat,'Au'])
     (ids,particles)=print_MCNP_input_files("Levy flight permutation of materials")
-    run_MCNP_on_algo("mat_levy", 0, int(g_set.p*g_set.fl))
+    run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl))
 
         
     ######## Levy flight permutation of cells ########
     new_pop=Cell_Levy_Flights(pop,eta_params,g_set)      
     (ids,particles)=print_MCNP_input_files("Levy flight permutation of cells")
-    run_MCNP_on_algo("cell_levy", 0, int(g_set.p*g_set.fl))
+    run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl))
 
         
     ######## Elite_Crossover ########
     new_pop=Elite_Crossover(pop,mod_rat,eta_params,mat_lib,g_set,[eta_params.fissile_mat,'Au'])
     (ids,particles)=print_MCNP_input_files("Elite Crossover")
-    run_MCNP_on_algo("elite_cross", 0, 1)
+    run_MCNP_on_algo(args,"elite_cross", 0, 1)
             
             
     ######## Mutate ########
     new_pop=Mutate(pop, eta_params, g_set)
     (ids,particles)=print_MCNP_input_files("Mutation Operator")
-    run_MCNP_on_algo("mutate", 0, int(g_set.p))
+    run_MCNP_on_algo(args,"mutate", 0, int(g_set.p))
       
 
     ######## Crossover ########
     new_pop=Crossover(pop,g_set)
     (ids,particles)=print_MCNP_input_files("Crossover")
-    run_MCNP_on_algo("crossover", 0, int(g_set.p*g_set.fe))
+    run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe))
         
         
     ######## 2-opt ########
     if eta_params.max_horiz >= 4:
         new_pop=Two_opt(pop,g_set)
         (ids,particles)=print_MCNP_input_files("2-opt")
-        run_MCNP_on_algo("two_opt", 0, int(g_set.p*g_set.fe))
+        run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe))
         
         
     ######## 3-opt ########
     if eta_params.max_horiz >= 6:
         new_pop=Three_opt(pop,g_set)
         (ids,particles)=print_MCNP_input_files("3-opt")
-        run_MCNP_on_algo("three_op", 0, int(g_set.p))
+        run_MCNP_on_algo(args,"three_op", 0, int(g_set.p))
         
         
     ######## Discard Cells ########
     new_pop=Discard_Cells(pop,mat_lib,g_set)
     (ids,particles)=print_MCNP_input_files("Discard Cells")
-    run_MCNP_on_algo("discard", 1, int(g_set.p*g_set.fd))
+    run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd))
     stats.write()
                 
     ######## Test Convergence ########
@@ -380,7 +385,7 @@ while history.tline[-1].g <= g_set.gm and history.tline[-1].e <= g_set.em and co
         Print_ADVANTG_Input(eta_params,pop[i].geom,advantg_set,i,cluster=True)
 
     # Run ADVANTG
-    Run_Transport(ids,code='advantg')
+    Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.paritition)
 
 #Determine execution time    
 logger.info('The optimization history is:{}\n'.format(history.tline))
