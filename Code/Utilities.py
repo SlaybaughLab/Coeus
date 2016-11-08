@@ -375,7 +375,7 @@ def Run_Transport_PP(lst,tasks=0,code='mcnp6'):
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
     
 #-------------------------------------------------------------------------------------------------------------#  
-def Run_Transport(lst,nps=[],code='mcnp6', qos="nuclear_normal", account="co_nuclear", partition="savio"):
+def Run_Transport(lst,qos, account, partition, nps=[],code='mcnp6'):
     """
     Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
    
@@ -571,14 +571,7 @@ def Build_Batch(lst,tasks,code, qos, account, partition, suf=""):
             f.write("# Partition:\n")
             f.write("#SBATCH --partition=" + partition + "\n") # this
             f.write("# QoS:\n")
-            # if (tasks <= 80 and tasks*len(lst) <= 200) or code == 'advantg':
-            #     f.write("#SBATCH --qos=nuclear_normal\n") # this
-            #     f.write("# Account:\n")
-            #     f.write("#SBATCH --account=co_nuclear\n")
-            # else:
-            #     f.write("#SBATCH --qos=savio_normal\n") # this
-            #     f.write("# Account:\n")
-            #     f.write("#SBATCH --account=fc_neutronics\n") # this
+            
             f.write("#SBATCH --qos=" + qos + "\n")
             f.write("# Account:\n")
             f.write("#SBATCH --account=" + account "\n")

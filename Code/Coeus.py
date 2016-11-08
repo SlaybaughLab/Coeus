@@ -62,7 +62,7 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval):
     global ids, particles, pop
     
     if len(ids)>0:
-        Run_Transport(ids,particles,code='mcnp6.mpi', , qos=args.qos, account=args.account, partition=args.paritition)
+        Run_Transport(ids,args.qos, args.account, args.paritition, particles,code='mcnp6.mpi')
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
     
         # Calculate Fitness
@@ -73,6 +73,8 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval):
 #-------------------------------------------------------------------------------------------------------------# 
         
 """
+@package docstring
+
     Entry point for the Coeus program.  
 
     All inputs are optional.  The program will load run inputs in the following order:
