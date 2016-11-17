@@ -20,16 +20,10 @@ Results/*
 *.json
 *.dat
 *.silo
-*run*
 stderr
 stdout
 *err
 gip_working_library
-
-# Solidworks files
-*.SLDPRT
-*.SLDDRW
-*.SLDASM
 
 
 ## Core latex/pdflatex auxiliary files:
