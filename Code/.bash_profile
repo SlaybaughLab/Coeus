@@ -36,5 +36,3 @@ DATAPATH=/global/scratch/co_nuclear/MCNP/MCNP_DATA/
 export PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/global/home/groups/co_nuclear/pyne/lib
 export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/pyne/lib/python2.7/site-packages
-export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs
-export DATAPATH
