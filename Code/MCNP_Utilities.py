@@ -462,7 +462,7 @@ class MCNP_Geometry:
             if adds in mat_lib.keys(): # and adds not in self.matls:
                 self.matls.append(adds)
             else:
-                module_logger.error("Material {} not found in the material library.".format(mat))
+                module_logger.error("Material {} not found in the material library.".format(adds))
 
         else:
             for mat in adds:
