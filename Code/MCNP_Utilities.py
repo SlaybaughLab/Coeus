@@ -24,36 +24,20 @@ import copy as cp
 from math import ceil
 from math import sin, cos, tan, atan, radians
 
-#---------------------------------------------------------------------------------------#    
 class MCNP_Settings:
-    """
-    Creates a object representing the settings for running the MCNP radiation trasport code.
-   
-    Attributes
-    ==========
-    physics : str
-        The physics cards for run parameters 
-        [Default: "MODE n\n"]
-    nps : integer
-        The starting number of particles to run.  The number ran by the code will depend on generation and fitness.
-        [Default: 1E6]
-    tally : str
-        The tallies for the problem.
-        [Default: ""]
-    source : array
-        Stores the upper energy bin bounds and source strength for each bin
-        [default=[]]
-        
-    Returns
-    =======
-    None
-    """
-        
-        
-    def __init__(self,physics="MODE n\n",nps=1E6, tally="", source=[]):  
+
+    ## Creates a object representing the settings for running the MCNP radiation trasport code.
+    def __init__(self,physics="MODE n\n",nps=1E6, tally="", source=[]): 
+        ## str The physics cards for run parameters
         self.phys=physics
+        ## int The starting number of particles to run.  The number ran by the code will depend on generation and fitness.
+        # [Default: 1E6]
         self.nps=nps
+        ## array Stores the upper energy bin bounds and source strength for each bin
+        # [default=[]]
         self.source=source  
+        ## str The tallies for the problem.
+        # [Default: ""]
         self.tally=tally
         
         
@@ -72,13 +56,11 @@ class MCNP_Settings:
         s = header + "\n".join(["{0:<7}{1}".format(ebin, flux) for ebin, flux in self.source])
         return s
     
-    
+    ## Parses a MCNP settings csv input file. 
+    #    The key word options are:
+    #        Physics
+    #        NPS
     def read_settings(self, filename):
-        """Parses a MCNP settings csv input file. 
-        The key word options are:
-            Physics
-            NPS
-        """
         # Open file
         try: 
             self.f = open(filename, 'r') 
@@ -122,12 +104,10 @@ class MCNP_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
         
-        
+    ## Parses an source input csv file. 
+    #    The first column contains the upper energy bin boundaries. 
+    #    The second column contains the flux/fluence of the bin.
     def read_source(self, filename):
-        """Parses an source input csv file. 
-        The first column contains the upper energy bin boundaries. 
-        The second column contains the flux/fluence of the bin.  
-        """
 
         # Open file
         try: 
@@ -147,22 +127,11 @@ class MCNP_Settings:
        
         # Test that the file closed
         assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
-        
+    
+    ## Sets the standard tallies to be used. 
+    # @param cell int the cell for volume tallies
+    # @param mat int the amterial number for reaction tallies
     def set_tallies(self, cell, mat):
-        """
-        Sets the standard tallies to be used. 
-        
-        Inputs
-        ==========
-        cell : int 
-            The cell for volume tallies
-        mat : int
-            The material number for reaction tallies
-        
-        Returns
-        =======
-        None
-        """
         
         # Add Standard Tallies to User Defined Tallies
         self.tally+="FC14 Fission Reaction Rate (Fissions per cm^3 per src particle)\n"
@@ -171,32 +140,16 @@ class MCNP_Settings:
         self.tally+="FC24 Uranium Flux Spectra (Number per cm^2 per src neutron)\n"
         self.tally+="F24:n {}\n".format(cell) 
 
-#-------------------------------------------------------------------------------------------------------------#  
+
 class MCNP_Geometry:
-    """
-    Creates the geometry for running the MCNP radiation trasport code.
-   
-    Attributes
-    ==========
-    surfaces : list of surface objects
-        Contains a list of all surface objects used in the design
-        [Default: []]
-    cells : list of cell objects
-        A list of all of the cell objects used in the design
-        [Default: []]
-    matls : list of material object keys
-        A list of the keys to material objects used in geometry.
-        [Default: []]
-        
-        
-    Returns
-    =======
-    None
-    """
     
+    ## Creates the geometry for running the MCNP radiation trasport code.
     def __init__(self):  
+        # [list of surface objects] Contains a list of all surface objects used in the design
         self.surfaces=[]
+        # [list of cell objects] A list of all of the cell objects used in the design
         self.cells=[]
+        # [list of material object keys] A list of the keys to material objects used in geometry.
         self.matls=[]
         
     def __repr__(self):
@@ -216,27 +169,14 @@ class MCNP_Geometry:
             header += [str(mat)]
         header ="\n".join(header)+"\n"
         s = header 
-        return s    
-    
+        return s  
+          
+    ## Builds the inital surface list, cells dictionary, and materials list for the ETA geometry envelope
+    # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+    # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  
+    #        Isotopic densities are in atoms/b-cm
     def init_geom(self, eta, mats):
-        """
-        Builds the inital surface list, cells dictionary, and materials list for the ETA geometry envelope
 
-        Parameters
-        ==========
-        eta : ETA parameters object
-            An object that contains all of the constraints required to initialize the geometry
-        mats : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes.  
-            Isotopic densities are in atoms/b-cm
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
         assert eta.r_f>0.0, 'The ETA face radius must be greater than zero'
         assert eta.theta>0.0, 'The ETA cone angle must be great than zero.'
         assert eta.r_o>=eta.r_f, 'The ETA outer radius must be greater than or equal to the face radius.'
