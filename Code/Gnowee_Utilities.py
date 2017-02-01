@@ -601,27 +601,33 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
     
     for i in ids:
+        tmp_fit=1E15
         index = next((c for c, parent in enumerate(pop) if parent.ident == i), -1)
         (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', '24', '14')
-        tally=to_NormDiff(tally)
-        tmp_fit=RelativeLeastSquares(tally,obj)
-        module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
+        try:
+            tally=to_NormDiff(tally)
+            tmp_fit=RelativeLeastSquares(tally,obj)
+            module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
+
+            # Check constraints
+            weight=weight/1000         # conversion to kg
+            if fissions[0] == 0.0 and fissions[0] < min_fiss:
+                module_logger.warning("WARNING: No fissions occured for the ETA design in parent #{}".format(i))
+                tmp_fit+=1E15
+            elif fissions[0] > 0 and fissions[0] < min_fiss:
+                tmp_fit+= 0.1*(min_fiss/fissions[0]-1)
+            elif fissions[0] > min_fiss:
+                tmp_fit-= 0.01*(fissions[0]/min_fiss-1)
+            module_logger.debug("fissions[0] = {} and min_fiss = {} ".format(fissions[0],min_fiss))
+            module_logger.debug("Parent ID # {} has fitness = {} from RLS+fissions".format(i,tmp_fit))
+
+            if weight > max_w:
+                tmp_fit+=1E15
+            module_logger.info("Parent ID # {} has fitness = {} from RLS+fissions+weight".format(i,tmp_fit))
         
-        # Check constraints
-        weight=weight/1000         # conversion to kg
-        if fissions[0] == 0.0 and fissions[0] < min_fiss:
-            module_logger.warning("WARNING: No fissions occured for the ETA design in parent #{}".format(i))
-            tmp_fit+=1E15
-        elif fissions[0] > 0 and fissions[0] < min_fiss:
-            tmp_fit+= 0.1*(min_fiss/fissions[0]-1)
-        elif fissions[0] > min_fiss:
-            tmp_fit-= 0.01*(fissions[0]/min_fiss-1)
-        module_logger.debug("fissions[0] = {} and min_fiss = {} ".format(fissions[0],min_fiss))
-        module_logger.debug("Parent ID # {} has fitness = {} from RLS+fissions".format(i,tmp_fit))
-        
-        if weight > max_w:
-            tmp_fit+=1E15
-        module_logger.info("Parent ID # {} has fitness = {} from RLS+fissions+weight".format(i,tmp_fit))
+        except:
+            module_logger.info("WARNING: Parent ID # {} MCNP run failed.".format(i,tmp_fit))
+            pass
         
         # Save fitness
         pop[index].fit=tmp_fit  

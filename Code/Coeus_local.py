@@ -39,10 +39,10 @@ import os
 import sys
 sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
  
+#-------------------------------------------------------------------------------------------------------------#  
 
 def main(**kwargs):
     
-#-------------------------------------------------------------------------------------------------------------#  
 ### Local Function definitions
 
     # Print MCNP input Files
