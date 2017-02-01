@@ -27,135 +27,8 @@ from math import pi
 
 #-------------------------------------------------------------------------------------------------------------#      
 class ETA_Parameters:
-    """
-    Creates an ETA object that stores the ETA design parameters, constraints, and objective function
-   
-    Attributes
-    ==========
-    spectrum_type : str
-        Indicator of objective spectrum type.  This is use to ensure that the calculate spectrum is converted to the 
-        proper form for comparison and output. Options are: "normalized", "normalized differential", or "normalized lethargy"
-        [default='normalized differential']
-    spectrum : array
-        Stores the upper energy bin bounds and flux/fluence for each bin
-        [default=[]]
-    src : float
-        NIF source neutron in 4pi
-        [default=5E15]
-        
-    min_fiss : float
-        The minimum number of fissions in fissile foil
-        [default=5e8]
-    max_weight : float
-        The maximum weight for the ETA assembly entered in kg
-        [default=125.0 [kg]]
-        
-    tcc_dist : float
-        The distance from the front face of the ETA assembly from target chamber center (TCC) entered in cm
-        [default=15.24 [cm]]
-    debris_shield_thickness : float
-        The thickness of the debris cover and conical section of the ETA assembly entered in cm
-        [default=0.3 [cm]]
-    wall_thickness : float
-        The thickness of the walls of the ETA assembly entered in cm
-        [default=0.25 [cm]]
-    snout_dist : float
-        The distance to where the snout mounts in cm. Measured from target chamber center (TCC)
-        [default=52.14 [cm]]
-    cover_thickness : float
-        The thickness of the back cover for the ETA in cm
-        [default=1.0 [cm]]
-    mount_thickness : float
-        The thickness of the mount connecting the ETA Nose Cone Assembly to the snout in cm
-        [default=2.4 [cm]]
-    face_radius : float
-        The opening radius of the ETA assembly entered in cm. Measured from ETA centerline
-        [default=5.48 [cm]]
-    cone_angle : float
-        The opening angle of the cone measured in degrees. Measured from ETA face plane.
-        [default=8.89 [cm]]
-    eta_or : float
-        The maximum outer radius of the ETA assembly structure entered in cm. Measured from ETA centerline
-        [default=9.39 [cm]]
-        
-    debris_shield_mat : string
-        The material used for the conical debris cover.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Al"]
-    struct_mat : string
-        The material used for the ETA structure.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Al"]
-    fill_mat : string
-        The material used to fill all nonspecified volume in the in the ETA.  Must be a naturally occuring element or specified 
-        in the materials compendium.
-        [default="Air (dry near sea level)"]
-    fissile_mat : string
-        The fissile material used in the ETA.  
-        Must be a naturally occuring element or specified in the materials compendium.
-        [default='U']
-        
-    nas_mat : string
-        The material used for the NAS structure.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Al"]
-    nas_th : float
-        The thickness of the neutron activation spectrometer in cm
-        [default= 0.14 cm]
-    nas_r : float
-        The radius of the neutron activation spectrometer in cm.
-        [default= 2.69 [cm]]
-        
-    nas_foil_th : list of floats
-        The thickness of the neutron activation spectrometer foils in cm
-        [default= [0.1, 0.1, 0.1, 0.1, 0.01] cm]
-    nas_foil_r : float
-        The radius of the neutron activation spectrometer foils entered in cm.
-        [default= 2.5 [cm]]
-    nas_foil_mat : list of strings
-        The material used for the neutron activation spectrometer foils in the in the ETA.  
-        Must be a naturally occuring element or specified in the materials compendium.
-        [default=['Zr', 'Zn', 'In', 'Al', 'Ta']]
-    toad_loc : str
-        String indicating the material that the TOAD assembly follows after in the stackup.
-        [default=['In']
-           
-    toad_mat : string
-        The material used for the TOAD structure.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Al"]
-    toad_foil_th : list of floats
-        The thickness of the TOAD foils in cm
-        [default= [,0.0127] cm]
-    toad_foil_r : float
-        The radius of foils entered in cm.
-        [default= 1.252 [cm]]
-    toad_foil_mat : list of strings
-        The material used for the neutron activation spectrometer foils in the in the ETA.  
-        Must be a naturally occuring element or specified in the materials compendium.
-        [default=['Au','U']]
-        
-    holder_mat : string
-        The material used for the holder structure.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Al"]
-    holder_fill_mat : string
-        The material used to fill the space int he holder structrure.  Must be a naturally occuring element or specified in the materials compendium.
-        [default="Fe"]
-    holder_thickness : float
-        The thickness of the holder for the NAS insertion assemblyentered in cm.
-        [default= 2 [cm]]
-        
-    max_vert : int
-        The maximum number of vertical macrobodies or components in the ETA geometry. This cn be reduced to increase run spead or
-        increased to obtain a better result.
-        [default=3]
-    max_horiz : int
-        The maximum number of horizontal macrobodies or components in the ETA geometry. This cn be reduced to increase run spead
-        or increased to obtain a better result.
-        [default=7]
-    
-    Returns
-    =======
-    None
-    """
      
-        
+    ## Creates an ETA object that stores the ETA design parameters, constraints, and objective function
     def __init__(self, spectrum_type='normalized differential', spectrum=np.array([]),\
                  min_fiss=5E8, max_weight=125.0,src=5E15,\
                  tcc_dist=15.24, debris_shield_thickness= 0.3, wall_thickness=0.5, snout_dist=52.14, cover_thickness=1.0, mount_thickness=2.4, 
@@ -169,50 +42,125 @@ class ETA_Parameters:
         assert len(nas_foil_th)==len(nas_foil_mat), 'The number of thicknesses and materials for the NAS must be equal.'
         assert len(toad_foil_th)==len(toad_foil_mat), 'The number of thicknesses and materials for the TOAD must be equal.'
         
+        ## str Indicator of objective spectrum type.  This is use to ensure that the calculate spectrum is converted to the 
+        # proper form for comparison and output. Options are: "normalized", "normalized differential", or "normalized lethargy"
+        # [default='normalized differential']
         self.spectrum_type=spectrum_type
+        ## array Stores the upper energy bin bounds and flux/fluence for each bin
+        # [default=[]]
         self.spectrum=spectrum
         
+        ## float The maximum weight for the ETA assembly entered in kg
+        # [default=125.0 [kg]]
         self.max_weight=max_weight
+        ## float NIF source neutron in 4pi
+        # [default=5E15]
         self.src=src
         
+        ## float The distance from the front face of the ETA assembly from target chamber center (TCC) entered in cm
+        # [default=15.24 [cm]]
         self.tcc_dist=tcc_dist
+        ## float The thickness of the debris cover and conical section of the ETA assembly entered in cm
+        # [default=0.3 [cm]]
         self.t_ds=debris_shield_thickness
+        ## float The thickness of the walls of the ETA assembly entered in cm
+        # [default=0.25 [cm]]
         self.t_w=wall_thickness
+        ## float The distance to where the snout mounts in cm. Measured from target chamber center (TCC)
+        # [default=52.14 [cm]]
         self.snout_dist=snout_dist
+        ## float The thickness of the back cover for the ETA in cm
+        # [default=1.0 [cm]]
         self.t_c=cover_thickness
+        ## float The thickness of the mount connecting the ETA Nose Cone Assembly to the snout in cm
+        # [default=2.4 [cm]]
         self.t_m=mount_thickness
+        ## float The opening radius of the ETA assembly entered in cm. Measured from ETA centerline
+        # [default=5.48 [cm]]
         self.r_f=face_radius
+        ## float The maximum outer radius of the ETA assembly structure entered in cm. Measured from ETA centerline
+        # [default=9.39 [cm]]
         self.r_o=eta_or
+        ## float The opening angle of the cone measured in degrees. Measured from ETA face plane.
+        # [default=8.89 [cm]]
         self.theta=cone_angle
         
+        ## string The material used for the conical debris cover.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Al"]
         self.ds_mat=debris_shield_mat
+        ## string The material used for the ETA structure.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Al"]
         self.struct_mat=struct_mat
+        ## string The material used to fill all nonspecified volume in the in the ETA.  Must be a naturally occuring element or specified 
+        # in the materials compendium.
+        # [default="Air (dry near sea level)"]
         self.fill_mat=fill_mat
+        ## string The fissile material used in the ETA.  
+        # Must be a naturally occuring element or specified in the materials compendium.
+        # [default='U']
         self.fissile_mat=fissile_mat
         
+        ## float The thickness of the neutron activation spectrometer in cm
+        # [default= 0.14 cm]
         self.t_nas=nas_th
+        ## float The radius of the neutron activation spectrometer in cm.
+        # [default= 2.69 [cm]]
         self.r_nas=nas_r
+        ## string The material used for the NAS structure.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Al"]
         self.nas_mat=nas_mat
         
+        ## list of floats The thickness of the neutron activation spectrometer foils in cm
+        # [default= [0.1, 0.1, 0.1, 0.1, 0.01] cm]
         self.t_nas_f=nas_foil_th
+        ## float The radius of the neutron activation spectrometer foils entered in cm.
+        # [default= 2.5 [cm]]
         self.r_nas_f=nas_foil_r
+        ## list of strings The material used for the neutron activation spectrometer foils in the in the ETA.  
+        # Must be a naturally occuring element or specified in the materials compendium.
+        # [default=['Zr', 'Zn', 'In', 'Al', 'Ta']]
         self.nas_mat_f=nas_foil_mat
+        ## str String indicating the material that the TOAD assembly follows after in the stackup.
+        # [default=['In']
         self.toad_loc=toad_loc
         
+        ## string The material used for the TOAD structure.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Al"]
         self.toad_mat=toad_mat
+        ## list of floats The thickness of the TOAD foils in cm
+        # [default= [,0.0127] cm]
         self.t_toad=toad_foil_th
+        ## float The radius of foils entered in cm.
+        # [default= 1.252 [cm]]
         self.r_toad=toad_foil_r
+        ## list of strings The material used for the neutron activation spectrometer foils in the in the ETA.  
+        # Must be a naturally occuring element or specified in the materials compendium.
+        # [default=['Au','U']]
         self.toad_mat_f=toad_foil_mat
         
+        ## string The material used for the holder structure.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Al"]
         self.holder_mat=holder_mat
+        ## string The material used to fill the space int he holder structrure.  Must be a naturally occuring element or specified in the materials compendium.
+        # [default="Fe"]
         self.h_fill_mat=holder_fill_mat
+        ## float The thickness of the holder for the NAS insertion assemblyentered in cm.
+        # [default= 2 [cm]]
         self.t_h=holder_thickness
         
+        ## int The maximum number of vertical macrobodies or components in the ETA geometry. This cn be reduced to increase run spead or
+        # increased to obtain a better result.
+        # [default=3]
         self.max_vert=max_vert
+        ## int The maximum number of horizontal macrobodies or components in the ETA geometry. This cn be reduced to increase run spead
+        # or increased to obtain a better result.
+        # [default=7]
         self.max_horiz=max_horiz
         
         # Calculate the number of fissions based on the source strength and volume
         ind=next((i for i in enumerate(self.toad_mat_f) if i == self.fissile_mat), -1)
+        ##  float The minimum number of fissions in fissile foil
+        # [default=5e8]
         self.min_fiss=min_fiss/(self.src*self.r_toad**2*pi*self.t_toad[ind])
     
     def __repr__(self):
@@ -276,13 +224,11 @@ class ETA_Parameters:
         s = header + "\n".join(["{0:<7}{1}".format(ebin, flux) for ebin, flux in self.spectrum])
         return s
 
-    
+    ## Parses an objective spectrum csv file. 
+    # The first row contains the spectrum type: "normalized", "normalized differential", or "normalized lethargy"
+    # The first column contains the upper energy bin boundaries. 
+    # The second column contains the flux/fluence of the bin.  
     def read_obj(self, filename):
-        """Parses an objective spectrum csv file. 
-        The first row contains the spectrum type: "normalized", "normalized differential", or "normalized lethargy"
-        The first column contains the upper energy bin boundaries. 
-        The second column contains the flux/fluence of the bin.  
-        """
 
         # Open file
         try: 
@@ -308,50 +254,49 @@ class ETA_Parameters:
 
         # Save the spectrum as an attribute
         self.spectrum=np.asarray(spectrum)
-    
+
+    ## Parses an ETA constraints csv file. 
+    #     The key word options are:
+    #         Minimum Fissions
+    #         ETA Max Weight
+    #         Source Strength
+            
+    #         TCC to ETA Distance
+    #         Debris Shield Thickness
+    #         ETA Wall Thickness
+    #         Snout Distance
+    #         ETA Back Cover Thickness
+    #         ETA to Snout Mount Thickness
+    #         ETA Face Radius
+    #         ETA Cone Outer Radius
+    #         ETA Cone Opening Angle
+            
+    #         Debris Shield Material
+    #         ETA Structural Material
+    #         ETA Void Fill Material
+    #         Fissile Foil
+
+    #         NAS Thickness
+    #         NAS Radius
+    #         NAS Material
+            
+    #         NAS Activation Foils
+    #         NAS Activation Foil Thickness
+    #         NAS Activation Foil Radius
+    #         TOAD Follows Material
+            
+    #         TOAD Material
+    #         TOAD Activation Foils
+    #         TOAD Activation Foil Thickness
+    #         TOAD Activation Foil Radius
+            
+    #         Holder Material
+    #         Holder Fill Material
+    #         Holder Wall Thickness
+
+    #         Max Vertical Components
+    #         Max Horizontal Components
     def read_constraints(self, filename):
-        """Parses an ETA constraints csv file. 
-        The key word options are:
-            Minimum Fissions
-            ETA Max Weight
-            Source Strength
-            
-            TCC to ETA Distance
-            Debris Shield Thickness
-            ETA Wall Thickness
-            Snout Distance
-            ETA Back Cover Thickness
-            ETA to Snout Mount Thickness
-            ETA Face Radius
-            ETA Cone Outer Radius
-            ETA Cone Opening Angle
-            
-            Debris Shield Material
-            ETA Structural Material
-            ETA Void Fill Material
-            Fissile Foil
-
-            NAS Thickness
-            NAS Radius
-            NAS Material
-            
-            NAS Activation Foils
-            NAS Activation Foil Thickness
-            NAS Activation Foil Radius
-            TOAD Follows Material
-            
-            TOAD Material
-            TOAD Activation Foils
-            TOAD Activation Foil Thickness
-            TOAD Activation Foil Radius
-            
-            Holder Material
-            Holder Fill Material
-            Holder Wall Thickness
-
-            Max Vertical Components
-            Max Horizontal Components
-        """
 
         # Open file
         try: 
@@ -501,5 +446,5 @@ class ETA_Parameters:
             if self.toad_mat_f[i]==self.fissile_mat:
                 ind=i
         self.min_fiss=self.min_fiss/(self.src*self.r_toad**2*pi*self.t_toad[ind])
-#-------------------------------------------------------------------------------------------------------------#               
+               
      

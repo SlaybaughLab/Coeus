@@ -81,10 +81,13 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ad3fb61fba63d126f234acfb12ab14ae3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_m_c_n_p___utilities.html#ad3fb61fba63d126f234acfb12ab14ae3">Print_MCNP_Input</a> (eta, geom, settings, mats, num, adv_print=True)</td></tr>
+<tr class="memdesc:ad3fb61fba63d126f234acfb12ab14ae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the generated MCNP input deck to file.  <a href="#ad3fb61fba63d126f234acfb12ab14ae3">More...</a><br /></td></tr>
 <tr class="separator:ad3fb61fba63d126f234acfb12ab14ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeed5b3c5e2512cc2cd14fcf3ac1d1057"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_m_c_n_p___utilities.html#aeed5b3c5e2512cc2cd14fcf3ac1d1057">Read_Tally_Output</a> (path, tnum)</td></tr>
+<tr class="memdesc:aeed5b3c5e2512cc2cd14fcf3ac1d1057"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the generated MCNP output and return the tally results.  <a href="#aeed5b3c5e2512cc2cd14fcf3ac1d1057">More...</a><br /></td></tr>
 <tr class="separator:aeed5b3c5e2512cc2cd14fcf3ac1d1057"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ccbb6c9adb80fcaeb7b6e5c5f5532b8"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_m_c_n_p___utilities.html#a9ccbb6c9adb80fcaeb7b6e5c5f5532b8">Read_MCNP_Output</a> (path, tnum, rnum)</td></tr>
+<tr class="memdesc:a9ccbb6c9adb80fcaeb7b6e5c5f5532b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the generated MCNP output and return the tally results.  <a href="#a9ccbb6c9adb80fcaeb7b6e5c5f5532b8">More...</a><br /></td></tr>
 <tr class="separator:a9ccbb6c9adb80fcaeb7b6e5c5f5532b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -142,32 +145,20 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Print the generated MCNP input deck to file 
-   
-Parameters
-==========
-eta : ETA parameters object
-    An object that contains all of the constraints required to initialize the geometry
-geom : MCNP_Geometry object
-    The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-settings : MCNP_Settings object
-    An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-    and tally information.
-mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes. 
-num : integer
-    The current parent number being generated
 
-Optional
-========
-adv_print : boolean
-    An optional indicator to determine whether to print weight window and source bias information in the input file from 
-    ADVANTG outputs. 
-    
-Returns
-=======
-None
-</pre> 
+<p>Print the generated MCNP input deck to file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eta</td><td>[ETA parameters object] An object that contains all of the constraints required to initialize the geometry </td></tr>
+    <tr><td class="paramname">geom</td><td>[<a class="el" href="class_m_c_n_p___utilities_1_1_m_c_n_p___geometry.html">MCNP_Geometry</a> object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information </td></tr>
+    <tr><td class="paramname">settings</td><td>[<a class="el" href="class_m_c_n_p___utilities_1_1_m_c_n_p___settings.html">MCNP_Settings</a> object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, and tally information. </td></tr>
+    <tr><td class="paramname">mats</td><td>[dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes. </td></tr>
+    <tr><td class="paramname">num</td><td>int The current parent number being generated </td></tr>
+    <tr><td class="paramname">adv_print</td><td>boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from ADVANTG outputs. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a9ccbb6c9adb80fcaeb7b6e5c5f5532b8"></a>
@@ -201,28 +192,22 @@ None
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Read the generated MCNP output and return the tally results
-   
-Parameters
-==========
-path : String
-    The path, including filename, to the MCNP output file to be read
-tnum : String
-    The number of the tally to be read.  Returns the entire binned tally.
-rnum : String
-    The number of the tally to be read for the total reactions only. 
 
-Optional
-======== 
-    
-Returns
-=======
-tally : array
-    Array of tally results for the tally specified by tnum [Ebins, tally, uncertainty]
-rxs : array
-    Total number of reactions for the tally specified by rx_num [tally, uncertainty]
-weight : float
-    The total weight of the system</pre> 
+<p>Read the generated MCNP output and return the tally results. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>String The path, including filename, to the MCNP output file to be read </td></tr>
+    <tr><td class="paramname">tnum</td><td>String The number of the tally to be read. Returns the entire binned tally. </td></tr>
+    <tr><td class="paramname">rnum</td><td>String The number of the tally to be read for the total reactions only. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>tally array Array of tally results for the tally specified by tnum [Ebins, tally, uncertainty] </dd>
+<dd>
+rxs array Total number of reactions for the tally specified by rx_num [tally, uncertainty] </dd>
+<dd>
+weight float The total weight of the system </dd></dl>
+
 </div>
 </div>
 <a id="aeed5b3c5e2512cc2cd14fcf3ac1d1057"></a>
@@ -250,23 +235,17 @@ weight : float
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Read the generated MCNP output and return the tally results
-   
-Parameters
-==========
-path : String
-    The path, including filename, to the MCNP output file to be read
-tnum : String
-    The number of the tally to be read
 
-Optional
-========
-None
-    
-Returns
-=======
-tally : array
-    Array of tally results</pre> 
+<p>Read the generated MCNP output and return the tally results. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>String The path, including filename, to the MCNP output file to be read </td></tr>
+    <tr><td class="paramname">tnum</td><td>String The number of the tally to be read </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>tally array Array of tally results </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>

@@ -75,6 +75,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a0539d1ca9bda5c5a517fcbaf32e5d3c4"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_a_d_v_a_n_t_g___utilities.html#a0539d1ca9bda5c5a517fcbaf32e5d3c4">Print_ADVANTG_Input</a> (eta, geom, S, num, cluster=False)</td></tr>
+<tr class="memdesc:a0539d1ca9bda5c5a517fcbaf32e5d3c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the generated MCNP input deck to file.  <a href="#a0539d1ca9bda5c5a517fcbaf32e5d3c4">More...</a><br /></td></tr>
 <tr class="separator:a0539d1ca9bda5c5a517fcbaf32e5d3c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -126,28 +127,19 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Print the generated MCNP input deck to file 
-   
-Parameters
-==========
-eta : ETA parameters object
-    An object that contains all of the constraints required to initialize the geometry
-geom : MCNP_Geometry object
-    The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-S : ADVANTG_Settings object
-    An object representing the settings for running the ADVANTG radiation trasport code.  
-num : integer
-    The current cuckoo number being generated
 
-Optional
-========
-cluster : boolean
-    An indicator to change the file to run on a cluster using Run_Transport function and slurm job submission
-    
-Returns
-=======
-None
-</pre> 
+<p>Print the generated MCNP input deck to file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">eta</td><td>[ETA parameters object] An object that contains all of the constraints required to initialize the geometry </td></tr>
+    <tr><td class="paramname">geom</td><td>[MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information </td></tr>
+    <tr><td class="paramname">S</td><td>[<a class="el" href="class_a_d_v_a_n_t_g___utilities_1_1_a_d_v_a_n_t_g___settings.html">ADVANTG_Settings</a> object] An object representing the settings for running the ADVANTG radiation trasport code. </td></tr>
+    <tr><td class="paramname">num</td><td>integer The current cuckoo number being generated </td></tr>
+    <tr><td class="paramname">cluster</td><td>boolean (optional) An indicator to change the file to run on a cluster using Run_Transport function and slurm job submission </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>

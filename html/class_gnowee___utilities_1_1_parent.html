@@ -74,6 +74,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a471ec7936bc6b237de50203cc2730500"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#a471ec7936bc6b237de50203cc2730500">__init__</a> (self, identifier, eta, geometry, GS, mcnp, mats, ex, i=0, fitness=1E15, build_geom=True)</td></tr>
+<tr class="memdesc:a471ec7936bc6b237de50203cc2730500"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a parent object representing a current design.  <a href="#a471ec7936bc6b237de50203cc2730500">More...</a><br /></td></tr>
 <tr class="separator:a471ec7936bc6b237de50203cc2730500"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41fe74ceaa7c6d0ce909f9affcbc5b69"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#a41fe74ceaa7c6d0ce909f9affcbc5b69">__repr__</a> (self)</td></tr>
 <tr class="separator:a41fe74ceaa7c6d0ce909f9affcbc5b69"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -83,36 +84,22 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:af9328b1f0268ce8c61c5805000f69d9c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#af9328b1f0268ce8c61c5805000f69d9c">ident</a></td></tr>
+<tr class="memdesc:af9328b1f0268ce8c61c5805000f69d9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">integer A set identifier tying a parent to a folder set  <a href="#af9328b1f0268ce8c61c5805000f69d9c">More...</a><br /></td></tr>
 <tr class="separator:af9328b1f0268ce8c61c5805000f69d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af966ed0de3c932fc1774bf0f78ece9e6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#af966ed0de3c932fc1774bf0f78ece9e6">geom</a></td></tr>
+<tr class="memdesc:af966ed0de3c932fc1774bf0f78ece9e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">object An object containing the design geometry variables  <a href="#af966ed0de3c932fc1774bf0f78ece9e6">More...</a><br /></td></tr>
 <tr class="separator:af966ed0de3c932fc1774bf0f78ece9e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a603408b8224dba3eca35448527801b26"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#a603408b8224dba3eca35448527801b26">rset</a></td></tr>
+<tr class="memdesc:a603408b8224dba3eca35448527801b26"><td class="mdescLeft">&#160;</td><td class="mdescRight">[MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code.  <a href="#a603408b8224dba3eca35448527801b26">More...</a><br /></td></tr>
 <tr class="separator:a603408b8224dba3eca35448527801b26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ab98e33b7fcca9282359732fd8501df"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#a5ab98e33b7fcca9282359732fd8501df">fit</a></td></tr>
+<tr class="memdesc:a5ab98e33b7fcca9282359732fd8501df"><td class="mdescLeft">&#160;</td><td class="mdescRight">scalar The assessed design fitness  <a href="#a5ab98e33b7fcca9282359732fd8501df">More...</a><br /></td></tr>
 <tr class="separator:a5ab98e33b7fcca9282359732fd8501df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78da329073f8374a593c1d70b13822f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_gnowee___utilities_1_1_parent.html#a78da329073f8374a593c1d70b13822f9">fixed_mats</a></td></tr>
+<tr class="memdesc:a78da329073f8374a593c1d70b13822f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">integer Number of fixed materials in the geometry.  <a href="#a78da329073f8374a593c1d70b13822f9">More...</a><br /></td></tr>
 <tr class="separator:a78da329073f8374a593c1d70b13822f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">Creates a parent object representing a current design
-   
-Attributes
-==========
-identifier : integer
-    A set identifier tying a parent to a folder set
-fit : scalar
-    The assessed design fitness
-geom : object
-    An object containing the design geometry variables 
-rset : MCNP_Settings object
-    An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-    and tally information.
-fixed_mats : integer
-    Number of fixed materials in the geometry.  This accounts for structural materials and foils that shouldn't change.
-Returns
-=======
-None
-</pre> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a471ec7936bc6b237de50203cc2730500"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a471ec7936bc6b237de50203cc2730500">&#9670;&nbsp;</a></span>__init__()</h2>
 
@@ -192,38 +179,23 @@ None
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Parameters
-==========
-identifier : integer
-    A set identifier tying a parent to a folder set
-eta : ETA parameters object
-    An object that contains all of the constraints required to initialize the geometry
-geometry : MCNP_Geometry object
-    The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-GS : Gnowee Settings object
-    An object representing the settings for the optimization algorithm
-mcnp : MCNP_Settings object
-    An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-    and tally information.
-mats : dict of material objects
-    A dictionary of the material objects from which ETA materials can be selected
-    [Default: {}]
-ex : list    
-    A list of materials to be excluded
 
-Optional
-========
-i : integer
-    Parent indexed location for initial LHC sampling purposes
-fitness : float
-    The assessed design fitness
-build_geom : boolean
-    Used to indicate if the geometry needs to be build for a new parent.  
-    Turned off if the complete geometry is passed in.
+<p>Creates a parent object representing a current design. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">identifier</td><td>integer A set identifier tying a parent to a folder set </td></tr>
+    <tr><td class="paramname">eta</td><td>[ETA parameters object] An object that contains all of the constraints required to initialize the geometry </td></tr>
+    <tr><td class="paramname">geometry</td><td>[MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information </td></tr>
+    <tr><td class="paramname">GS</td><td>[Gnowee Settings object] An object representing the settings for the optimization algorithm </td></tr>
+    <tr><td class="paramname">mcnp</td><td>[MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, and tally information. </td></tr>
+    <tr><td class="paramname">mats</td><td>[dict of material objects] A dictionary of the material objects from which ETA materials can be selected [Default: {}] </td></tr>
+    <tr><td class="paramname">ex</td><td>list A list of materials to be excluded </td></tr>
+    <tr><td class="paramname">i</td><td>integer (optional) <a class="el" href="class_gnowee___utilities_1_1_parent.html">Parent</a> indexed location for initial LHC sampling purposes  fitness float (optional) The assessed design fitness </td></tr>
+    <tr><td class="paramname">build_geom</td><td>boolean (optional) Used to indicate if the geometry needs to be build for a new parent. Turned off if the complete geometry is passed in. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-Returns
-=======
-</pre> 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -276,6 +248,8 @@ Returns
       </table>
 </div><div class="memdoc">
 
+<p>scalar The assessed design fitness </p>
+
 </div>
 </div>
 <a id="a78da329073f8374a593c1d70b13822f9"></a>
@@ -289,6 +263,9 @@ Returns
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>integer Number of fixed materials in the geometry. </p>
+<p>This accounts for structural materials and foils that shouldn't change. Determine number of fixed mats </p>
 
 </div>
 </div>
@@ -304,6 +281,8 @@ Returns
       </table>
 </div><div class="memdoc">
 
+<p>object An object containing the design geometry variables </p>
+
 </div>
 </div>
 <a id="af9328b1f0268ce8c61c5805000f69d9c"></a>
@@ -318,6 +297,8 @@ Returns
       </table>
 </div><div class="memdoc">
 
+<p>integer A set identifier tying a parent to a folder set </p>
+
 </div>
 </div>
 <a id="a603408b8224dba3eca35448527801b26"></a>
@@ -331,6 +312,9 @@ Returns
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>[MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. </p>
+<p>Contains the source, physics, and tally information. </p>
 
 </div>
 </div>

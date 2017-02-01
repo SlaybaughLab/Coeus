@@ -79,12 +79,16 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:aa2e516007decda6b60fa483c3835cb97"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_gnowee___utilities.html#aa2e516007decda6b60fa483c3835cb97">Calc_Fitness</a> (ids, pop, obj, min_fiss=0, max_w=1000)</td></tr>
+<tr class="memdesc:aa2e516007decda6b60fa483c3835cb97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the generated MCNP input deck to file.  <a href="#aa2e516007decda6b60fa483c3835cb97">More...</a><br /></td></tr>
 <tr class="separator:aa2e516007decda6b60fa483c3835cb97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90d9a255aebc23bd75ee7969fc3b5d2c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_gnowee___utilities.html#a90d9a255aebc23bd75ee7969fc3b5d2c">Pop_Update</a> (old, new, nps, eta=None, mats=None, run=None, rr=False)</td></tr>
+<tr class="memdesc:a90d9a255aebc23bd75ee7969fc3b5d2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the population based on the assessed fitness values.  <a href="#a90d9a255aebc23bd75ee7969fc3b5d2c">More...</a><br /></td></tr>
 <tr class="separator:a90d9a255aebc23bd75ee7969fc3b5d2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c1982abd59eea59ba7c78a024c990b1"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_gnowee___utilities.html#a5c1982abd59eea59ba7c78a024c990b1">Rejection_Bounds</a> (parent, child, stepsize, lb, ub, S, change_count=0)</td></tr>
+<tr class="memdesc:a5c1982abd59eea59ba7c78a024c990b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application of problem boundaries to generated solutions.  <a href="#a5c1982abd59eea59ba7c78a024c990b1">More...</a><br /></td></tr>
 <tr class="separator:a5c1982abd59eea59ba7c78a024c990b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12d23d91f3dd30385717fcf65eca7fdb"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_gnowee___utilities.html#a12d23d91f3dd30385717fcf65eca7fdb">Simple_Bounds</a> (tmp, lb, ub, change_count=0)</td></tr>
+<tr class="memdesc:a12d23d91f3dd30385717fcf65eca7fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Application of problem boundaries to generated solutions.  <a href="#a12d23d91f3dd30385717fcf65eca7fdb">More...</a><br /></td></tr>
 <tr class="separator:a12d23d91f3dd30385717fcf65eca7fdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
@@ -136,29 +140,19 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Print the generated MCNP input deck to file 
-   
-Parameters
-==========
-ids : list of integers
-    The parents that need to have fitness solutions calculated
-pop : list of parent objects
-    The population and their design features
-obj : array
-    The objective spectrum
 
-Optional
-========
-min_fiss : float
-    A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
-    [Default = 0]
-max_w : float
-    A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
-    
-Returns
-=======
-None
-</pre> 
+<p>Print the generated MCNP input deck to file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ids</td><td>[list of integers] The parents that need to have fitness solutions calculated </td></tr>
+    <tr><td class="paramname">pop</td><td>[list of parent objects] The population and their design features </td></tr>
+    <tr><td class="paramname">obj</td><td>array The objective spectrum </td></tr>
+    <tr><td class="paramname">min_fiss</td><td>float (optional) A constraint specifying the minimum number fo fissions. Implemented as a soft constraint. [Default = 0] </td></tr>
+    <tr><td class="paramname">max_w</td><td>float (optional) A constraint specifying the maximum weight of the assembly. Implemented as a hard constraint. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a90d9a255aebc23bd75ee7969fc3b5d2c"></a>
@@ -216,34 +210,24 @@ None
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Updates the population based on the assessed fitness values.  
-   
-Parameters
-==========
-old : list of parent objects
-    The current population and their design features
-new : list of parent objects
-    The proposed population and their design features
-nps : float
-    The baseline number of NPS particles specified 
-Optional
-========
-eta : ETA parameters object
-    An object that contains all of the constraints required to initialize the geometry
-mats : dict of material objects
-    A dictionary of the material objects from which ETA materials can be selected
-run : function
-    A function that runs the radiation transport calculations
-rr : boolean
-    Indicator if random replacement is used to update the list
-    
-Returns
-=======
-changes : Integer
-    The number of accepted changes
-feval : Integer
-    The number of function evaluations performed for increasing the particles
-</pre> 
+
+<p>Updates the population based on the assessed fitness values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">old</td><td>[list of parent objects] The current population and their design features </td></tr>
+    <tr><td class="paramname">new</td><td>[list of parent objects] The proposed population and their design features </td></tr>
+    <tr><td class="paramname">nps</td><td>float The baseline number of NPS particles specified </td></tr>
+    <tr><td class="paramname">eta</td><td>[ETA parameters object] (optional) An object that contains all of the constraints required to initialize the geometry </td></tr>
+    <tr><td class="paramname">mats</td><td>[dict of material objects] (optional) A dictionary of the material objects from which ETA materials can be selected </td></tr>
+    <tr><td class="paramname">run</td><td>function (optional) A function that runs the radiation transport calculations </td></tr>
+    <tr><td class="paramname">rr</td><td>boolean (optional) Indicator if random replacement is used to update the list </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>changes Integer The number of accepted changes </dd>
+<dd>
+feval Integer The number of function evaluations performed for increasing the particles </dd></dl>
+
 </div>
 </div>
 <a id="a5c1982abd59eea59ba7c78a024c990b1"></a>
@@ -301,36 +285,22 @@ feval : Integer
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Application of problem boundaries to generated solutions. If a solution is outside of the 
-bounds, the step is rejected and that particular value reverts to the previous solution.
-   
-Parameters
-==========
-parent : array
-    The current system designs
-child : array
-    The proposed new system designs
-stepsize : float
-    The Levy flight stepsize
-lb : array
-    The lower bounds of the design variable(s)
-ub : array
-    The upper bounds of the design variable(s)
-S : Gnowee Settings Object    
-    An object representing the settings for the Gnowee optimization algorithm
-   
-Optional
-======== 
-change_count : integer
-    Counter to track the number of solutions that occur outside of problem boundaries.  
-    Can be used to diagnose too large or small of alpha
-    (Default: 0)
-   
-Returns
-=======
-new : array
-    The new system designs that are within problem boundaries
-</pre> 
+
+<p>Application of problem boundaries to generated solutions. </p>
+<p>If a solution is outside of the bounds, the step is rejected and that particular value reverts to the previous solution. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parent</td><td>array The current system designs </td></tr>
+    <tr><td class="paramname">child</td><td>array The proposed new system designs </td></tr>
+    <tr><td class="paramname">stepsize</td><td>float The Levy flight stepsize </td></tr>
+    <tr><td class="paramname">lb</td><td>array The lower bounds of the design variable(s) </td></tr>
+    <tr><td class="paramname">ub</td><td>array The upper bounds of the design variable(s) </td></tr>
+    <tr><td class="paramname">S</td><td>[Gnowee Settings Object] An object representing the settings for the Gnowee optimization algorithm </td></tr>
+    <tr><td class="paramname">change_count</td><td>integer (optional) Counter to track the number of solutions that occur outside of problem boundaries. Can be used to diagnose too large or small of alpha (Default: 0) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>new array The new system designs that are within problem boundaries </dd></dl>
+
 </div>
 </div>
 <a id="a12d23d91f3dd30385717fcf65eca7fdb"></a>
@@ -370,29 +340,19 @@ new : array
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Application of problem boundaries to generated solutions
-   
-Parameters
-==========
-tmp : array
-    The proposed new system designs
-lb : array
-    The lower bounds of the design variable(s)
-ub : array
-    The upper bounds of the design variable(s)
-   
-Optional
-========
-change_count : integer
-    Counter to track the number of solutions that occur outside of problem boundaries.  
-    Can be used to diagnose too large or small of alpha
-    (Default: 0)
-   
-Returns
-=======
-tmp : array
-    The new system designs that are within problem boundaries
-</pre> 
+
+<p>Application of problem boundaries to generated solutions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tmp</td><td>array The proposed new system designs </td></tr>
+    <tr><td class="paramname">lb</td><td>array The lower bounds of the design variable(s) </td></tr>
+    <tr><td class="paramname">ub</td><td>array The upper bounds of the design variable(s) </td></tr>
+    <tr><td class="paramname">change_count</td><td>integer (optional) Counter to track the number of solutions that occur outside of problem boundaries. Can be used to diagnose too large or small of alpha (Default: 0) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>tmp array The new system designs that are within problem boundaries </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
