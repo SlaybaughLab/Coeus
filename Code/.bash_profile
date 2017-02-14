@@ -19,11 +19,11 @@ module load mpi4py
 
 alias groupdir="cd /global/home/groups/co_nuclear"
 
-alias stat='squeue | grep jbevins'
+alias stat='squeue | grep youdongz'
 
 alias nuc='squeue -q nuclear_normal'
 
-alias scratch="cd /global/scratch/jbevins/"
+alias scratch="cd /global/scratch/youdongz/"
 
 # wwall -j jobid
 
@@ -35,4 +35,5 @@ DATAPATH=/global/scratch/co_nuclear/MCNP/MCNP_DATA/
 
 export PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/global/home/groups/co_nuclear/pyne/lib
+export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs
 export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/pyne/lib/python2.7/site-packages
