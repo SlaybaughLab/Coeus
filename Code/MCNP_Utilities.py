@@ -24,36 +24,20 @@ import copy as cp
 from math import ceil
 from math import sin, cos, tan, atan, radians
 
-#---------------------------------------------------------------------------------------#    
 class MCNP_Settings:
-    """
-    Creates a object representing the settings for running the MCNP radiation trasport code.
-   
-    Attributes
-    ==========
-    physics : str
-        The physics cards for run parameters 
-        [Default: "MODE n\n"]
-    nps : integer
-        The starting number of particles to run.  The number ran by the code will depend on generation and fitness.
-        [Default: 1E6]
-    tally : str
-        The tallies for the problem.
-        [Default: ""]
-    source : array
-        Stores the upper energy bin bounds and source strength for each bin
-        [default=[]]
-        
-    Returns
-    =======
-    None
-    """
-        
-        
-    def __init__(self,physics="MODE n\n",nps=1E6, tally="", source=[]):  
+
+    ## Creates a object representing the settings for running the MCNP radiation trasport code.
+    def __init__(self,physics="MODE n\n",nps=1E6, tally="", source=[]): 
+        ## str The physics cards for run parameters
         self.phys=physics
+        ## int The starting number of particles to run.  The number ran by the code will depend on generation and fitness.
+        # [Default: 1E6]
         self.nps=nps
+        ## array Stores the upper energy bin bounds and source strength for each bin
+        # [default=[]]
         self.source=source  
+        ## str The tallies for the problem.
+        # [Default: ""]
         self.tally=tally
         
         
@@ -72,13 +56,11 @@ class MCNP_Settings:
         s = header + "\n".join(["{0:<7}{1}".format(ebin, flux) for ebin, flux in self.source])
         return s
     
-    
+    ## Parses a MCNP settings csv input file. 
+    #    The key word options are:
+    #        Physics
+    #        NPS
     def read_settings(self, filename):
-        """Parses a MCNP settings csv input file. 
-        The key word options are:
-            Physics
-            NPS
-        """
         # Open file
         try: 
             self.f = open(filename, 'r') 
@@ -122,12 +104,10 @@ class MCNP_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
         
-        
+    ## Parses an source input csv file. 
+    #    The first column contains the upper energy bin boundaries. 
+    #    The second column contains the flux/fluence of the bin.
     def read_source(self, filename):
-        """Parses an source input csv file. 
-        The first column contains the upper energy bin boundaries. 
-        The second column contains the flux/fluence of the bin.  
-        """
 
         # Open file
         try: 
@@ -147,22 +127,11 @@ class MCNP_Settings:
        
         # Test that the file closed
         assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
-        
+    
+    ## Sets the standard tallies to be used. 
+    # @param cell int the cell for volume tallies
+    # @param mat int the amterial number for reaction tallies
     def set_tallies(self, cell, mat):
-        """
-        Sets the standard tallies to be used. 
-        
-        Inputs
-        ==========
-        cell : int 
-            The cell for volume tallies
-        mat : int
-            The material number for reaction tallies
-        
-        Returns
-        =======
-        None
-        """
         
         # Add Standard Tallies to User Defined Tallies
         self.tally+="FC14 Fission Reaction Rate (Fissions per cm^3 per src particle)\n"
@@ -171,32 +140,16 @@ class MCNP_Settings:
         self.tally+="FC24 Uranium Flux Spectra (Number per cm^2 per src neutron)\n"
         self.tally+="F24:n {}\n".format(cell) 
 
-#-------------------------------------------------------------------------------------------------------------#  
+
 class MCNP_Geometry:
-    """
-    Creates the geometry for running the MCNP radiation trasport code.
-   
-    Attributes
-    ==========
-    surfaces : list of surface objects
-        Contains a list of all surface objects used in the design
-        [Default: []]
-    cells : list of cell objects
-        A list of all of the cell objects used in the design
-        [Default: []]
-    matls : list of material object keys
-        A list of the keys to material objects used in geometry.
-        [Default: []]
-        
-        
-    Returns
-    =======
-    None
-    """
     
+    ## Creates the geometry for running the MCNP radiation trasport code.
     def __init__(self):  
+        # [list of surface objects] Contains a list of all surface objects used in the design
         self.surfaces=[]
+        # [list of cell objects] A list of all of the cell objects used in the design
         self.cells=[]
+        # [list of material object keys] A list of the keys to material objects used in geometry.
         self.matls=[]
         
     def __repr__(self):
@@ -216,27 +169,14 @@ class MCNP_Geometry:
             header += [str(mat)]
         header ="\n".join(header)+"\n"
         s = header 
-        return s    
-    
+        return s  
+          
+    ## Builds the inital surface list, cells dictionary, and materials list for the ETA geometry envelope
+    # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+    # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  
+    #        Isotopic densities are in atoms/b-cm
     def init_geom(self, eta, mats):
-        """
-        Builds the inital surface list, cells dictionary, and materials list for the ETA geometry envelope
 
-        Parameters
-        ==========
-        eta : ETA parameters object
-            An object that contains all of the constraints required to initialize the geometry
-        mats : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes.  
-            Isotopic densities are in atoms/b-cm
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
         assert eta.r_f>0.0, 'The ETA face radius must be greater than zero'
         assert eta.theta>0.0, 'The ETA cone angle must be great than zero.'
         assert eta.r_o>=eta.r_f, 'The ETA outer radius must be greater than or equal to the face radius.'
@@ -311,25 +251,11 @@ class MCNP_Geometry:
         self.add_cell(MCNP_Cell(4,ind+1,"mass",mats[self.matls[ind]].density, "-506", (1,0)))
         self.add_cell(MCNP_Cell(5,ind+1,"mass",mats[self.matls[ind]].density, "-507", (1,0)))
     
+    ## Finishes the geometry by adding the filler and void cells, surfaces, and materials to the geometry
+    # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+    # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  
+    #        Isotopic densities are in atoms/b-cm
     def fin_geom(self, eta, mats):
-        """
-        Finishes the geometry by adding the filler and void cells, surfaces, and materials to the geometry
-
-        Parameters
-        ==========
-        eta : ETA parameters object
-            An object that contains all of the constraints required to initialize the geometry
-        mats : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes.  
-            Isotopic densities are in atoms/b-cm
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
         assert eta.r_f>0.0, 'The ETA face radius must be greater than zero'
         assert eta.theta>0.0, 'The ETA cone angle must be great than zero.'
         assert eta.r_o>=eta.r_f, 'The ETA outer radius must be greater than or equal to the face radius.'
@@ -371,24 +297,9 @@ class MCNP_Geometry:
         # Create the Outer Kill cell
         self.add_cell(MCNP_Cell(self.cells[-1].name+1,0,"void",0.0,"{}".format(self.surfaces[-1].name), (0,0),comment="kill cell"))
         
-        
+    ## Adds new surface object to geometry surface list.
+    # @param add A list of the surface objects to add
     def add_surf(self,adds):
-        """
-        Adds new surface object to geometry surface list.
-
-        Parameters
-        ==========
-        adds : list
-            A list of the surface objects to add
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
-        
         if isinstance(adds,list)==False:
             assert isinstance(adds, MCNP_Surface)==True, 'Surfaces in the MCNP geometry must be a MCNP_Surface instance.'
             if any(s.name==adds.name for s in self.surfaces): 
@@ -404,24 +315,9 @@ class MCNP_Geometry:
                 else:    
                     self.surfaces.append(cp.deepcopy(y))
         
-        
+    ## Adds new cell object to geometry cells list.
+    # @param adds A list of the cell objects to add
     def add_cell(self,adds):
-        """
-        Adds new cell object to geometry cells list.
-
-        Parameters
-        ==========
-        adds : list
-            A list of the cell objects to add
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
-        
         if isinstance(adds,list)==False:
             assert isinstance(adds, MCNP_Cell)==True, 'Cells in the MCNP geometry must be a MCNP_Surface instance.'
             if any(s.name==adds.name for s in self.cells): 
@@ -437,26 +333,10 @@ class MCNP_Geometry:
                 else:    
                     self.cells.append(cp.deepcopy(y))
         
-        
+    ## Add materials to the matls list.  Checks for materials existing in the materials library.
+    # @param mat_lib [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes
+    # @param adds A list of the names of the materials to add to the matls list
     def add_matls(self,mat_lib,adds):
-        """
-        Add materials to the matls list.  Checks for materials existing in the materials library.
-
-        Parameters
-        ==========
-        mat_lib : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes.
-        adds : list
-            A list of the names of the materials to add to the matls list
-
-        Optional
-        ========
-
-        Returns
-        =======
-        None
-        """
-                
         # Add the material
         if isinstance(adds,list)==False:
             if adds in mat_lib.keys(): # and adds not in self.matls:
@@ -471,27 +351,12 @@ class MCNP_Geometry:
                 elif mat not in self.matls:
                     module_logger.error("Material {} not found in the material library.".format(mat))
     
+    ## Builds the geometry object from an MCNP input file. Fairly specific to the current ETA design.
+    # @param path String The path, including filename, to the MCNP output file to be read
+    # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  
+    #        Isotopic densities are in atoms/b-cm
+    # @return nps integer Number of particles for the MCNP run
     def read_geom(self, path, mats):
-        """
-        Builds the geometry object from an MCNP input file. Fairly specific to the current ETA design.
-
-        Parameters
-        ==========
-        path : String
-            The path, including filename, to the MCNP output file to be read
-        mats : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes.  
-            Isotopic densities are in atoms/b-cm
-
-        Optional
-        ========
-
-        Returns
-        =======
-        nps : integer
-            Number of particles for the MCNP run
-        """  
-        
         assert isinstance(path, str)==True, 'Path must be of type str.'
       
         # Open input file 
@@ -598,97 +463,69 @@ class MCNP_Geometry:
         assert f.closed==True, "File ({}) did not close properly.".format(path) 
     
         return nps
-#-------------------------------------------------------------------------------------------------------------#  
+
 class MCNP_Surface:
-    """
-    Creates a MCNP surface object.  Currently can handle SO, (PX,PY,PZ), (CX,CY,CZ), RCC, RPP, and TRC
-    surfaces and macrobodies.  All others will throw an exception.  Attributes not used are specified as -1. 
-    All atribute names follow those shown in Table 3.1 and Section 3.III.D in Volume II of the MCNP manual
-   
-    Attributes
-    ==========
-    name : int
-        Surface number. 
-    s_type : string
-        The type of MCNP surface.  Currently can specify "SO", ("PX","PY","PZ"), ("CX","CY","CZ"), "RCC", 
-        "RPP", and ("KX","KY","KY")
-    r : float
-        A radius in cm.  Used for the SO, CX, CY, CZ, and RCC surfaces
-        [Default: -1]
-    d : float
-        A location in cm.  Used for the PX, PY, and PZ surfaces
-        [Default: -1]
-    x_min : float
-        The minimum x location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    x_max : float
-        The maximum x location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    y_min : float
-        The minimum y location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    y_max : float
-        The maximum y location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    z_min : float
-        The minimum z location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    z_max : float
-        The maximum z location in cm.  Used for the RPP macrobody
-        [Default: -1]
-    vx : float
-        The x location of the center of the base in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    vy : float
-        The y location of the center of the base in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    vz : float
-        The z location of the center of the base in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    hx : float
-        The change in x for the height vector in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    hy : float
-        The change in y for the height vector in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    hz : float
-        The change in z for the height vector in cm.  Used for the RCC and TRC macrobody
-        [Default: -1]
-    r1 : float
-        The radius of the lower cone base in cm.  Used for the TRC macrobody
-        [Default: -1]
-    r2 : float
-        The radius of the upper cone base in cm.  Used for the TRC macrobody
-        [Default: -1]
-    comment : string
-        Comment describing the surface feature.  Can be used to find the surface corresponding
-        to a particular geometric feature
-        
-    Returns
-    =======
-    None
-    """
-    
+
+    ## Creates a MCNP surface object.  Currently can handle SO, (PX,PY,PZ), (CX,CY,CZ), RCC, RPP, and TRC
+    #    surfaces and macrobodies.  All others will throw an exception.  Attributes not used are specified as -1. 
+    #    All atribute names follow those shown in Table 3.1 and Section 3.III.D in Volume II of the MCNP manual
     def __init__(self, name, s_type, r=-1, d=-1, x_min=-1, x_max=-1,  y_min=-1, y_max=-1, z_min=-1, z_max=-1,
                  vx=-1, vy=-1, vz=-1, hx=-1, hy=-1, hz=-1, r1=-1, r2=-1, comment=""):  
+        ## Surface number
         self.name=name
+        ## The type of MCNP surface.  Currently can specify "SO", ("PX","PY","PZ"), ("CX","CY","CZ"), "RCC", 
+        # "RPP", and ("KX","KY","KY")
         self.s_type=s_type
+        ## A radius in cm.  Used for the SO, CX, CY, CZ, and RCC surfaces
+        # [Default: -1]
         self.r=r
+        ## A location in cm.  Used for the PX, PY, and PZ surfaces
+        # [Default: -1]
         self.d=d
+        ## The minimum x location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.x_min=x_min
+        ## The maximum x location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.x_max=x_max
+        ## The minimum y location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.y_min=y_min
+        ## The maximum y location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.y_max=y_max
+        ## The minimum z location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.z_min=z_min
+        ## The maximum z location in cm.  Used for the RPP macrobody
+        # [Default: -1]
         self.z_max=z_max
+        ## The x location of the center of the base in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.vx=vx
+        ## The y location of the center of the base in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.vy=vy
+        ## The z location of the center of the base in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.vz=vz
+        ## The change in x for the height vector in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.hx=hx
+        ## The change in y for the height vector in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.hy=hy
+        ## The change in z for the height vector in cm.  Used for the RCC and TRC macrobody
+        # [Default: -1]
         self.hz=hz
+        ## The radius of the lower cone base in cm.  Used for the TRC macrobody
+        # [Default: -1]
         self.r1=r1
+        ## The radius of the upper cone base in cm.  Used for the TRC macrobody
+        # [Default: -1]
         self.r2=r2
+        ## describing the surface feature.  Can be used to find the surface corresponding
+        # to a particular geometric feature
         self.c=comment
         
         assert isinstance(self.name, int)==True, 'name must be of type int.'
@@ -833,36 +670,11 @@ class MCNP_Surface:
             surf+=tmp
             
         return surf
-    
-#-------------------------------------------------------------------------------------------------------------#  
+ 
+
 class MCNP_Cell:
-    """
-    Creates a MCNP cell object.  
-   
-    Attributes
-    ==========
-    name : int
-        Cell number. 
-    m : int
-        Material number.  0 for a void cell
-    units : string
-        Acceptable values are "atom", "mass", and "void".  Capitalization does not matter
-    d : float
-        The density of the cell
-    geom : string
-        Specification of the Boolean geometry of the cell.  
-    imp : int tuple
-        Specification of the importance of the regions for (neutron, photons)
-    comment : string
-        Comment describing the surface feature.  Can be used to find the surface corresponding
-        to a particular geometric feature
-        [Default='']
-        
-    Returns
-    =======
-    None
-    """
-    
+
+    ##  Creates a MCNP cell object. 
     def __init__(self, name, mat, units, dens, geom, imp, comment=''):  
         
         assert isinstance(name, int)==True, 'name must be of type int.'
@@ -873,12 +685,21 @@ class MCNP_Cell:
         assert isinstance(imp[0], int)==True and isinstance(imp[1], int)==True, 'all imp must be of type int.'
         assert isinstance(comment, str)==True, 'comment must be of type str.'
         
+        ## int Cell number
         self.name=name
+        ## int Material number.  0 for a void cell
         self.m=mat
+        ## string Acceptable values are "atom", "mass", and "void".  Capitalization does not matter
         self.units=units
+        ## float The density of the cell
         self.d=dens
+        ## string Specification of the Boolean geometry of the cell. 
         self.geom=geom
+        ## int tuple Specification of the importance of the regions for (neutron, photons)
         self.imp=imp
+        ## string Comment describing the surface feature.  Can be used to find the surface corresponding
+        # to a particular geometric feature
+        # [Default='']
         self.comment=comment
                
     def __repr__(self):
@@ -913,35 +734,16 @@ class MCNP_Cell:
             
         return cell
 
-#-------------------------------------------------------------------------------------------------------------#  
-def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
-    """
-    Print the generated MCNP input deck to file 
-   
-    Parameters
-    ==========
-    eta : ETA parameters object
-        An object that contains all of the constraints required to initialize the geometry
-    geom : MCNP_Geometry object
-        The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-    settings : MCNP_Settings object
-        An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-        and tally information.
-    mats : dictionary of material objects
-            A materials library containing all relevant nulcear data required to run radiation transport codes. 
-    num : integer
-        The current parent number being generated
-
-    Optional
-    ========
-    adv_print : boolean
-        An optional indicator to determine whether to print weight window and source bias information in the input file from 
-        ADVANTG outputs. 
-        
-    Returns
-    =======
-    None
-    """       
+##  Print the generated MCNP input deck to file 
+# @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+# @param geom [MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
+# @param settings [MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
+#        and tally information.
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes. 
+# @param num int The current parent number being generated
+# @param adv_print boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
+#        ADVANTG outputs. 
+def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):     
     path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))+"/Results/Population/{}".format(num)
     # Delete previous input file if present
     if os.path.exists(path):
@@ -1062,28 +864,11 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
     # Test that the file closed
     assert inp_file.closed==True, "File did not close properly."
     
-#-------------------------------------------------------------------------------------------------------------#  
+## Read the generated MCNP output and return the tally results
+#  @param path String The path, including filename, to the MCNP output file to be read
+#  @param tnum String The number of the tally to be read
+#  @return tally array Array of tally results  
 def Read_Tally_Output(path, tnum):
-    """
-    Read the generated MCNP output and return the tally results
-   
-    Parameters
-    ==========
-    path : String
-        The path, including filename, to the MCNP output file to be read
-    tnum : String
-        The number of the tally to be read
-
-    Optional
-    ========
-    None
-        
-    Returns
-    =======
-    tally : array
-        Array of tally results
-        
-    """  
     
     assert isinstance(path, str)==True, 'Path must be of type str.'
     assert isinstance(tnum, str)==True, 'tnum must be of type str.'
@@ -1128,34 +913,15 @@ def Read_Tally_Output(path, tnum):
     
     return np.asarray(tally)   
 
-#-------------------------------------------------------------------------------------------------------------#  
+## Read the generated MCNP output and return the tally results
+    # @param path String The path, including filename, to the MCNP output file to be read
+    # @param tnum String The number of the tally to be read.  Returns the entire binned tally.
+    # @param rnum String The number of the tally to be read for the total reactions only. 
+    # @return tally array Array of tally results for the tally specified by tnum [Ebins, tally, uncertainty]
+    # @return rxs array Total number of reactions for the tally specified by rx_num [tally, uncertainty]
+    # @return weight float The total weight of the system
 def Read_MCNP_Output(path, tnum, rnum):
-    """
-    Read the generated MCNP output and return the tally results
-   
-    Parameters
-    ==========
-    path : String
-        The path, including filename, to the MCNP output file to be read
-    tnum : String
-        The number of the tally to be read.  Returns the entire binned tally.
-    rnum : String
-        The number of the tally to be read for the total reactions only. 
 
-    Optional
-    ======== 
-        
-    Returns
-    =======
-    tally : array
-        Array of tally results for the tally specified by tnum [Ebins, tally, uncertainty]
-    rxs : array
-        Total number of reactions for the tally specified by rx_num [tally, uncertainty]
-    weight : float
-        The total weight of the system
-        
-    """  
-    
     assert isinstance(path, str)==True, 'Path must be of type str.'
     assert isinstance(tnum, str)==True, 'tnum must be of type str.'
     assert isinstance(rnum, str)==True, 'rnum must be of type str.'

@@ -27,36 +27,18 @@ from math import sqrt, ceil, tan, radians
 from Utilities import WeightedRandomGenerator
 from scipy.stats import rankdata
 
-#---------------------------------------------------------------------------------------#
+## Change cell materials based on Levy draw. The materials will be changed by either 
+#   a) using material library key list index numbers or b) moderating ratio (for both 1 and 14 MeV).  
+#   The choice will be based on a random number draw and be 33/33/33. 
+#   This provides for a decoupling to the moderation power to add a layer of more randomness, 
+#   while maintaining a physics based Levy flight process. 
+# @param x [list of parent objects] The current parents representing system designs
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.
+# @param mr [list of modertaing raio objects] Contains the moderating ratios for the materials library used to guide the Levy flight
+# @param S object An object representing the settings for the optimization algorithm
+# @param exclude list A list of materials to be excluded
+# @return tmp [list of parent objects] The proposed parents representing new system designs
 def Mat_Levy_Flights(x,mats,mr,S,exclude):
-    """
-    Change cell materials based on Levy draw. The materials will be changed by either 
-    a) using material library key list index numbers or b) moderating ratio (for both 1 and 14 MeV).  
-    The choice will be based on a random number draw and be 33/33/33. 
-    This provides for a decoupling to the moderation power to add a layer of more randomness, 
-    while maintaining a physics based Levy flight process. 
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.
-    mr : list of moderating ratio objects
-        Contains the moderating ratios for the materials library used to guide the Levy flight
-    S : Object    
-        An object representing the settings for the optimization algorithm
-    exclude : list    
-        A list of materials to be excluded
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """
     
     assert S.fl>=0 and S.fl <=1, 'The probability that a parent is used for global Levy search must exist on [0,1] & =%d' %S.fl
     
@@ -170,30 +152,14 @@ def Mat_Levy_Flights(x,mats,mr,S,exclude):
         
     return tmp
 
-#---------------------------------------------------------------------------------------#
+## Cell Levy Flight: Change all cell and foil starting locations and cell deltas based on Levy draw. 
+#     The parameters modified are $z_{foil}$, $\Delta z_{hc}$, $r_{vc}$, $\Delta r_{vc}$, $z_{vc}$ , 
+#     and $\Delta z_{vc}$.
+# @param x [list of parent objects]
+# @param eta Object An object representing the constraints for the eta design
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
 def Cell_Levy_Flights(x,eta,S):
-    """
-     Cell Levy Flight: Change all cell and foil starting locations and cell deltas based on Levy draw. 
-     The parameters modified are $z_{foil}$, $\Delta z_{hc}$, $r_{vc}$, $\Delta r_{vc}$, $z_{vc}$ , 
-     and $\Delta z_{vc}$.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    eta : Object    
-        An object representing the constraints for the eta design
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """
     assert S.fl>=0 and S.fl <=1, 'The probability that a parent is used for global Levy search must exist on [0,1] & =%d' %S.fl
     
     # Initialize lists
@@ -337,36 +303,18 @@ def Cell_Levy_Flights(x,eta,S):
         module_logger.debug("For i={}, ident={}, the parent={}\n".format(i,tmp[i].ident,str(tmp[i].geom)))             
     return tmp
 
-#---------------------------------------------------------------------------------------#
+## Change the materials between the top parent and an elite parent based on moderating ratio. 
+#    The materials will be changed by moderating ratio (for both 1 and 14 MeV).  
+#    The choice will be based on a random number draw and be 50/50.
+# @param x [list of parent objects] The current parent representing system designs
+# @param mr [list of moderating ratio objects] Contains the moderating ratios for the materials library used to guide the Levy flight
+# @param eta [bject] An object representing the constraints for the eta design
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.
+# @param S [Object] An object representing the settings for the optimization algorithm
+# @param exclude [list] A list of materials to be excluded
+# @return tmp [list of parent objects] The proposed parent representing new system design
 def Elite_Crossover(x,mr,eta,mats,S,exclude):
-    """
-    Change the materials between the top parent and an elite parent based on moderating ratio. 
-    The materials will be changed by moderating ratio (for both 1 and 14 MeV).  
-    The choice will be based on a random number draw and be 50/50.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parent representing system designs
-    mr : list of moderating ratio objects
-        Contains the moderating ratios for the materials library used to guide the Levy flight
-    eta : Object    
-        An object representing the constraints for the eta design
-    mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.
-    S : Object    
-        An object representing the settings for the optimization algorithm
-    exclude : list    
-        A list of materials to be excluded
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parent representing new system design
-    """    
+
     assert S.fe>=0 and S.fe <=1, 'The probability that a parent is elite must exist on [0,1] & =%d' %S.fe
 
     
@@ -479,32 +427,15 @@ def Elite_Crossover(x,mr,eta,mats,S,exclude):
          
     return tmp
 
-#---------------------------------------------------------------------------------------#
-def Partial_Inversion(x,mr,mats,S):
-    """
-    Invert materials based on moderating ratio gradient.  I.e. Pick random layer l.  
-    If layer l+1 has the next highest (or lowest) moderating ratio do nothing.  
-    Otherwise invert the layer(s) between layer l and the layer with the next higher (or lower) ratio.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    mr : list of moderating ratio objects
-        Contains the moderating ratios for the materials library used to guide the inversion
-    mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """    
+## Invert materials based on moderating ratio gradient.  I.e. Pick random layer l.  
+#    If layer l+1 has the next highest (or lowest) moderating ratio do nothing.  
+#    Otherwise invert the layer(s) between layer l and the layer with the next higher (or lower) ratio.
+# @param x [list of parent objects] The current parents representing system designs
+# @param mr [list of moderating ratio objects] Contains the moderating ratios for the materials library used to guide the inversion
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
+def Partial_Inversion(x,mr,mats,S):  
     tmp=[]
     
     for i in range(0,S.p):
@@ -578,26 +509,11 @@ def Partial_Inversion(x,mr,mats,S):
             
     return tmp
 
-#---------------------------------------------------------------------------------------#
-def Two_opt(x,S):
-    """
-    Implement 2_opt by reordering layers for top parents.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """    
+## Implement 2_opt by reordering layers for top parents.
+# @param x [list of parent objects] The current parents representing system designs
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
+def Two_opt(x,S):   
     tmp=[]
     cell_ids=[]
     
@@ -655,27 +571,13 @@ def Two_opt(x,S):
                   
     return tmp
 
-#---------------------------------------------------------------------------------------#
+## For each parent in top S.fe parents, N1, randomly select a parent, N2.  
+#    Randomly select an overall cell from N1 and copy into N2. Repeat s.pt times.  
+# @param x [list of parent objects] The current parents representing system designs
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
 def Crossover(x,S):
-    """
-    For each parent in top S.fe parents, N1, randomly select a parent, N2.  
-    Randomly select an overall cell from N1 and copy into N2. Repeat s.pt times.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """    
+
     tmp=[]
     cell_ids=[]
     used=[]
@@ -734,27 +636,13 @@ def Crossover(x,S):
                     tmp[i].geom.surfaces[j]=cp.deepcopy(x[i].geom.surfaces[j])
     return tmp
 
-#---------------------------------------------------------------------------------------#
+## Perform for horizontal macrobodies if the number of cells is greater than 6.  
+#    Reorganizes the cells is all of the possible combinations for each parent. 
+# @param x [list of parent objects] The current parents representing system designs
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
 def Three_opt(x,S):
-    """
-    Perform for horizontal macrobodies if the number of cells is greater than 6.  
-    Reorganizes the cells is all of the possible combinations for each parent.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """    
+    
     tmp=[]
     
     for i in range(0,int(S.p)):
@@ -846,29 +734,14 @@ def Three_opt(x,S):
         
     return tmp  
 
-#---------------------------------------------------------------------------------------#
+## Discard a cell from fd parents. Bias discard towards better solutions.  Only accept if the 
+#    discard improves the fitness. 
+# @param x [list of parent objects] The current parents representing system designs
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system design
 def Discard_Cells(x,mats,S):
-    """
-    Discard a cell from fd parents. Bias discard towards better solutions.  Only accept if the 
-    discard improves the fitness.
-   
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    tmp : list of parent objects
-        The proposed parents representing new system designs
-    """              
+             
     used=[]
     tmp=[]
     
@@ -924,28 +797,13 @@ def Discard_Cells(x,mats,S):
                             
     return tmp
 
-#---------------------------------------------------------------------------------------#
+## Mutate parent population and build new ones. Bias discard to poor solutions.
+# @param x [list of parent objects] The current parents representing system designs
+# @param eta Object n object representing the constraints for the eta design
+# @param S Object An object representing the settings for the optimization algorithm
+# @return tmp [list of parent objects] The proposed parents representing new system designs
 def Mutate(x,eta,S):
-    """
-    Mutate parent population and build new ones. Bias discard to poor solutions.
-    
-    Parameters
-    ==========
-    x : list of parent objects
-        The current parents representing system designs
-    eta : Object    
-        An object representing the constraints for the eta design
-    S : Object    
-        An object representing the settings for the optimization algorithm
-   
-    Optional
-    ========   
-   
-    Returns
-    =======
-    y : list of parent objects
-        The proposed parents representing new system designs
-    """ 
+
     tmp=[]
     old=[]
     y=cp.deepcopy(x)

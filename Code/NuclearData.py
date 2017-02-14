@@ -28,33 +28,17 @@ from scipy.constants import N_A
 import os
 import sys
 
-#---------------------------------------------------------------------------------------# 
+## Builds and initializes a library of elements and materials provided by user using PyNE material library 
+# functions.  
+# @param mat_path str absolute path to the location of the user supplied materials compendium
+# @param remove_gases boolean allows the user to selectively remove gases from the elements library
+# @param remove_liquids boolean allows the user to selectively remove liquids from the elements library
+# @param remove_expensive boolean allows the user to selectively remove expensive materials from the elements library.  "Expensive" encompasses from a 
+# materials hazard and cost perspective
+# @return mat_lib [dictionary of material objects] a materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
+#     are in atoms/b-cm 
 def Build_Matlib(mat_path='/home/pyne-user/Dropbox/UCB/Research/ETAs/META-CODE/MCNP/pyne/eta_materials_compendium.csv', remove_gases=True, remove_liquids=True, remove_expensive=True):
-    """
-    Builds and initializes a library of elements and materials provided by user using PyNE material library 
-    functions.  
-
-    Parameters
-    ==========
-
-    Optional
-    ========
-    mat_path : str
-        Absolute path to the location of the user supplied materials compendium
-    remove_gases : boolean
-        Allows the user to selectively remove gases from the elements library
-    remove_liquids : boolean
-        Allows the user to selectively remove liquids from the elements library
-    remove_expensive : boolean
-        Allows the user to selectively remove expensive materials from the elements library.  "Expensive" encompasses from a 
-        materials hazard and cost perspective
-
-    Returns
-    =======
-    mat_lib : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
-        are in atoms/b-cm
-        """
+        
     
     # Test path for materials compendium file. Build materials library if file exists; only build element library if not
     if os.path.isfile(mat_path): 
@@ -78,25 +62,11 @@ def Build_Matlib(mat_path='/home/pyne-user/Dropbox/UCB/Research/ETAs/META-CODE/M
         
     return mat_lib
 
-#---------------------------------------------------------------------------------------# 
+## Initialized the material density for the elemental library
+# @param mat_lib [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
+#     are in atoms/b-cm
+# @return mat_lib [dictionary of material objects] An updated materials library containing all relevant nulcear data required to run radiation transport codes.  
 def Set_Density(mat_lib):
-    """
-    Initialized the material density for the elemental library. 
-
-    Parameters
-    ==========
-    mat_lib : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
-        are in atoms/b-cm
-
-    Optional
-    ========
-
-    Returns
-    =======
-    mat_lib : dictionary of material objects
-        An updated materials library containing all relevant nulcear data required to run radiation transport codes.  
-    """
     
     dens=dict(H=0.0000899, He=0.0001785, Li=0.535, Be=1.848, B=2.370, C=2.260, N=0.001251, O=0.001429, F=0.001696, Ne=0.000900,
               Na=0.968,Mg=1.738, Al=2.7, Si=2.330, P=1.823, S=1.960, Cl=0.003214, Ar=0.001784, K=0.856, Ca=1.550, Sc=2.985, 
@@ -115,33 +85,16 @@ def Set_Density(mat_lib):
         
     return mat_lib
 
-#---------------------------------------------------------------------------------------# 
+## Removes materials from library that don't work from an engineering, safety, or cost perspective. 
+# @param mat_lib [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
+#        are in atoms/b-cm
+# @param remove_gases boolean Allows the user to selectively remove gases from the materials library
+# @param remove_liquids boolean Allows the user to selectively remove liquids from the elements library
+# @param remove_expensive boolean Allows the user to selectively remove expensive materials from the materials library.  "Expensive" encompasses from a 
+#       materials hazard and cost perspective
+# @return mat_lib [dictionary of material objects] An updated materials library containing all relevant nulcear data required to run radiation transport codes.  
+#        Isotopic densities are in atoms/b-cm
 def Strip_Undesireables(mat_lib, remove_gases, remove_liquids, remove_expensive):
-    """
-    Removes materials from library that don't work from an engineering, safety, or cost perspective. 
-
-    Parameters
-    ==========
-    mat_lib : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
-        are in atoms/b-cm
-    remove_gases : boolean
-        Allows the user to selectively remove gases from the materials library
-    remove_liquids : boolean
-        Allows the user to selectively remove liquids from the elements library
-    remove_expensive : boolean
-        Allows the user to selectively remove expensive materials from the materials library.  "Expensive" encompasses from a 
-        materials hazard and cost perspective
-
-    Optional
-    ========
-
-    Returns
-    =======
-    mat_lib : dictionary of material objects
-        An updated materials library containing all relevant nulcear data required to run radiation transport codes.  
-        Isotopic densities are in atoms/b-cm
-    """
     
     if "Pa" in mat_lib:
         del mat_lib["Pa"] 
@@ -174,31 +127,15 @@ def Strip_Undesireables(mat_lib, remove_gases, remove_liquids, remove_expensive)
         
     return mat_lib
 
-#---------------------------------------------------------------------------------------# 
+##  Calculated and returns the moderating ratio for each material in a materials library. 
+#   Currently limited to 1 and 14 MeV and the EAS data source.  More sophisticated approaches are 
+#   possible but not implemented. The moderating ratio is calculated as:  
+#      MR={1 - (A-1)^2/2A * ln[(A+1)(A-1)]} * Sima_s / Sigma_a        
+#   The EAS data source does not have any cross-sections for Zn, Dy, or Er.
+# @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
+#        are in atoms/b-cm
+# @return mr [list of Moderating_Ratio objects] A list containing the 1 and 14 MeV moderating ratios for the input material library
 def Calc_Moderating_Ratio(mats):
-    """
-    Calculated and returns the moderating ratio for each material in a materials library. 
-    Currently limited to 1 and 14 MeV and the EAS data source.  More sophisticated approaches are 
-    possible but not implemented. The moderating ratio is calculated as:
-    
-         MR={1 - (A-1)^2/2A * ln[(A+1)(A-1)]} * Sima_s / Sigma_a
-         
-    The EAS data source does not have any cross-sections for Zn, Dy, or Er.
-
-    Parameters
-    ==========
-    mats : dictionary of material objects
-        A materials library containing all relevant nulcear data required to run radiation transport codes.  Isotopic densities 
-        are in atoms/b-cm
-    
-    Optional
-    ========
-
-    Returns
-    =======
-    mr : list of Moderating_Ratio objects
-        A list containing the 1 and 14 MeV moderating ratios for the input material library
-    """
     # Initialize output and key list
     mr=[]
     key_lst=mats.keys()
@@ -251,32 +188,19 @@ def Calc_Moderating_Ratio(mats):
 
     return mr
 
-#-------------------------------------------------------------------------------------------------------------#  
+##  Creates a moderating ratio object.
 class Moderating_Ratio:
-    """
-    Creates a moderating ratio object.  
-   
-    Attributes
-    ==========
-    name : str
-        The material name 
-    mr_1MeV : int
-        The moderating ratio at 1 MeV
-    mr_14MeV : int
-        The moderating ratio at 14 MeV
-        
-    Returns
-    =======
-    None
-    """
     
     def __init__(self, name, mr_1MeV=0, mr_14MeV=0):  
         
         assert isinstance(mr_1MeV, float)==True, 'mr_1MeV must be of type float. {} given.'.format(mr_1MeV)
         assert isinstance(mr_14MeV, float)==True, 'mr_14MeV must be of type float. {} given.'.format(mr_14MeV)
         
+        ## str The material name 
         self.name=name
+        ## int The moderating ratio at 1 MeV
         self.mr_1MeV=mr_1MeV
+        ## int The moderating ratio at 14 MeV
         self.mr_14MeV=mr_14MeV
                
     def __repr__(self):
