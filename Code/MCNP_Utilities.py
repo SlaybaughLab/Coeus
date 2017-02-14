@@ -462,7 +462,7 @@ class MCNP_Geometry:
             if adds in mat_lib.keys(): # and adds not in self.matls:
                 self.matls.append(adds)
             else:
-                module_logger.error("Material {} not found in the material library.".format(mat))
+                module_logger.error("Material {} not found in the material library.".format(adds))
 
         else:
             for mat in adds:
@@ -980,7 +980,7 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c  Physics  \n")
             inp_file.write("{}".format(settings.phys))
             inp_file.write("NPS {}\n".format(settings.nps))
-            inp_file.write("RAND GEN=2 STRIDE=1529171\n".format(settings.nps))
+            inp_file.write("RAND GEN=2 STRIDE=1529\n".format(settings.nps))
 
             # Print Material Cards
             inp_file.write("c ****************************************************************************\n")
