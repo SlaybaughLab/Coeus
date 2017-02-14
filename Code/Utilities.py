@@ -25,7 +25,6 @@ import time
 import sys
 import threading
 import shutil
-import pp
 import bisect
 
 #-------------------------------------------------------------------------------------------------------------#
@@ -152,102 +151,7 @@ class FuncThreadWithReturn(Thread):
         return self._return    
     
 #-------------------------------------------------------------------------------------------------------------#  
-def Run_Transport_Threads(lst,tasks=0,code='mcnp6'):
-    """
-    Runs a multi-threaded transport calculation. Doesn't work for clusters.
    
-    Parameters
-    ==========
-    lst : list of integers
-        Parent identifier numbers to be ran
-    tasks: int
-        Number of tasks to run per code thread instance. If left blank, calculation will be performed to assign all
-        availiable cpus evenly
-    code : str
-        An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
-        [Default = 'mcnp6']
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    None
-    """ 
-    
-    start_time=time.time()     #Start Clock
-    
-    # Initialize thread list
-#    thread_lst=[]
-    processes=[]
-    
-    # Define number of threads to run at once
-    cores=mp.cpu_count()
-    tasks=cores/len(lst)
-    if tasks==0:
-        tasks=1
-    module_logger.debug("\n\nNumber of Cores = {}".format(cores))
-    module_logger.debug("Number of Tasks = {}\n\n".format(tasks))
-    
-    # Create thread for each current solution
-    for i in lst:
-
-        # Define path to current parent run directory
-        path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"+str(i)+"/tmp"
-          
-        # Create subdirectory for each parent if it doesn't exist
-        if os.path.isdir(path)==False:
-            os.mkdir(str(path))
-            
-        # Set the cmd line input
-        if code.strip().lower()=='mcnp6':
-            # Clean up run directory
-            if os.path.isfile("{}/ETA.out".format(path)):
-                os.remove("{}/ETA.out".format(path))
-            if os.path.isfile("{}/runtpe".format(path)):
-                os.remove("{}/runtpe".format(path))
-            if os.path.isfile("{}/../wwinp".format(path)):
-                cmd="mcnp6 i=../ETA.inp o=ETA.out wwinp=../wwinp tasks {}".format(tasks)
-            else:
-                cmd="mcnp6 i=../ETA.inp o=ETA.out tasks {}".format(tasks)
-        elif code.strip().lower()=='mcnp6.mpi':
-            # Clean up run directory
-            if os.path.isfile("{}/ETA.out".format(path)):
-                os.remove("{}/ETA.out".format(path))
-            if os.path.isfile("{}/runtpe".format(path)):
-                os.remove("{}/runtpe".format(path))
-            if os.path.isfile("{}/../wwinp".format(path)):
-                cmd="mpirun mcnp6.mpi i=../ETA.inp o=ETA.out wwinp=../wwinp"
-            else:
-                cmd="mpirun mcnp6.mpi i=../ETA.inp o=ETA.out"
-        elif code.strip().lower()=='advantg':
-            # Clean up run directory
-            shutil.rmtree(path)
-            os.mkdir(str(path))
-            cmd="advantg ../runCADIS.adv"
-        else:
-            module_logger.warning("Unknown radiation transport code specified: {}.  Only ADVANTG, MCNP6, and MCNP6.mpi are valid options.".format(code))
-        
-        processes.append(sub.Popen(cmd,cwd=path,shell=True))
-        
-    # Create processes    
-    for p in processes:
-        p.wait()
-    
-    # Copy ADVANTG generated inputs to correct directory
-    if code=='advantg':
-        for i in lst:
-            path=''
-            path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Resuts/Population/"+str(i)+"/"
-            shutil.copyfile(path+'tmp/output/wwinp',path+'wwinp')
-            shutil.copyfile(path+'tmp/output/inp_edits.txt',path+'inp_edits.txt')
-            shutil.rmtree(path+'tmp/output')
-            shutil.rmtree(path+'tmp/model')
-            shutil.rmtree(path+'tmp/adj_solution')
-    
-    module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
-    
-#-------------------------------------------------------------------------------------------------------------#
 def Run_CmdLine(cmd,cwdir):
     """
     A callable function to execute a command line program.
@@ -482,7 +386,7 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
         module_logger.warning("Unknown code ({}) specified. Please try again. \n".format(code))
         
     # Execute batch
-    main_jobid=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
+    main_jobid=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
     module_logger.debug("main_jobid={}\n".format(main_jobid))
     for i in range(0,len(run_files)):
         cmd="sbatch {}".format(run_files[i])
@@ -493,9 +397,9 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
             sub.Popen(cmd,cwd=os.path.abspath(os.getcwd()),stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
     # Monitor for completion
     time.sleep(15)
-    output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+    output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
     while output.strip().split()[0] != main_jobid or len(output.split()) > 8:
-        output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+        output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
         if output.strip().split()[0] == main_jobid and len(output.split()) <= 8:
             time.sleep(1)
             output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]

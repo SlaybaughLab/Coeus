@@ -26,5 +26,6 @@
 # SLURM Error File
 #SBATCH --error=slurm.err
 
+. .bash_profile
 ## Run command
 python Coeus.py --r=n
