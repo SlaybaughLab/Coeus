@@ -267,13 +267,13 @@ def main():
     logger.info('Finished printing initial input files at {} sec\n'.format(time.time() - start_time))
 
     # Run ADVANTG (might need to comment out for mcnp)
-    Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.paritition, timeout=args.timeout)
+    Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.partition, timeout=args.timeout)
     logger.info('Finished running ADVANTG at {} sec\n'.format(time.time() - start_time))
 
     # Run MCNP
     for i in ids:
         Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
-    Run_Transport(ids,particles,code='mcnp6.mpi', qos=args.qos, account=args.account, partition=args.paritition, timeout=args.timeout)
+    Run_Transport(ids,particles, args.qos, args.account, args.partition, args.timeout, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
     # Calculate Fitness

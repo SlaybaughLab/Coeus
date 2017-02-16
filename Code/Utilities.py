@@ -27,7 +27,6 @@ import bisect
 
 
 ## Creates a switch class object to switch between cases
-=
 class Switch(object):
     
     ## The constructor.
@@ -468,7 +467,7 @@ def Build_Batch(lst,tasks,code, qos, account, partition, timeout, suf=""):
             
             f.write("#SBATCH --qos=" + qos + "\n")
             f.write("# Account:\n")
-            f.write("#SBATCH --account=" + account "\n")
+            f.write("#SBATCH --account=" + account + "\n")
 
             f.write("# Processors:\n")
             f.write("#SBATCH --ntasks={}\n".format(tasks))
