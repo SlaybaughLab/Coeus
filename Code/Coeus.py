@@ -150,7 +150,7 @@ def main():
     parser.add_argument('--mcnp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/mcnp_settings.csv',help='The name and path for the file containing the mcnp settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/mcnp_settings.csv]')
     parser.add_argument('--mat', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_materials_compendium.csv',help='The name and path for the file containing the materials to be included in the problem. The format is a comma delimited key word input file. [default = ../Inputs/eta_materials_compendium.csv]')
     parser.add_argument('--src', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/source.csv',help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
-    parser.add_argument('--qos', nargs='?', default='nuclear_normal')
+    parser.add_argument('--qos', nargs='?', default='savio_lowprio')
     parser.add_argument('--account', nargs='?', default='co_nuclear')
     parser.add_argument('--partition', nargs='?', default='savio')
     parser.add_argument('--timeout', nargs='?', default='02:30:00')
@@ -273,7 +273,7 @@ def main():
     # Run MCNP
     for i in ids:
         Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
-    Run_Transport(ids,particles, args.qos, args.account, args.partition, args.timeout, code='mcnp6.mpi')
+    Run_Transport(ids, args.qos, args.account, args.partition, args.timeout, nps=particles, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
     # Calculate Fitness

@@ -303,7 +303,7 @@ def Run_Transport_PP(lst,tasks=0,code='mcnp6'):
 # @param nps list of number of particles to run per code thread instance. If left blank, calculation will be performed to assign all
 #    availiable cpus evenly
 # @param code [Default = 'mcnp6'] An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
-def Run_Transport(lst,qos, account, partition, timeout, nps=[],code='mcnp6'):
+def Run_Transport(lst, qos, account, partition, timeout, nps=[],code='mcnp6'):
     module_logger.debug("In Run Transport, the lst input = {}, nps = {}, and code is = {}".format(lst,nps,code))
     
     # Start Clock
@@ -390,21 +390,23 @@ def Run_Transport(lst,qos, account, partition, timeout, nps=[],code='mcnp6'):
         module_logger.warning("Unknown code ({}) specified. Please try again. \n".format(code))
         
     # Execute batch
-    main_jobid=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
+    main_jobid=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
     module_logger.debug("main_jobid={}\n".format(main_jobid))
     for i in range(0,len(run_files)): # run_files should contains the second ID part of mcnp jobs
         cmd="sbatch {}".format(run_files[i])
         if code == 'advantg':
             rundir=path+"/Results/Population/"+str(lst[i])+"/tmp/"
-            sub.Popen(cmd,cwd=rundir,stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
+            jobOut=sub.Popen(cmd,cwd=rundir,stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True).communicate()
+            module_logger.info("ADVANTG job submission communication: {}".format(jobOut))
         else:
+
             sub.Popen(cmd,cwd=os.path.abspath(os.getcwd()),stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
  
     # Monitor for completion
     time.sleep(15)
-    output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+    output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
     while output.strip().split()[0] != main_jobid or len(output.split()) > 8:
-        output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+        output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
         if output.strip().split()[0] == main_jobid and len(output.split()) <= 8:
             time.sleep(1)
             output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
