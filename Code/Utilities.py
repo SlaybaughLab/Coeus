@@ -464,8 +464,8 @@ def Build_Batch(lst,tasks,code, qos, account, partition, timeout, suf=""):
             f.write("# Partition:\n")
             f.write("#SBATCH --partition=" + partition + "\n") 
             f.write("# QoS:\n")
-            
-            f.write("#SBATCH --qos=" + qos + "\n")
+           
+            f.write("#SBATCH --qos=" + str(qos) + "\n")
             f.write("# Account:\n")
             f.write("#SBATCH --account=" + account + "\n")
 
