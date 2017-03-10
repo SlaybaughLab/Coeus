@@ -44,6 +44,7 @@ import argparse
 ## Print MCNP input Files for each algorithm
 # @param step denotes which algorithm we are printing for
 def print_MCNP_input_files(step):
+    global logger, history, start_time, new_pop, eta_params, mat_lib
     idents=[]
     run_particles=[]
     for i in range(0,len(new_pop)):
@@ -62,14 +63,15 @@ def print_MCNP_input_files(step):
 # @param update_gen 
 # @param update_feval 
 def run_MCNP_on_algo(args, algo, update_gen, update_feval):
-    
+    global stats, logger, history, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set
+    slurmArgs=[args.qos, args.account, args.partition, args.timeout]
     if len(ids)>0:
-        Run_Transport(ids,args.qos, args.account, args.partition, args.timeout, particles, code='mcnp6.mpi')
+        Run_Transport(ids, *slurmArgs, nps=particles, code='mcnp6.mpi')
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
     
         # Calculate Fitness
         Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
-        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, eta_params, mat_lib, Run_Transport, rr=False) 
+        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, slurmArgs, eta_params, mat_lib, Run_Transport, rr=False) 
         pop=history.update(pop, update_gen, update_feval)
         stats.update(algo,(changes, update_feval + feval))
     
@@ -112,7 +114,7 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval):
 #     the population must have full initialization inputs to work. 
 
 def main():
-    global ids, particles, pop, new_pop
+    global stats, logger, history, start_time, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set
     start_time=time.time()     #Start Clock
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
         
@@ -381,7 +383,7 @@ def main():
             Print_ADVANTG_Input(eta_params,pop[i].geom,advantg_set,i,cluster=True)
 
         # Run ADVANTG
-        Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.paritition, timeout=args.timeout)
+        Run_Transport(ids,code='advantg', qos=args.qos, account=args.account, partition=args.partition, timeout=args.timeout)
 
     #Determine execution time    
     logger.info('The optimization history is:{}\n'.format(history.tline))

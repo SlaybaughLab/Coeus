@@ -390,7 +390,7 @@ def Run_Transport(lst, qos, account, partition, timeout, nps=[],code='mcnp6'):
         module_logger.warning("Unknown code ({}) specified. Please try again. \n".format(code))
         
     # Execute batch
-    main_jobid=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
+    main_jobid=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
     module_logger.debug("main_jobid={}\n".format(main_jobid))
     for i in range(0,len(run_files)): # run_files should contains the second ID part of mcnp jobs
         cmd="sbatch {}".format(run_files[i])
@@ -404,12 +404,12 @@ def Run_Transport(lst, qos, account, partition, timeout, nps=[],code='mcnp6'):
  
     # Monitor for completion
     time.sleep(15)
-    output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+    output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
     while output.strip().split()[0] != main_jobid or len(output.split()) > 8:
-        output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+        output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
         if output.strip().split()[0] == main_jobid and len(output.split()) <= 8:
             time.sleep(1)
-            output=sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+            output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
         module_logger.debug("\n\n\nLen(full_out)={}, Line 1 of Squeue output = {}".format(len(output),output))
         time.sleep(1)
     

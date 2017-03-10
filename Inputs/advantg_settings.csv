@@ -6,9 +6,9 @@ Point Source, True
 Material Mix Tolerance, 0.05
 Scattering Order,3
 /
-ETA X Spacing Interval,1.0
-ETA Y Spacing Interval,1.0
-ETA Z Spacing Interval,1.0
+ETA X Spacing Interval,2.0
+ETA Y Spacing Interval,2.0
+ETA Z Spacing Interval,2.0
 Foil X Spacing Interval,0.33
 Foil Y Spacing Interval,0.33
 Foil Z Spacing Interval,0.1

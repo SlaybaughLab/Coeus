@@ -557,6 +557,7 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
 # @param old [list of parent objects] The current population and their design features
 # @param new [list of parent objects] The proposed population and their design features
 # @param nps float The baseline number of NPS particles specified 
+# @param runArgs list of arguments for run transport
 # @param eta [ETA parameters object] (optional) An object that contains all of the constraints required to initialize the geometry
 # @param mats [dict of material objects] (optional) A dictionary of the material objects from which ETA materials can be selected
 # @param run function (optional) A function that runs the radiation transport calculations
@@ -565,7 +566,7 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
 #   The number of accepted changes
 # @return feval Integer
 #   The number of function evaluations performed for increasing the particles
-def Pop_Update(old, new, nps, eta=None, mats=None, run=None, rr=False):
+def Pop_Update(old, new, nps, runArgs, eta=None, mats=None, run=None, rr=False):
     
     #Test input values for consistency
     if run != None:
@@ -612,13 +613,13 @@ def Pop_Update(old, new, nps, eta=None, mats=None, run=None, rr=False):
             module_logger.info("For 1E7, the file ids are = {}".format(ids_1E7))
             for i in ind_1E7:
                 Print_MCNP_Input(eta,old[i].geom,old[i].rset,mats,old[i].ident,adv_print=True)
-            run(ids_1E7,[1E7]*len(ids_1E7),code='mcnp6.mpi')
+            run(ids_1E7,*runArgs,nps=[1E7]*len(ids_1E7),code='mcnp6.mpi')
             Calc_Fitness(ids_1E7, old, eta.spectrum[:,1], eta.min_fiss, eta.max_weight)
         if len(ids_1E8)!=0:
             module_logger.info("For 1E8, the file ids are = {}".format(ids_1E8))
             for i in ind_1E8:
                 Print_MCNP_Input(eta,old[i].geom,old[i].rset,mats,old[i].ident,adv_print=True)
-            run(ids_1E8,[1E8]*len(ids_1E8),code='mcnp6.mpi')
+            run(ids_1E8,*runArgs,nps=[1E8]*len(ids_1E8),code='mcnp6.mpi')
             Calc_Fitness(ids_1E8, old, eta.spectrum[:,1], eta.min_fiss, eta.max_weight)
             
         for i in ids_1E7+ids_1E8:
