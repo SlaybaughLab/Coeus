@@ -44,8 +44,6 @@ import argparse
 ## Print MCNP input Files for each algorithm
 # @param step denotes which algorithm we are printing for
 def print_MCNP_input_files(step):
-    global new_pop
-    
     idents=[]
     run_particles=[]
     for i in range(0,len(new_pop)):
@@ -64,7 +62,6 @@ def print_MCNP_input_files(step):
 # @param update_gen 
 # @param update_feval 
 def run_MCNP_on_algo(args, algo, update_gen, update_feval):
-    global ids, particles, pop
     
     if len(ids)>0:
         Run_Transport(ids,args.qos, args.account, args.partition, args.timeout, particles, code='mcnp6.mpi')
@@ -115,6 +112,7 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval):
 #     the population must have full initialization inputs to work. 
 
 def main():
+    global ids, particles, pop, new_pop
     start_time=time.time()     #Start Clock
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
         
