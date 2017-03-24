@@ -396,33 +396,30 @@ def Run_Transport(lst, qos, account, partition, timeout, nps=[],code='mcnp6'):
         if code == 'advantg':
             rundir=path+"/Results/Population/"+str(lst[i])+"/tmp/"
             jobOut=sub.Popen(cmd,cwd=rundir,stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True).communicate()[0].strip().split()
-            if jobOut:
-                job_id_list.append(jobOut[3])
             module_logger.info("ADVANTG job submission communication: {}".format(jobOut))
-        else:
-            sub.Popen(cmd,cwd=os.path.abspath(os.getcwd()),stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
+        elif code =="mcnp6" or code== "mcnp6.mpi":
+            jobOut=sub.Popen(cmd,cwd=os.path.abspath(os.getcwd()),stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True).communicate()[0].strip().split()
+        if jobOut:
+            job_id_list.append(jobOut[3])
  
     # Monitor for completion
     time.sleep(15)
-    module_logger.info(job_id_list)
+    module_logger.info("job ids: {}".format(job_id_list))
     def monitor():
         output = []
 	for jobid in job_id_list:
             job = sub.Popen("squeue | grep " + jobid, cwd=path, stdout=sub.PIPE,shell=True).communicate()[0].strip().split()
 	    if job:
-		output.append(job[3])
+		output.append(job[0])
 	return output
-   #  monitor=lambda:sub.Popen("squeue | grep youdongz",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
+
     output=monitor()
     module_logger.info("monitor output={}\n".format(output))
-    while len(output) > 8:
+    while len(output) > 0:
         output=monitor()
-        if len(output) <= 8:
-            time.sleep(1)
-            output=monitor()
         module_logger.debug("\n\n\nLen(full_out)={}, Line 1 of Squeue output = {}".format(len(output),output))
         time.sleep(1)
-    
+ 
     # Copy ADVANTG generated inputs to correct directory
     if code=='advantg':
         for i in lst:
