@@ -25,6 +25,7 @@ import numpy as np
 
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
+from Objective_Functions import obj_func
 from Utilities import Switch, to_NormDiff, RelativeLeastSquares, FuncThreadWithReturn, Event
 from math import tan, radians, log
 from random import random
@@ -35,7 +36,7 @@ class Gnowee_Settings:
     ##  Creates an object representing the settings for the optimization algorithm
     def __init__(self,population=25,initial_sampling='lhc',frac_discovered=0.25,frac_elite=0.20, frac_levy=0.4,
                  max_gens=10000, feval_max=100000, conv_tol=1e-6, stall_iter_limit=200, optimal_fitness=0.01,
-                 opt_conv_tol=1e-2,alpha=1.5, gamma=1.0,n=1,scaling_factor=10.0):          
+                 opt_conv_tol=1e-2,alpha=1.5, gamma=1.0,n=1,scaling_factor=10.0,obj_func="RelativeLeastSquares"):          
         
         ## integer The number of parents in each generation 
         #    [Default: 25]
@@ -86,11 +87,14 @@ class Gnowee_Settings:
         ## scalar Step size scaling factor used to adjust Levy flights to length scale of system 
         #     [Default: 10]                    
         self.sf=scaling_factor
+        ## objective function to calculate fitness
+        #     [Default: RelativeLeastSquares]
+        self.func=obj_func
         
     def __repr__(self):
-        return "Gnowee Settings({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(self.p, self.s,
+        return "Gnowee Settings({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(self.p, self.s,
                 self.fd, self.fe, self.fl, self.gm, self.em, self.ct, self.sl, self.of, self.ot, self.a, self.g, self.n, \
-                self.sf)
+                self.sf, self.func)
     
     
     def __str__(self):
@@ -186,6 +190,8 @@ class Gnowee_Settings:
                     if case('Step Size Scaling Factor'.lower()): 
                         self.sf=float(split_list[1].strip())
                         break
+                    if case('Objective Function'.lower()):
+                        self.func=split_list[1].strip()
                     if case(): # default, could also just omit condition or 'if True'
                         module_logger.warning("A user input was found in the Gnowee settings file that does not match the allowed input types ({}): \
                             Population Size, Initial Sampling Method, Discovery Fraction, Elite Fraction, \
@@ -527,7 +533,7 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
         (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', '24', '14')
         try:
             tally=to_NormDiff(tally)
-            tmp_fit=RelativeLeastSquares(tally,obj)
+            tmp_fit=obj_func()(tally,obj)
             module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
 
             # Check constraints

@@ -13,3 +13,4 @@ Levy Alpha,0.5
 Levy Gamma,1.0
 Levy Indepentent Variables,1
 Step Size Scaling Factor,10.0
+Objective Function,RelativeLeastSquares
