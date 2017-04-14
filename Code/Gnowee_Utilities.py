@@ -25,7 +25,6 @@ import numpy as np
 
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
-from Objective_Functions import obj_func
 from Utilities import Switch, to_NormDiff, RelativeLeastSquares, FuncThreadWithReturn, Event
 from math import tan, radians, log
 from random import random
@@ -524,7 +523,7 @@ class Parent:
 # @param min_fiss float (optional) A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
 #    [Default = 0]
 # @param max_w float (optional) A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
-def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000): 
+def Calc_Fitness(ids, pop, obj_func, obj, min_fiss=0, max_w=1000): 
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
     
     for i in ids:
@@ -533,7 +532,7 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
         (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', '24', '14')
         try:
             tally=to_NormDiff(tally)
-            tmp_fit=obj_func()(tally,obj)
+            tmp_fit=obj_func(tally,obj)
             module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
 
             # Check constraints
