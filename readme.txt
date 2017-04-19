@@ -28,10 +28,18 @@ PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs/pp-1.6.5
 
 PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs/pyDOE-0.3.8-py2.7.egg
 
-
 export PATH
-
 
 # Aliases
 alias groupdir="cd /global/home/groups/co_nuclear"
 alias nuc='squeue -q nuclear_normal'
+
+
+
+
+To get the latest repo on Savio:
+You will need to generate an SSH key.  Follow the steps here:
+
+https://help.github.com/articles/connecting-to-github-with-ssh/
+
+Then clone the repo in your desired folder location.  

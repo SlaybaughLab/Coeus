@@ -6,7 +6,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Oct16
+# Last Modified: 31Oct16
 #
 #######################################################################################################
 
@@ -462,7 +462,7 @@ class MCNP_Geometry:
             if adds in mat_lib.keys(): # and adds not in self.matls:
                 self.matls.append(adds)
             else:
-                module_logger.error("Material {} not found in the material library.".format(mat))
+                module_logger.error("Material {} not found in the material library.".format(adds))
 
         else:
             for mat in adds:
@@ -980,7 +980,7 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c  Physics  \n")
             inp_file.write("{}".format(settings.phys))
             inp_file.write("NPS {}\n".format(settings.nps))
-            inp_file.write("RAND GEN=2 STRIDE=1529171\n".format(settings.nps))
+            inp_file.write("RAND GEN=2 STRIDE=1529\n".format(settings.nps))
 
             # Print Material Cards
             inp_file.write("c ****************************************************************************\n")
@@ -988,12 +988,13 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c ****************************************************************************\n")
             i=1
             for key in geom.matls:
-                str1=mats[key].mcnp()
-                str1=str1.split('\n')
+                str1=mats[key].mcnp().split('\n')
                 str1[2]="m{}".format(i)
-                if mats[key].metadata['name'] == "Ta" or mats[key].metadata['name'] == "W":
-                    str1.pop(3)
-                inp_file.write("{}".format('\n'.join("{}".format(i) for i in str1)))
+                str2=[]
+                for s in range(0,len(str1)):
+                    if str1[s][:9]!="     8018" and str1[s][:10]!="     73180" and str1[s][:10]!="     74180":
+                                str2.append(str1[s])
+                inp_file.write("{}".format('\n'.join("{}".format(i) for i in str2)))
                 i+=1
 
             # Calculate cos(theta)

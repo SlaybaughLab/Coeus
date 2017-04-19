@@ -38,42 +38,44 @@ import logging
 import os
 import sys
 sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
-
+ 
 #-------------------------------------------------------------------------------------------------------------#  
-### Local Function definitions
-
-# Print MCNP input Files
-def print_MCNP_input_files(step):
-    global new_pop
-    
-    idents=[]
-    run_particles=[]
-    for i in range(0,len(new_pop)):
-        Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
-        idents.append(new_pop[i].ident)
-        run_particles.append(new_pop[i].rset.nps)
-        for m in range(9,len(new_pop[i].geom.matls)):
-            if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
-                sys.exit()
-    logger.info('Gen {} {} finished at {} sec\n'.format(history.tline[-1].g,step,time.time() - start_time))
-    return idents, run_particles
-
-# Run MCNP
-def run_MCNP_on_algo(algo, update_gen, update_feval):
-    global ids, particles, pop
-    
-    if len(ids)>0:
-        Run_Transport_Threads(ids,code='mcnp6')
-        logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
-    
-        # Calculate Fitness
-        Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
-        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, eta_params, mat_lib, Run_Transport, rr=False) 
-        pop=history.update(pop, update_gen, update_feval)
-        stats.update(algo,(changes, update_feval + feval))  
-#-------------------------------------------------------------------------------------------------------------# 
 
 def main(**kwargs):
+    
+### Local Function definitions
+
+    # Print MCNP input Files
+    def print_MCNP_input_files(step):
+        global new_pop
+
+        idents=[]
+        run_particles=[]
+        for i in range(0,len(new_pop)):
+            Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+            idents.append(new_pop[i].ident)
+            run_particles.append(new_pop[i].rset.nps)
+            for m in range(9,len(new_pop[i].geom.matls)):
+                if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
+                    sys.exit()
+        logger.info('Gen {} {} finished at {} sec\n'.format(history.tline[-1].g,step,time.time() - start_time))
+        return idents, run_particles
+
+    # Run MCNP
+    def run_MCNP_on_algo(algo, update_gen, update_feval):
+        global ids, particles, pop
+
+        if len(ids)>0:
+            Run_Transport_Threads(ids,code='mcnp6')
+            logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
+
+            # Calculate Fitness
+            Calc_Fitness(ids, new_pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
+            (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, eta_params, mat_lib, Run_Transport, rr=False) 
+            pop=history.update(pop, update_gen, update_feval)
+            stats.update(algo,(changes, update_feval + feval)) 
+#-------------------------------------------------------------------------------------------------------------# 
+
     """
     Entry point for the Coeus program.  
     

@@ -509,7 +509,7 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
             path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))+"/Results/Population/"+str(i)+"/"
             sub.Popen("cp {} {}".format(path+"tmp/output/wwinp",path+"wwinp"),cwd=path,stdout=sub.PIPE,shell=True)
             sub.Popen("cp {} {}".format(path+"tmp/output/inp_edits.txt",path+"inp_edits.txt"), cwd=path,stdout=sub.PIPE,shell=True)
-            sub.Popen("rm -rf {}tmp/*".format(path,i),cwd=path,stdout=sub.PIPE,shell=True)
+            sub.Popen("rm -rf {}tmp/*".format(path,i),cwd=path,stderr=sub.STDOUT,stdout=sub.PIPE,shell=True)
             
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
         
@@ -612,6 +612,30 @@ def Build_Batch(lst,tasks,code,suf=""):
     return fname
 
 #-------------------------------------------------------------------------------------------------------------#  
+def to_Norm(spectrum):
+    """
+    Normalizes a MCNP tallied flux 
+   
+    Parameters
+    ==========
+    spectrum : array
+        The input flux spectrum
+
+    Optional
+    ========
+        
+    Returns
+    =======
+    result : array
+        The output normalized differential flux spectrum
+    """ 
+    
+    flux=np.zeros(len(spectrum[:,0]))
+    result=flux/np.sum(flux)
+        
+    return result
+
+#-------------------------------------------------------------------------------------------------------------#  
 def to_NormDiff(spectrum):
     """
     Converts a MCNP tallied flux to a Normalized Differential flux
@@ -639,25 +663,12 @@ def to_NormDiff(spectrum):
     # Calculate the differential flux
     diff[0]=(spectrum[0,1])/(spectrum[0,0])
     for i in range(1,len(spectrum[:,0])):
-        diff[i]=(spectrum[i,1]+spectrum[i-1,1])/(spectrum[i,0]-spectrum[i-1,0])
-    
-    # Calculate the integral of the differential flux using simpson's method
-    intdiff[0]=0.5*spectrum[0,0]*diff[0]
-    for i in range(1,len(spectrum[:,0])):
-        intdiff[i]=0.5*(spectrum[i,0]-spectrum[i-1,0])*(diff[i]+diff[i-1])
+        diff[i]=(spectrum[i,1])/(spectrum[i,0]-spectrum[i-1,0])
     
     # Calculate the normalized differential flux 
-    integral=np.sum(intdiff)
-    for i in range(0,len(spectrum[:,0])):
-        normdiff[i]=diff[i]/integral
-    
-    # Calculate the integral of the normalized differential flux using simpson's method
-    result[0]=0.5*spectrum[0,0]*normdiff[0]
-    for i in range(1,len(spectrum[:,0])):
-        result[i]=0.5*(spectrum[i,0]-spectrum[i-1,0])*(normdiff[i]+normdiff[i-1])
+    result=diff/np.sum(diff)
         
     return result
-
     
 #-------------------------------------------------------------------------------------------------------------#  
 def Uopt(c,d):
@@ -688,7 +699,7 @@ def Uopt(c,d):
 #-------------------------------------------------------------------------------------------------------------#  
 def LeastSquares(c,d):
     """
-    Calculate the U-optimality 
+    Calculate the LeastSquares fit between two arrays 
    
     Parameters
     ==========
@@ -706,7 +717,7 @@ def LeastSquares(c,d):
         The least-squares design based fitness
     """    
     
-    assert len(c)==len(d), "The length of the candidate and objective design must be equal in Uopt."  
+    assert len(c)==len(d), "The length of the candidate and objective design must be equal in LeastSquares."  
    
     return np.sum((d-c)**2)
 

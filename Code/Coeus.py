@@ -138,6 +138,10 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 logger.setLevel(logging.INFO)
 logger.info('Started Coeus:\n')
+
+# Create the output folder
+if os.path.exists('{}/Results/Population'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))==False:    
+    os.mkdir('{}/Results/Population'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
     
 # Set print options to print full numpy arrays
 np.set_printoptions(threshold='nan')
