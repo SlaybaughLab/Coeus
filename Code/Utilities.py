@@ -1,14 +1,11 @@
-#######################################################################################################
+
+## Module : Utilities.py
 #
-# Module : Utilities.py
+## Contains : Utility functions for the Coeus program.
 #
-# Contains : Utility functions for the Coeus program.
+## Author : James Bevins
 #
-# Author : James Bevins
-#
-# Last Modified: 17Oct16
-#
-#######################################################################################################
+## Last Modified: 17Oct16
 
 import logging
 module_logger = logging.getLogger('Coeus.Utilities')
@@ -28,31 +25,29 @@ import shutil
 import pp
 import bisect
 
-#-------------------------------------------------------------------------------------------------------------#
+
+
+## Creates a switch class object to switch between cases
+=
 class Switch(object):
-    """
-    Creates a switch class object to switch between cases
-   
-    Attributes
-    ==========
-    value : string
-        case selector value
-    Returns
-    =======
-    True or False based on match
-    """
     
+    ## The constructor.
+    # @param value selector value
     def __init__(self, value):
+        ## string case selector value
         self.value = value
+        ## boolean based on match
         self.fall = False
 
+    ## Return the match method once, then stop
     def __iter__(self):
-        """Return the match method once, then stop"""
         yield self.match
         raise StopIteration
-    
+
+
+    ## PrintIndicate whether or not to enter a case suite
+    # @param args list of arguments to match with
     def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
             return True
         elif self.value in args: 
@@ -61,25 +56,17 @@ class Switch(object):
         else:
             return False   
         
-#-------------------------------------------------------------------------------------------------------------#
+## Creates a Thread class object to run command line programs in parallel
 class Cmd_Thread(Thread):
-    """
-    Creates a Thread class object to run command line programs in parallel
-   
-    Attributes
-    ==========
-    cwdir : str
-        Current working directory path
-    cmd : str
-        The command line input to be executed
-    Returns
-    =======
-    """
- 
+
+    ## The constructor
+    # @param cwdir Current working directory path
+    # @param cmd The command line input to be executed
     def __init__(self,cwdir,cmd):
-        ''' Constructor. '''
         Thread.__init__(self)
+        ## Current working directory path
         self.cwdir = cwdir
+        ## The command line input to be executed
         self.cmd=cmd
         
     def __repr__(self):
@@ -91,52 +78,36 @@ class Cmd_Thread(Thread):
         header += ["The cmd line input is = {}".format(self.cmd)]
         header ="\n".join(header)+"\n"
         return header
-        
+
+    ## Run Thread in local working directory
     def run(self):             
-        # Run Thread in local working directory
         t=sub.Popen(self.cmd,cwd=self.cwdir,shell=True)
         t.communicate()
         if t.returncode !=0:
             module_logger.error("The thread {} did not execute properly.".format(self.getName()))
             sys.exit()
 
-#-------------------------------------------------------------------------------------------------------------#
+## Creates a Thread class object to run functions without returns in parallel.
 class FuncThread(Thread):
-    """
-    Creates a Thread class object to run functions without returns in parallel.
-   
-    Attributes
-    ==========
-    target : function
-        The function to be executed
-    *args : str
-        The functions arguments
-    Returns
-    =======
-    """
 
+    ## The constructor
+    # @param target The function to be executed
+    # @param args The functions arguments
     def __init__(self, target, *args):
+        ## The function to be executed
         self._target = target
+        ## The functions arguments
         self._args = args
         Thread.__init__(self)
  
     def run(self):
         self._target(*self._args)      
 
-#-------------------------------------------------------------------------------------------------------------#
+
+## Creates a Thread class object to run functions containing returns in parallel.
 class FuncThreadWithReturn(Thread):
-    """
-    Creates a Thread class object to run functions containing returns in parallel.
-   
-    Attributes
-    ==========
-    target : function
-        The function to be executed
-    *args : str
-        The functions arguments
-    Returns
-    =======
-    """
+
+    # @param *args The functions arguments
     def __init__(self, *args, **kwargs):
         super(FuncThreadWithReturn, self).__init__(*args, **kwargs)
 
@@ -151,34 +122,16 @@ class FuncThreadWithReturn(Thread):
 
         return self._return    
     
-#-------------------------------------------------------------------------------------------------------------#  
+## Runs a multi-threaded transport calculation. Doesn't work for clusters.
+# @param lst list of parent identifier number to be ran
+# @param tasks Number of tasks to run per code thread instance. If left blank, calculation will be performed to assign all
+# availiable cpus evenly
+# @param code  [Default = 'mcnp6'] An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
 def Run_Transport_Threads(lst,tasks=0,code='mcnp6'):
-    """
-    Runs a multi-threaded transport calculation. Doesn't work for clusters.
-   
-    Parameters
-    ==========
-    lst : list of integers
-        Parent identifier numbers to be ran
-    tasks: int
-        Number of tasks to run per code thread instance. If left blank, calculation will be performed to assign all
-        availiable cpus evenly
-    code : str
-        An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
-        [Default = 'mcnp6']
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    None
-    """ 
-    
-    start_time=time.time()     #Start Clock
-    
+    #Start Clock
+    start_time=time.time()
     # Initialize thread list
-#    thread_lst=[]
+#   thread_lst=[]
     processes=[]
     
     # Define number of threads to run at once
@@ -247,21 +200,10 @@ def Run_Transport_Threads(lst,tasks=0,code='mcnp6'):
     
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
     
-#-------------------------------------------------------------------------------------------------------------#
+##  A callable function to execute a command line program.
+#   @param cwdir Current working directory path
+#   @param cmd The command line input to be executed
 def Run_CmdLine(cmd,cwdir):
-    """
-    A callable function to execute a command line program.
-   
-    Inputs
-    ==========
-    cwdir : str
-        Current working directory path
-    cmd : str
-        The command line input to be executed
-    Returns
-    =======
-    """
-    
     try:    
         #proc = subprocess.Popen(['/home/pyne-user/MCNP/MCNP_CODE/bin/mcnp6', 'i=../ETA.inp o=ETA.out'],cwd=cwdir,stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)#,shell=True)
         proc = subprocess.Popen(cmd,cwd=cwdir,stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
@@ -271,31 +213,15 @@ def Run_CmdLine(cmd,cwdir):
     
     print output     
         
-#-------------------------------------------------------------------------------------------------------------#  
+  
+##Runs a multi-threaded transport calculation. Doesn't work for clusters.
+# @param lst list of parent identifier numbers to be ran
+# @param tasks Number of tasks to run per code thread instance. If left blank, calculation will be performed to assign all
+#    availiable cpus evenly
+# @param code [Default = 'mcnp6'] An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
 def Run_Transport_PP(lst,tasks=0,code='mcnp6'):
-    """
-    Runs a multi-threaded transport calculation. Doesn't work for clusters.
-   
-    Parameters
-    ==========
-    lst : list of integers
-        Parent identifier numbers to be ran
-    tasks: int
-        Number of tasks to run per code thread instance. If left blank, calculation will be performed to assign all
-        availiable cpus evenly
-    code : str
-        An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
-        [Default = 'mcnp6']
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    None
-    """ 
-    
-    start_time=time.time()     #Start Clock
+    #Start Clock
+    start_time=time.time()
 
     # Initialize job queue
     jobs=[]
@@ -374,32 +300,16 @@ def Run_Transport_PP(lst,tasks=0,code='mcnp6'):
     module_logger.info("Job server stats: {}".format(job_server.print_stats()))
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
     
-#-------------------------------------------------------------------------------------------------------------#  
-def Run_Transport(lst,nps=[],code='mcnp6'):
-    """
-    Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
-   
-    Parameters
-    ==========
-    lst : list of integers
-        Parent identifier numbers to be ran
-    nps: list of integers
-        Number of particles to run per code thread instance. If left blank, calculation will be performed to assign all
-        availiable cpus evenly
-    code : str
-        An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
-        [Default = 'mcnp6']
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    None
-    """ 
+## Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
+# @param  lst list of parent identifier numbers to be ran
+# @param nps list of number of particles to run per code thread instance. If left blank, calculation will be performed to assign all
+#    availiable cpus evenly
+# @param code [Default = 'mcnp6'] An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
+def Run_Transport(lst,qos, account, partition, timeout, nps=[],code='mcnp6'):
     module_logger.debug("In Run Transport, the lst input = {}, nps = {}, and code is = {}".format(lst,nps,code))
     
-    start_time=time.time()     #Start Clock
+    # Start Clock
+    start_time=time.time()
     run_files=[]    
     
     # Ensure output directories are ready and clean old files
@@ -456,14 +366,14 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
             
             # Build batch
             if (t < 20 and len(sub_lst)%2==0) or t >= 20:
-                run_files.append(Build_Batch(sub_lst,t,code))
+                run_files.append(Build_Batch(sub_lst,t,code, qos, account, partition, timeout))
             else:
-                run_files.append(Build_Batch(sub_lst[0:-1],t,code))
-                run_files.append(Build_Batch([sub_lst[-1]],t,code,suf="a"))
+                run_files.append(Build_Batch(sub_lst[0:-1],t,code, qos, account, partition, timeout))
+                run_files.append(Build_Batch([sub_lst[-1]],t,code, qos, account, partition, timeout, suf="a"))
                 
     elif code=="advantg":
         # Build batch
-        fname=Build_Batch(lst,20,code)
+        fname=Build_Batch(lst,20,code, qos, account, partition, timeout)
         
         # Copy files into correct run directory
         for i in lst:
@@ -484,13 +394,14 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
     # Execute batch
     main_jobid=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0].strip().split()[0]
     module_logger.debug("main_jobid={}\n".format(main_jobid))
-    for i in range(0,len(run_files)):
+    for i in range(0,len(run_files)): # run_files should contains the second ID part of mcnp jobs
         cmd="sbatch {}".format(run_files[i])
         if code == 'advantg':
             rundir=path+"/Results/Population/"+str(lst[i])+"/tmp/"
             sub.Popen(cmd,cwd=rundir,stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
         else:
             sub.Popen(cmd,cwd=os.path.abspath(os.getcwd()),stdin=sub.PIPE,stdout=sub.PIPE,stderr=sub.PIPE,shell=True)
+ 
     # Monitor for completion
     time.sleep(15)
     output=sub.Popen("squeue | grep jbevins",cwd=path,stdout=sub.PIPE,shell=True).communicate()[0]
@@ -513,32 +424,16 @@ def Run_Transport(lst,nps=[],code='mcnp6'):
             
     module_logger.info('Total transport time was {} sec'.format(time.time() - start_time))
         
-#-------------------------------------------------------------------------------------------------------------#  
-def Build_Batch(lst,tasks,code,suf=""):
-    """
-    Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
-   
-    Parameters
-    ==========
-    lst : list of integers
-        Parent identifier numbers to be ran
-    tasks: int
-        Number of tasks to run per code thread instance. I
-    code : str
-        An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
 
-    Optional
-    ========
-    suf : str
-        Optional string identifier suffix to be added at end of file
-        
-    Returns
-    =======
-    f : str
-        Filename for the batchfile created
-    """ 
-    
-    lst=sorted(lst)            #Sort the identifiers
+## Build a Slurm Batch script using the Jobs Array feature to run transport calculations. 
+# @param  lst list of parent identifier numbers to be ran
+# @param tasks Number of tasks to run per code thread instance
+# @param code [Default = 'mcnp6'] An indicator for which code to run  (options = 'mcnp6', 'mcnp6.mpi', 'advantg')
+# @param suf Optional string identifier suffix to be added at end of file
+# @return Filename for the batchfile created
+def Build_Batch(lst,tasks,code, qos, account, partition, timeout, suf=""):
+    #Sort the identifiers
+    lst=sorted(lst)       
     
     # Determine whether to use weight windows
     ww="wwinp=../Results/Population/$SLURM_ARRAY_TASK_ID/wwinp"
@@ -560,7 +455,7 @@ def Build_Batch(lst,tasks,code,suf=""):
     try:
         with open(path+fname, "w") as f:
             f.write("#!/bin/sh\n\n")
-            f.write("#SBATCH --time=02:30:00\n")
+            f.write("#SBATCH --time=" + timeout +"\n")
             f.write("# Job name:\n")
             
             if code == "mcnp6.mpi" or code=="mcnp6":
@@ -569,16 +464,13 @@ def Build_Batch(lst,tasks,code,suf=""):
                 f.write("#SBATCH --job-name=adv{}\n".format(tasks))
                 
             f.write("# Partition:\n")
-            f.write("#SBATCH --partition=savio\n")
+            f.write("#SBATCH --partition=" + partition + "\n") 
             f.write("# QoS:\n")
-            if (tasks <= 80 and tasks*len(lst) <= 200) or code == 'advantg':
-                f.write("#SBATCH --qos=nuclear_normal\n")
-                f.write("# Account:\n")
-                f.write("#SBATCH --account=co_nuclear\n")
-            else:
-                f.write("#SBATCH --qos=savio_normal\n")
-                f.write("# Account:\n")
-                f.write("#SBATCH --account=fc_neutronics\n")
+            
+            f.write("#SBATCH --qos=" + qos + "\n")
+            f.write("# Account:\n")
+            f.write("#SBATCH --account=" + account "\n")
+
             f.write("# Processors:\n")
             f.write("#SBATCH --ntasks={}\n".format(tasks))
 
@@ -611,49 +503,10 @@ def Build_Batch(lst,tasks,code,suf=""):
         
     return fname
 
-#-------------------------------------------------------------------------------------------------------------#  
-def to_Norm(spectrum):
-    """
-    Normalizes a MCNP tallied flux 
-   
-    Parameters
-    ==========
-    spectrum : array
-        The input flux spectrum
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    result : array
-        The output normalized differential flux spectrum
-    """ 
-    
-    flux=np.zeros(len(spectrum[:,0]))
-    result=flux/np.sum(flux)
-        
-    return result
-
-#-------------------------------------------------------------------------------------------------------------#  
+## Converts a MCNP tallied flux to a Normalized Differential flux
+# @param spectrum The input flux spectrum
+# @return The output normalized differential flux spectrum
 def to_NormDiff(spectrum):
-    """
-    Converts a MCNP tallied flux to a Normalized Differential flux
-   
-    Parameters
-    ==========
-    spectrum : array
-        The input flux spectrum
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    result : array
-        The output normalized differential flux spectrum
-    """ 
-    
     # Initialize variables
     diff=np.zeros(len(spectrum[:,0]))
     intdiff=np.zeros(len(spectrum[:,0]))
@@ -670,80 +523,31 @@ def to_NormDiff(spectrum):
         
     return result
     
-#-------------------------------------------------------------------------------------------------------------#  
+## Calculate the U-optimality 
+# @param c the candidate design
+# @param d the objective design
+# @return The u-optimality design based fitness
 def Uopt(c,d):
-    """
-    Calculate the U-optimality 
-   
-    Parameters
-    ==========
-    c : array
-        The candidate design
-    d : array
-        The objective design
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    u : array
-        The u-optimality design based fitness
-    """    
-    
     assert len(c)==len(d), "The length of the candidate and objective design must be equal in Uopt."  
    
     return np.sum(abs(d-c))
 
     
-#-------------------------------------------------------------------------------------------------------------#  
+## Calculate the U-optimality 
+# @param c the candidate design
+# @param d the objective design
+# @return The least-squares design based fitness
 def LeastSquares(c,d):
-    """
-    Calculate the LeastSquares fit between two arrays 
-   
-    Parameters
-    ==========
-    c : array
-        The candidate design
-    d : array
-        The objective design
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    ls : array
-        The least-squares design based fitness
-    """    
-    
     assert len(c)==len(d), "The length of the candidate and objective design must be equal in LeastSquares."  
    
     return np.sum((d-c)**2)
 
-    
-#-------------------------------------------------------------------------------------------------------------#  
-def RelativeLeastSquares(c,o):
-    """
-    Calculates the relative least squares.  Assumes a normalized input candidate and objective spectrum to simplify  
-    calculation (i.e. sum of bins should equal 1). Not valid for unnormalized spectra.  
-   
-    Parameters
-    ==========
-    c : array
-        The candidate design
-    o : array
-        The objective design
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    ls : array
-        The least-squares design based fitness
-    """    
-    
+## Calculates the relative least squares.  Assumes a normalized input candidate and objective spectrum to simplify  
+#    calculation (i.e. sum of bins should equal 1). Not valid for unnormalized spectra.  
+# @param c the candidate design
+# @param o the objective design
+# @return The least-squares design based fitness
+def RelativeLeastSquares(c,o):  
     assert len(c)==len(o), "The length of the candidate and objective design must be equal in RelativeLeastSquares."  
     rls=(o-c)**2/o
     
@@ -754,29 +558,14 @@ def RelativeLeastSquares(c,o):
         if loc == -1:
             break
     rls[0:loc+1]=np.array([np.average(rls[loc+1:loc+4])]*(loc+1))
-    return np.sum(rls)    
-#---------------------------------------------------------------------------------------#  
+    return np.sum(rls) 
+
+    
+## an event object representing a snapshot in the optimization process
 class Event:
-    """
-    Creates an event object representing a snapshot in the optimization process
-   
-    Attributes
-    ==========
-    generation : integer
-        The generation the design was arrived at
-    evaluations : integer
-        The number of fitness evaluations done to obtain this design
-    fitness : float
-        The assessed design fitness
-    nps : float or integer
-        The number of particles run for that event
-    ident : integer or str
-        The identifty of the current top solution
-    Returns
-    =======
-    None
-    """
-        
+
+    ## Creates an event object representing a snapshot in the optimization process
+    # @return None
     def __init__(self,generation,evaluations,fitness,nps,ident):
         assert generation >= 0, "The number of generations cannot be negative."
         assert evaluations >= 0, "The number of evaluations cannot be negative."
@@ -784,10 +573,15 @@ class Event:
         assert isinstance(generation, int)==True, 'Generation must be of type int.'
         assert isinstance(evaluations, int)==True, 'Evaluations must be of type int.'
         assert isinstance(fitness, float)==True, 'Fitness must be of type float.'
+        ## The generation the design was arrived at
         self.g=generation
+        ## The number of fitness evaluations done to obtain this design
         self.e=evaluations
+        ## The assessed design fitness
         self.f=fitness 
+        ## The number of particles run for that event
         self.n=nps
+        ## The identifty of the current top solution
         self.i=ident
         
     def __repr__(self):
@@ -803,25 +597,13 @@ class Event:
         header ="\n".join(header)+"\n"
         return header
 
-#---------------------------------------------------------------------------------------#
+## Defines a class of weights to be used to select number of instances in array randomly with
+#    linear weighting. 
 class WeightedRandomGenerator(object):
-    """
-    Defines a class of weights to be used to select number of instances in array randomly with
-    linear weighting.  
-   
-    Parameters
-    ==========
-    self : object
-        Current instance of the class
-    weights : array
-        The array of weights (Higher = more likely to be selected)
-   
-    Returns
-    =======
-    bisect.bisect_right(self.totals, rnd) : integer
-        The randomly selected index of the weights array
-    """
-    
+
+    # @param self Current instance of the class
+    # @param weights The array of weights (Higher = more likely to be selected)
+    # @return  The randomly selected index of the weights array
     def __init__(self, weights):
         self.totals = []
         running_total = 0
@@ -830,6 +612,7 @@ class WeightedRandomGenerator(object):
             running_total += w
             self.totals.append(running_total)
 
+    # @return  The randomly selected index of the weights array
     def next(self):
         rnd = np.random.rand() * self.totals[-1]
         return bisect.bisect_right(self.totals, rnd)
@@ -837,48 +620,26 @@ class WeightedRandomGenerator(object):
     def __call__(self):
         return self.next()
         
-#-------------------------------------------------------------------------------------------------------------#  
+## Stores and prints effectiveness stats for each metaheuristic search method.
 class Meta_Stats():
-    """
-    Stores and prints effectiveness stats for each metaheuristic search method.
-   
-    Attributes
-    ==========
-    mat_levy : tuple
-        Contains the changes and total number of function evaluations for the Mat_Levy_Flights function
-    cell_levy : tuple
-        Contains the changes and total number of function evaluations for the Cell_Levy_Flights function
-    elite_cross : tuple
-        Contains the changes and total number of function evaluations for the Mutate_Mats function
-    part_inv : tuple
-        Contains the changes and total number of function evaluations for the Partial_Inversion function
-    mutate : tuple
-        Contains the changes and total number of function evaluations for the Mutate function
-    two_opt : tuple
-        Contains the changes and total number of function evaluations for the 2-opt function
-    crossover : tuple
-        Contains the changes and total number of function evaluations for the Crossover function
-    three_op : tuple
-        Contains the changes and total number of function evaluations for the Three_opt function
-    discard : tuple
-        Contains the changes and total number of function evaluations for the Discard function
-    fname : str
-        Name and path of the file to store the timeline for post processing
-
-    Optional
-    ========
-        
-    Returns
-    =======
-    None    
-    """
-
+    
+    ## Initializer
+    # @param mat_levy tuple contains the changes and total number of function evaluations for the Mat_Levy_Flights function
+    # @param cell_levy tuple contains the changes and total number of function evaluations for the Cell_Levy_Flights function
+    # @param elite_cross tuple contains the changes and total number of function evaluations for the Mutate_Mats function
+    # @param part_inv tuple contains the changes and total number of function evaluations for the Partial_Inversion function
+    # @param mutate tuple contains the changes and total number of function evaluations for the Mutate function
+    # @param two_opt tuple contains the changes and total number of function evaluations for the 2-opt function
+    # @param crossover tuple contains the changes and total number of function evaluations for the Crossover function
+    # @param three_op tuple contains the changes and total number of function evaluations for the Three_opt function
+    # @param discard tuple contains the changes and total number of function evaluations for the Discard function
     def __init__(self, mat_levy=(0,0), cell_levy=(0,0), elite_cross=(0,0), part_inv=(0,0), mutate=(0,0), two_opt=(0,0), crossover=(0,0), three_op=(0,0), discard=(0,0), fname=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/Results/meta_stats.txt"):
-
+        ## dictionary string name of each algorithms
         self.algorithms = {"mat_levy": mat_levy, "cell_levy": cell_levy, 
                     "elite_cross": elite_cross, "part_inv":part_inv, "mutate": mutate, 
                     "two_opt":two_opt, "crossover":crossover,"three_op": three_op, 
                     "discard": discard}
+        ## str Name and path of the file to store the timeline for post processing
         self.fname=fname
 
         if os.path.isfile(self.fname)==True:
@@ -895,11 +656,14 @@ class Meta_Stats():
         s = header
         return s
     
+    ## Adds val tuples to the algorithm arg's tuples
+    # @param alg str name of the algorithm selected
+    # @param val tuple value to be added
     def update(self, alg, val):
         self.algorithms[alg] = (self.algorithms[alg][0]+val[0], self.algorithms[alg][1]+val[1])
     
+    ## Create and open input file 
     def write(self,header=False):
-        # Create and open input file 
         try:
             with open(self.fname, "a") as f:  
                 if header:
@@ -907,7 +671,6 @@ class Meta_Stats():
                 else:
                     f.write(repr(self))
 
-            # Close the file
             f.close()
 
         except IOError as e:

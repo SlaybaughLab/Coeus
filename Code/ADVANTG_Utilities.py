@@ -24,74 +24,50 @@ from math import ceil, floor, sqrt
 
 #---------------------------------------------------------------------------------------#    
 class ADVANTG_Settings:
-    """
-    Creates a object representing the settings for running the ADVANTG deterministic radiation trasport code calculations.
-   
-    Attributes
-    ==========
-    lib : string
-        The multi-group library used
-        [Default: "dplus"]
-    method : string
-        The solution method for ADVANTG (CADIS or DX)
-        [Default: "cadis"]
-    ouputs : string
-        The output files to be produced
-        [Default: "mcnp"]
-    tnum : int
-        The tally number for calculating the adjoint flux
-        [Default: 24]
-    pt_src : string
-        Whether or not the source should be treated as a point source in deterministic transport
-        [Default: False]
-    mix_tol : string
-        The material mix tolerance fraction.  Controls the precision of mixed cells.
-        [Default: 0.01]
-    pn_order : integer
-        The scattering order
-        [Default: 1]
-    eta_x : float
-        The spacing of the mesh intervals in the x (radial) axis in cm in the ETA.  
-        [Default: 0.5 cm]
-    eta_y : float
-        The spacing of the mesh intervals in the y (radial) axis in cm in the ETA.  
-        [Default: 0.5 cm]
-    eta_z : float
-        The spacing of the mesh intervals in the z (axial) axis in cm in the ETA.  
-        [Default: 0.5 cm]
-    foil_x : float
-        The spacing of the mesh intervals in the x (radial) axis in cm near the foil.  
-        [Default: 0.25 cm]
-    foil_y : float
-        The spacing of the mesh intervals in the y (radial) axis in cm near the foil.  
-        [Default: 0.25 cm]
-    foil_z : float
-        The spacing of the mesh intervals in the z (axial) axis in cm near the foil.  
-        [Default: 0.05 cm]
-    ext_spacing : float
-        The spacing of the mesh intervals in x,y, and z axis in cm outside the ETA.  
-        [Default: 1 cm]
         
-    Returns
-    =======
-    None
-    """
-        
-        
+    ## Creates a object representing the settings for running the ADVANTG deterministic radiation trasport code calculations.
     def __init__(self, lib="dplus", method="cadis", outputs="mcnp silo", tnum=24, pt_src="True", mix_tol=0.01, pn_order=1, eta_x=0.5, eta_y=0.5, eta_z =0.5, foil_x=0.25, foil_y=0.25, foil_z=0.05, ext_spacing=1.0):  
+        ## string The multi-group library used
+        # [Default: "dplus"]
         self.lib=lib
+        ## string The solution method for ADVANTG (CADIS or DX)
+        #  [Default: "cadis"]
         self.method=method
+        ## string The output files to be produced
+        # [Default: "mcnp"]
         self.outputs=outputs
+        ## int The tally number for calculating the adjoint flux
+        # [Default: 24]
         self.tnum=tnum
+        ## string Whether or not the source should be treated as a point source in deterministic transport
+        # [Default: False]
         self.pt_src=pt_src
+        ## string The material mix tolerance fraction.  Controls the precision of mixed cells.
+        # [Default: 0.01]
         self.mix_tol=mix_tol
+        ## integer The scattering order
+        # [Default: 1]
         self.pn_order=pn_order
+        ## float The spacing of the mesh intervals in the x (radial) axis in cm in the ETA.  
+        # [Default: 0.5 cm]
         self.eta_x=eta_x
+        ## float The spacing of the mesh intervals in the y (radial) axis in cm in the ETA.  
+        # [Default: 0.5 cm]
         self.eta_y=eta_y
+        ## float The spacing of the mesh intervals in the z (axial) axis in cm in the ETA.  
+        # [Default: 0.5 cm]
         self.eta_z=eta_z
+        ## float The spacing of the mesh intervals in the x (radial) axis in cm near the foil.  
+        # [Default: 0.25 cm]
         self.foil_x=foil_x
+        ## float The spacing of the mesh intervals in the y (radial) axis in cm near the foil.  
+        # [Default: 0.25 cm]
         self.foil_y=foil_y
+        ## float The spacing of the mesh intervals in the z (axial) axis in cm near the foil.  
+        # [Default: 0.05 cm]
         self.foil_z=foil_z
+        ## float The spacing of the mesh intervals in x,y, and z axis in cm outside the ETA.  
+        # [Default: 1 cm]
         self.ext=ext_spacing          
         
         
@@ -119,25 +95,24 @@ class ADVANTG_Settings:
         s = header
         return s
     
-    
+    ## Parses a ADVANTG settings csv input file. 
+    # The key word options are:
+    #     Library
+    #     Method
+    #     Outputs
+    #     Tally Number
+    #     Point Source
+    #     Material Mix Tolerance
+    #     Scattering Order
+    #     ETA X Spacing Interval
+    #     ETA Y Spacing Interval
+    #     ETA Z Spacing Interval
+    #     Foil X Spacing Interval
+    #     Foil Y Spacing Interval
+    #     Foil Z Spacing Interval
+    #     External Spacing Interval
     def read_settings(self, filename):
-        """Parses a ADVANTG settings csv input file. 
-        The key word options are:
-            Library
-            Method
-            Outputs
-            Tally Number
-            Point Source
-            Material Mix Tolerance
-            Scattering Order
-            ETA X Spacing Interval
-            ETA Y Spacing Interval
-            ETA Z Spacing Interval
-            Foil X Spacing Interval
-            Foil Y Spacing Interval
-            Foil Z Spacing Interval
-            External Spacing Interval
-        """
+    
         # Open file
         try: 
             self.f = open(filename, 'r') 
@@ -202,31 +177,14 @@ class ADVANTG_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File did not close properly."
         
-#-------------------------------------------------------------------------------------------------------------#  
+## Print the generated MCNP input deck to file 
+# @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+# @param geom [MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
+# @param S [ADVANTG_Settings object] An object representing the settings for running the ADVANTG radiation trasport code.  
+# @param num integer The current cuckoo number being generated
+# @param cluster boolean (optional) An indicator to change the file to run on a cluster using Run_Transport function and slurm job submission   
 def Print_ADVANTG_Input(eta,geom,S,num,cluster=False):
-    """
-    Print the generated MCNP input deck to file 
-   
-    Parameters
-    ==========
-    eta : ETA parameters object
-        An object that contains all of the constraints required to initialize the geometry
-    geom : MCNP_Geometry object
-        The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-    S : ADVANTG_Settings object
-        An object representing the settings for running the ADVANTG radiation trasport code.  
-    num : integer
-        The current cuckoo number being generated
-
-    Optional
-    ========
-    cluster : boolean
-        An indicator to change the file to run on a cluster using Run_Transport function and slurm job submission
-        
-    Returns
-    =======
-    None
-    """      
+ 
     path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))
         
     # Delete previous input file if present

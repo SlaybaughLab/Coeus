@@ -31,83 +31,60 @@ from random import random
 
 #---------------------------------------------------------------------------------------#    
 class Gnowee_Settings:
-    """
-    Creates an object representing the settings for the optimization algorithm
-   
-    Attributes
-    ==========
-    population : integer
-        The number of parents in each generation 
-        [Default: 25]
-    initial_sampling : string
-        The method used to sample the phase space and create the initial population 
-        Valid('random','nolh','nolh-rp','nolh-cdr',and 'lhc') 
-        [Default: 'LHC']
-    frac_discovered : float
-        Discovery probability 
-        [Default: 0.25]
-    frac_elite : float
-        Elite fraction of population
-        [Default: 0.20]
-    frac_levy : float
-        Fraction of Levy population engaging in Levy flights in a given generation
-        [Default: 0.40]
-    max_gens : integer
-        The maximum number of generations to search 
-        [Default: 10000]
-    feval_max : integer
-        The maximum number of objective function evaluations 
-        [Default: 100000]
-    conv_tol : float
-        The minimum change of the best objective value before the search
-        terminates 
-        [Default: 1e-6]
-    stall_iter_limit : integer
-        The maximum number of genrations to search without a decrease
-        exceeding conv_tol 
-        [Default: 200]       
-    optimal_fitness : float
-        The best know fitness value for the problem considered 
-        [Default: 0.0]
-    opt_conv_tol : float
-        The maximum deviation from the best know fitness value before the search
-        terminates 
-        [Default: 1e-2]
-    alpha : float
-        Levy exponent - defines the index of the distribution and controls scale properties of the stochastic process
-        [Default: 1.5]
-    gamma : float
-        Gamma - Scale unit of process for Levy flights 
-        [Default: 1.0]
-    n : integer
-        Number of independent variables - can be used to reduce Levy flight variance 
-        [Default: 1]
-    scaling_factor : scalar
-        Step size scaling factor used to adjust Levy flights to length scale of system 
-        [Default: 10]
-    Returns
-    =======
-    None
-    """
-        
-        
+
+    ##  Creates an object representing the settings for the optimization algorithm
     def __init__(self,population=25,initial_sampling='lhc',frac_discovered=0.25,frac_elite=0.20, frac_levy=0.4,
                  max_gens=10000, feval_max=100000, conv_tol=1e-6, stall_iter_limit=200, optimal_fitness=0.01,
                  opt_conv_tol=1e-2,alpha=1.5, gamma=1.0,n=1,scaling_factor=10.0):          
-        self.p=population                    
-        self.s=initial_sampling          
-        self.fd=frac_discovered            
-        self.fe=frac_elite              
-        self.fl=frac_levy  
-        self.gm=max_gens                 
-        self.em=feval_max               
-        self.ct=conv_tol                 
-        self.sl=stall_iter_limit        
-        self.of=optimal_fitness         
-        self.ot=opt_conv_tol         
-        self.a=alpha                   
-        self.g=gamma                   
-        self.n=n                       
+        
+        ## integer The number of parents in each generation 
+        #    [Default: 25]
+        self.p=population 
+        ## string The method used to sample the phase space and create the initial population 
+        #     Valid('random','nolh','nolh-rp','nolh-cdr',and 'lhc') 
+        #     [Default: 'LHC']                   
+        self.s=initial_sampling 
+        ## float Discovery probability 
+        #     [Default: 0.25]         
+        self.fd=frac_discovered 
+        ## float Elite fraction of population
+        #     [Default: 0.20]           
+        self.fe=frac_elite 
+        ## float Fraction of Levy population engaging in Levy flights in a given generation
+        #     [Default: 0.40]             
+        self.fl=frac_levy 
+        ## integer The maximum number of generations to search 
+        #     [Default: 10000] 
+        self.gm=max_gens 
+        ## integer The maximum number of objective function evaluations 
+        #     [Default: 100000]                
+        self.em=feval_max 
+        ## float The minimum change of the best objective value before the search
+        #     terminates 
+        #     [Default: 1e-6]              
+        self.ct=conv_tol 
+        ## integer The maximum number of genrations to search without a decrease
+        #     exceeding conv_tol 
+        #     [Default: 200]                  
+        self.sl=stall_iter_limit    
+        ## float The best know fitness value for the problem considered 
+        #     [Default: 0.0]    
+        self.of=optimal_fitness  
+        ## float The maximum deviation from the best know fitness value before the search
+        #     terminates 
+        #     [Default: 1e-2]       
+        self.ot=opt_conv_tol   
+        ## float Levy exponent - defines the index of the distribution and controls scale properties of the stochastic process
+        #     [Default: 1.5]      
+        self.a=alpha  
+        ## float Gamma - Scale unit of process for Levy flights 
+        #     [Default: 1.0]                 
+        self.g=gamma 
+        ## integer Number of independent variables - can be used to reduce Levy flight variance 
+        #     [Default: 1]                  
+        self.n=n   
+        ## scalar Step size scaling factor used to adjust Levy flights to length scale of system 
+        #     [Default: 10]                    
         self.sf=scaling_factor
         
     def __repr__(self):
@@ -137,26 +114,24 @@ class Gnowee_Settings:
         s = header
         return s
     
-    
+    ## Parses a Gnowee settings csv input file. 
+    # The key word options are:
+    #     Population Size
+    #     Initial Sampling Method
+    #     Discovery Fraction
+    #     Elite Fraction
+    #     Levy Fraction
+    #     Max Generations
+    #     Max Function Evaluations
+    #     Stall Convergence Tolerance
+    #     Stall Iteration Limit
+    #     Optimal Fitness
+    #     Optimal Convergence Tolerance
+    #     Levy Alpha
+    #     Levy Gamma
+    #     Levy Indepentent Variables
+    #     Step Size Scaling Factor
     def read_settings(self, filename):
-        """Parses a Gnowee settings csv input file. 
-        The key word options are:
-            Population Size
-            Initial Sampling Method
-            Discovery Fraction
-            Elite Fraction
-            Levy Fraction
-            Max Generations
-            Max Function Evaluations
-            Stall Convergence Tolerance
-            Stall Iteration Limit
-            Optimal Fitness
-            Optimal Convergence Tolerance
-            Levy Alpha
-            Levy Gamma
-            Levy Indepentent Variables
-            Step Size Scaling Factor
-        """
 
         # Open file
         try: 
@@ -227,74 +202,38 @@ class Gnowee_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File did not close properly."
 
-#-------------------------------------------------------------------------------------------------------------#  
+  
 class Parent:
-    """
-    Creates a parent object representing a current design
-   
-    Attributes
-    ==========
-    identifier : integer
-        A set identifier tying a parent to a folder set
-    fit : scalar
-        The assessed design fitness
-    geom : object
-        An object containing the design geometry variables 
-    rset : MCNP_Settings object
-        An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-        and tally information.
-    fixed_mats : integer
-        Number of fixed materials in the geometry.  This accounts for structural materials and foils that shouldn't change.
-    Returns
-    =======
-    None
-    """
-    
+
+    ## Creates a parent object representing a current design
+    # @param identifier integer A set identifier tying a parent to a folder set
+    # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+    # @param geometry [MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
+    # @param GS [Gnowee Settings object] An object representing the settings for the optimization algorithm
+    # @param mcnp [MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
+    #    and tally information.
+    # @param mats [dict of material objects] A dictionary of the material objects from which ETA materials can be selected
+    #    [Default: {}]
+    # @param ex list A list of materials to be excluded
+    # @param i integer (optional) Parent indexed location for initial LHC sampling purposes
+    # @pram fitness float (optional) The assessed design fitness
+    # @param build_geom boolean (optional) Used to indicate if the geometry needs to be build for a new parent.  
+    #    Turned off if the complete geometry is passed in.
     def __init__(self,identifier,eta,geometry,GS,mcnp,mats,ex,i=0,fitness=1E15,build_geom=True):
-        """
-
-        Parameters
-        ==========
-        identifier : integer
-            A set identifier tying a parent to a folder set
-        eta : ETA parameters object
-            An object that contains all of the constraints required to initialize the geometry
-        geometry : MCNP_Geometry object
-            The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
-        GS : Gnowee Settings object
-            An object representing the settings for the optimization algorithm
-        mcnp : MCNP_Settings object
-            An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
-            and tally information.
-        mats : dict of material objects
-            A dictionary of the material objects from which ETA materials can be selected
-            [Default: {}]
-        ex : list    
-            A list of materials to be excluded
-
-        Optional
-        ========
-        i : integer
-            Parent indexed location for initial LHC sampling purposes
-        fitness : float
-            The assessed design fitness
-        build_geom : boolean
-            Used to indicate if the geometry needs to be build for a new parent.  
-            Turned off if the complete geometry is passed in.
-
-        Returns
-        =======
-        """
-
-        # Initialize the parent
+        ## integer A set identifier tying a parent to a folder set
         self.ident=identifier
+        ## object An object containing the design geometry variables
         self.geom=cp.deepcopy(geometry)
+        ## [MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
+        # and tally information.
         self.rset=cp.deepcopy(mcnp)
+        ## scalar The assessed design fitness
         self.fit=fitness 
         
         # After initial initialization set sampling method to random
         GS.s='random'
         
+        ## integer Number of fixed materials in the geometry.  This accounts for structural materials and foils that shouldn't change.
         # Determine number of fixed mats
         self.fixed_mats=1    # ETA structural material
         tmp=[]
@@ -572,32 +511,14 @@ class Parent:
         s = header
         return s
        
-#-------------------------------------------------------------------------------------------------------------#  
-def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
-    """
-    Print the generated MCNP input deck to file 
-   
-    Parameters
-    ==========
-    ids : list of integers
-        The parents that need to have fitness solutions calculated
-    pop : list of parent objects
-        The population and their design features
-    obj : array
-        The objective spectrum
-
-    Optional
-    ========
-    min_fiss : float
-        A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
-        [Default = 0]
-    max_w : float
-        A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
-        
-    Returns
-    =======
-    None
-    """  
+## Print the generated MCNP input deck to file 
+# @param ids [list of integers] The parents that need to have fitness solutions calculated
+# @param pop [list of parent objects] The population and their design features
+# @param obj array The objective spectrum
+# @param min_fiss float (optional) A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
+#    [Default = 0]
+# @param max_w float (optional) A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
+def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000): 
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
     
     for i in ids:
@@ -632,37 +553,19 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
         # Save fitness
         pop[index].fit=tmp_fit  
     
-#-------------------------------------------------------------------------------------------------------------#  
+## Updates the population based on the assessed fitness values.  
+# @param old [list of parent objects] The current population and their design features
+# @param new [list of parent objects] The proposed population and their design features
+# @param nps float The baseline number of NPS particles specified 
+# @param eta [ETA parameters object] (optional) An object that contains all of the constraints required to initialize the geometry
+# @param mats [dict of material objects] (optional) A dictionary of the material objects from which ETA materials can be selected
+# @param run function (optional) A function that runs the radiation transport calculations
+# @param rr boolean (optional) Indicator if random replacement is used to update the list
+# @return changes Integer
+#   The number of accepted changes
+# @return feval Integer
+#   The number of function evaluations performed for increasing the particles
 def Pop_Update(old, new, nps, eta=None, mats=None, run=None, rr=False):
-    """
-    Updates the population based on the assessed fitness values.  
-   
-    Parameters
-    ==========
-    old : list of parent objects
-        The current population and their design features
-    new : list of parent objects
-        The proposed population and their design features
-    nps : float
-        The baseline number of NPS particles specified 
-    Optional
-    ========
-    eta : ETA parameters object
-        An object that contains all of the constraints required to initialize the geometry
-    mats : dict of material objects
-        A dictionary of the material objects from which ETA materials can be selected
-    run : function
-        A function that runs the radiation transport calculations
-    rr : boolean
-        Indicator if random replacement is used to update the list
-        
-    Returns
-    =======
-    changes : Integer
-        The number of accepted changes
-    feval : Integer
-        The number of function evaluations performed for increasing the particles
-    """
     
     #Test input values for consistency
     if run != None:
@@ -722,29 +625,14 @@ def Pop_Update(old, new, nps, eta=None, mats=None, run=None, rr=False):
             shutil.copyfile(path+str(i)+'/tmp/ETA.out',path+str(i)+'/ETA.out')
     
     return changes,len(ids_1E7)+len(ids_1E8)
-
-#-------------------------------------------------------------------------------------------------------------#  
+  
 class Timeline():
-    """
-    An object that stores event objects to track optimization progress.
-   
-    Attributes
-    ==========
-    tline : list of event objects
-        Contains a list of event objects detailing the optimization history
-    fname : str
-        Name and path of the file to store the timeline for post processing
 
-    Optional
-    ========
-        
-    Returns
-    =======
-    None    
-    """
-
+    ## An object that stores event objects to track optimization progress.
     def __init__(self,tline=[],fname=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/Results/timeline.txt"):
+        ## list of event objects Contains a list of event objects detailing the optimization history
         self.tline=tline
+        ## str Name and path of the file to store the timeline for post processing
         self.fname=fname
         if os.path.isfile(self.fname)==True:
             os.remove(self.fname)
@@ -822,39 +710,19 @@ class Timeline():
         # Test that the file closed
         assert f.closed==True, "File did not close properly."
         
-#---------------------------------------------------------------------------------------# 
+## Application of problem boundaries to generated solutions. If a solution is outside of the 
+# bounds, the step is rejected and that particular value reverts to the previous solution.
+# @param parent array The current system designs
+# @param child array The proposed new system designs
+# @param stepsize float The Levy flight stepsize
+# @param lb array The lower bounds of the design variable(s)
+# @param ub array The upper bounds of the design variable(s)
+# @param S [Gnowee Settings Object] An object representing the settings for the Gnowee optimization algorithm
+# @param change_count integer (optional) Counter to track the number of solutions that occur outside of problem boundaries.  
+#    Can be used to diagnose too large or small of alpha
+#    (Default: 0)
+# @return new array The new system designs that are within problem boundaries 
 def Rejection_Bounds(parent,child,stepsize,lb,ub,S,change_count=0):
-    """
-    Application of problem boundaries to generated solutions. If a solution is outside of the 
-    bounds, the step is rejected and that particular value reverts to the previous solution.
-   
-    Parameters
-    ==========
-    parent : array
-        The current system designs
-    child : array
-        The proposed new system designs
-    stepsize : float
-        The Levy flight stepsize
-    lb : array
-        The lower bounds of the design variable(s)
-    ub : array
-        The upper bounds of the design variable(s)
-    S : Gnowee Settings Object    
-        An object representing the settings for the Gnowee optimization algorithm
-   
-    Optional
-    ======== 
-    change_count : integer
-        Counter to track the number of solutions that occur outside of problem boundaries.  
-        Can be used to diagnose too large or small of alpha
-        (Default: 0)
-   
-    Returns
-    =======
-    new : array
-        The new system designs that are within problem boundaries
-    """
     
     assert len(child)==len(lb), 'Child and lb best have different # of design variables in Rejection_Bounds function.'
     assert len(ub)==len(lb), 'Boundaries best have different # of design variables in Rejection_Bounds function.'
@@ -883,32 +751,15 @@ def Rejection_Bounds(parent,child,stepsize,lb,ub,S,change_count=0):
     module_logger.debug("Change Count = {}".format(change_count)) 
     return child
 
-#---------------------------------------------------------------------------------------#
+## Application of problem boundaries to generated solutions
+# @param tmp array The proposed new system designs
+# @param lb array The lower bounds of the design variable(s)
+# @param ub array The upper bounds of the design variable(s)
+# @param change_count integer (optional) Counter to track the number of solutions that occur outside of problem boundaries.  
+#    Can be used to diagnose too large or small of alpha
+#    (Default: 0)
+# @return tmp array The new system designs that are within problem boundaries
 def Simple_Bounds(tmp,lb,ub,change_count=0):
-    """
-    Application of problem boundaries to generated solutions
-   
-    Parameters
-    ==========
-    tmp : array
-        The proposed new system designs
-    lb : array
-        The lower bounds of the design variable(s)
-    ub : array
-        The upper bounds of the design variable(s)
-   
-    Optional
-    ========
-    change_count : integer
-        Counter to track the number of solutions that occur outside of problem boundaries.  
-        Can be used to diagnose too large or small of alpha
-        (Default: 0)
-   
-    Returns
-    =======
-    tmp : array
-        The new system designs that are within problem boundaries
-    """
     
     assert len(tmp)==len(lb), 'Tmp and lb best have different # of design variables in Simple_Bounds function.'
     assert len(ub)==len(lb), 'Boundaries best have different # of design variables in Simple_Bounds function.'
