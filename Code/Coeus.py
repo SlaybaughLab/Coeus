@@ -27,7 +27,6 @@ from ADVANTG_Utilities import ADVANTG_Settings, Print_ADVANTG_Input
 from NuclearData import Build_Matlib, Calc_Moderating_Ratio
 from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input, Read_Tally_Output
 from Utilities import Run_Transport, Event, Meta_Stats
-from Objective_Functions import _FUNC_DICT
 
 import time
 import shutil
@@ -202,12 +201,7 @@ def main():
         Gnowee_Settings.read_settings(g_set,gs_path)
     else:
         logger.info("\nNo user supplier Gnowee Search settings file located.  Program default values to be used instead.")
-            
-    def obj_func(g_set):
-        func_name = g_set.func
-        return _FUNC_DICT[func_name]
-
-    obj_func = obj_func(g_set)
+        
     # Create ADVANTG Settings object
     advantg_set=ADVANTG_Settings()
        
@@ -302,7 +296,7 @@ def main():
     ######## Partial Inversion ########
     new_pop=Partial_Inversion(pop,mod_rat,mat_lib,g_set)
     (ids,particles)=print_MCNP_input_files('Partial Inversion')
-    run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p), obj_func)
+    run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p), g_set.func)
 
             
     # Iterate until termination criterion met
@@ -314,51 +308,51 @@ def main():
         ######## Levy flight permutation of materials ########
         new_pop=Mat_Levy_Flights(pop, mat_lib, mod_rat, g_set, [eta_params.fissile_mat,'Au'])
         (ids,particles)=print_MCNP_input_files("Levy flight permutation of materials")
-        run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl), obj_func)
+        run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl), g_set.func)
 
             
         ######## Levy flight permutation of cells ########
         new_pop=Cell_Levy_Flights(pop,eta_params,g_set)      
         (ids,particles)=print_MCNP_input_files("Levy flight permutation of cells")
-        run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl), obj_func)
+        run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl), g_set.func)
 
             
         ######## Elite_Crossover ########
         new_pop=Elite_Crossover(pop,mod_rat,eta_params,mat_lib,g_set,[eta_params.fissile_mat,'Au'])
         (ids,particles)=print_MCNP_input_files("Elite Crossover")
-        run_MCNP_on_algo(args,"elite_cross", 0, 1, obj_func)
+        run_MCNP_on_algo(args,"elite_cross", 0, 1, g_set.func)
                 
                 
         ######## Mutate ########
         new_pop=Mutate(pop, eta_params, g_set)
         (ids,particles)=print_MCNP_input_files("Mutation Operator")
-        run_MCNP_on_algo(args,"mutate", 0, int(g_set.p), obj_func)
+        run_MCNP_on_algo(args,"mutate", 0, int(g_set.p), g_set.func)
           
 
         ######## Crossover ########
         new_pop=Crossover(pop,g_set)
         (ids,particles)=print_MCNP_input_files("Crossover")
-        run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe), obj_func)
+        run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe), g_set.func)
             
             
         ######## 2-opt ########
         if eta_params.max_horiz >= 4:
             new_pop=Two_opt(pop,g_set)
             (ids,particles)=print_MCNP_input_files("2-opt")
-            run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe), obj_func)
+            run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe), g_set.func)
             
             
         ######## 3-opt ########
         if eta_params.max_horiz >= 6:
             new_pop=Three_opt(pop,g_set)
             (ids,particles)=print_MCNP_input_files("3-opt")
-            run_MCNP_on_algo(args,"three_op", 0, int(g_set.p), obj_func)
+            run_MCNP_on_algo(args,"three_op", 0, int(g_set.p), g_set.func)
             
             
         ######## Discard Cells ########
         new_pop=Discard_Cells(pop,mat_lib,g_set)
         (ids,particles)=print_MCNP_input_files("Discard Cells")
-        run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd), obj_func)
+        run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd), g_set.func)
         stats.write()
                     
         ######## Test Convergence ########
