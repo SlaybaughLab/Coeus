@@ -26,6 +26,7 @@ import numpy as np
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
 from Utilities import Switch, to_NormDiff, RelativeLeastSquares, FuncThreadWithReturn, Event
+from Objective_Functions import _FUNC_DICT
 from math import tan, radians, log
 from random import random
 
@@ -190,7 +191,7 @@ class Gnowee_Settings:
                         self.sf=float(split_list[1].strip())
                         break
                     if case('Objective Function'.lower()):
-                        self.func=split_list[1].strip()
+                        self.set_obj_func(split_list[1].strip())
                     if case(): # default, could also just omit condition or 'if True'
                         module_logger.warning("A user input was found in the Gnowee settings file that does not match the allowed input types ({}): \
                             Population Size, Initial Sampling Method, Discovery Fraction, Elite Fraction, \
@@ -207,6 +208,12 @@ class Gnowee_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File did not close properly."
 
+    
+    ## Converts an input string name for a function to a function handle
+    # @param func_name string A string identifying the objective function.
+    def set_obj_func(self, func_name):
+        self.func=_FUNC_DICT[func_name]
+        
   
 class Parent:
 
