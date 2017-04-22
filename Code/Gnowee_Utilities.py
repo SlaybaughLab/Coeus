@@ -7,7 +7,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Oct16
+# Last Modified: 22April17
 #
 #######################################################################################################
 
@@ -26,7 +26,7 @@ import numpy as np
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
 from Utilities import Switch, to_NormDiff, RelativeLeastSquares, FuncThreadWithReturn, Event
-from Objective_Functions import _FUNC_DICT
+from ObjectiveFunction import ObjectiveFunction
 from math import tan, radians, log
 from random import random
 
@@ -36,7 +36,7 @@ class Gnowee_Settings:
     ##  Creates an object representing the settings for the optimization algorithm
     def __init__(self,population=25,initial_sampling='lhc',frac_discovered=0.25,frac_elite=0.20, frac_levy=0.4,
                  max_gens=10000, feval_max=100000, conv_tol=1e-6, stall_iter_limit=200, optimal_fitness=0.01,
-                 opt_conv_tol=1e-2,alpha=1.5, gamma=1.0,n=1,scaling_factor=10.0,obj_func="RelativeLeastSquares"):          
+                 opt_conv_tol=1e-2,alpha=1.5, gamma=1.0,n=1,scaling_factor=10.0):          
         
         ## integer The number of parents in each generation 
         #    [Default: 25]
@@ -87,9 +87,6 @@ class Gnowee_Settings:
         ## scalar Step size scaling factor used to adjust Levy flights to length scale of system 
         #     [Default: 10]                    
         self.sf=scaling_factor
-        ## objective function to calculate fitness
-        #     [Default: RelativeLeastSquares]
-        self.func=obj_func
         
     def __repr__(self):
         return "Gnowee Settings({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(self.p, self.s,
@@ -190,8 +187,6 @@ class Gnowee_Settings:
                     if case('Step Size Scaling Factor'.lower()): 
                         self.sf=float(split_list[1].strip())
                         break
-                    if case('Objective Function'.lower()):
-                        self.set_obj_func(split_list[1].strip())
                     if case(): # default, could also just omit condition or 'if True'
                         module_logger.warning("A user input was found in the Gnowee settings file that does not match the allowed input types ({}): \
                             Population Size, Initial Sampling Method, Discovery Fraction, Elite Fraction, \
@@ -208,13 +203,6 @@ class Gnowee_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File did not close properly."
 
-    
-    ## Converts an input string name for a function to a function handle
-    # @param func_name string A string identifying the objective function.
-    def set_obj_func(self, func_name):
-        self.func=_FUNC_DICT[func_name]
-        
-  
 class Parent:
 
     ## Creates a parent object representing a current design
