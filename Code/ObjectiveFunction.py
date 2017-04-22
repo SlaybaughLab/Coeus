@@ -36,7 +36,13 @@ class ObjectiveFunction:
             input for the objective function calculation. \n
         @param objType: \e string \n
             The type of objective.  Valid entries are "spectrum" or
-            "total". \n
+-           "total". \n
+        @param objForm: \e integer \n
+            The type of objective.  Valid entries are 0-4. \n
+            0 = "mcnp" \n
+            1 = "normalized" \n
+            2 = "differential" \n
+            3 = "normalized_differential" \n
         @param objective: <em> integer, float, or numpy array </em> \n
             The desired objective associated with the optimization.  The
             chosen value and type must be compatible with the optiization
