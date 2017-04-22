@@ -1,4 +1,3 @@
-
 """!
 @file ObjectiveFunctions.py
 @package Coeus
@@ -40,10 +39,10 @@ class ObjectiveFunction:
             function chosen. \n
         """
 
-        ## @var funcName <em> function handle </em> The function handle for
+        ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        self.funcName = method 
+        self.func = method 
         ## @var funcTally \e integer The MCNP tally number to be used to
         #provide the input for the objective function calculation.
         self.funcTally = tallyNum 
@@ -73,8 +72,25 @@ class ObjectiveFunction:
         header += ["Objective Function: {}".format(funcName._Name_)]
         header += ["Tally Number: {}".format(funcTally)]
         return "\n".join(header)+"\n"
+
+    def set_obj_func(self, funcName):
+        """!
+        Converts an input string name for a function to a function handle.
+
+        @param self: \e pointer \n
+            The ObjectiveFunction pointer. \n
+        @param funcName \e string \n
+             A string identifying the objective function to be used. \n
+        """
+        self.func=_FUNC_DICT[func_name]
+        
+#-----------------------------------------------------------------------------#
+# The following sections are user modifiable to all for the use of new
+# objective functions that have not yet been implemented.  The same format must
+# be followed to work with the standard Coeus call.
+#-----------------------------------------------------------------------------#
  
-    def Uopt(self, c):
+    def u_opt(self, c):
         """!
         Calculated the fitness of a series of values using the U-Optimality
         condition.  From: "Relationships among Several Optimality Criteria
