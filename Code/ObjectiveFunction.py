@@ -22,7 +22,8 @@ class ObjectiveFunction:
     optimization algorithms.
     """
 
-    def __init__(self, method=None, tallyNum=None, objective=None):
+    def __init__(self, method=None, tallyNum=None, tallyType=None, 
+                 objective=None):
         """!
         Constructor to build the ObjectiveFunction class.
 
@@ -33,6 +34,9 @@ class ObjectiveFunction:
         @param tallyNum: \e string \n
             An associated MCNP tally number that is to be used to provide the
             input for the objective function calculation. \n
+        @param objType: \e string \n
+            The type of objective.  Valid entries are "spectrum" or
+            "total". \n
         @param objective: <em> integer, float, or numpy array </em> \n
             The desired objective associated with the optimization.  The
             chosen value and type must be compatible with the optiization
@@ -43,9 +47,11 @@ class ObjectiveFunction:
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
         self.func = method 
-        ## @var funcTally \e integer The MCNP tally number to be used to
+        ## @var funcTally \e string The MCNP tally number to be used to
         #provide the input for the objective function calculation.
         self.funcTally = tallyNum 
+        ## @var objType \e string The type of objective function calculation.
+        self.objType = tallyType
         ## @var objective  <em> integer, float, or numpy array </em> The
         # desired outcome of the optimization.
         self.objective = objective 
