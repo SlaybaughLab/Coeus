@@ -1,8 +1,8 @@
 """!
-@file ObjectiveFunctions.py
+@file ObjectiveFunction.py
 @package Coeus
 
-@defgroup ObjectiveFunctions ObjectiveFunctions
+@defgroup ObjectiveFunction ObjectiveFunction
 
 @brief Defines a class to perform objective function calculations.
 
