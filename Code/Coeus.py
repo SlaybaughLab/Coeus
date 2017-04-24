@@ -45,11 +45,11 @@ import argparse
 ## Print MCNP input Files for each algorithm
 # @param step denotes which algorithm we are printing for
 def print_MCNP_input_files(step):
-    global logger, history, start_time, new_pop, eta_params, mat_lib
+    global logger, history, start_time, new_pop, eta_params, mat_lib, objFunc
     idents=[]
     run_particles=[]
     for i in range(0,len(new_pop)):
-        Print_MCNP_Input(eta_params, objFunc.spectrum, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+        Print_MCNP_Input(eta_params, objFunc.objective, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
         idents.append(new_pop[i].ident)
         run_particles.append(new_pop[i].rset.nps)
         for m in range(9,len(new_pop[i].geom.matls)):
@@ -144,7 +144,7 @@ def main():
     logger.info('Reading inputs and initializing settings:')
     parser = argparse.ArgumentParser()
     parser.add_argument('--r', nargs='?', default='n', help='Boolean indicator for if an initial population is supplied.  This initial population must be in the form of MCNP input decks in the Coeus standard directories.  Options are y or n.  [default = n]')
-    parser.add_argument('--inp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/user_inputs.csv',help='The name and path for the user inputs file location. The format is a space delimited file with keyword arguments.  For more details, see the UserInputs class.  [default = ../Inputs/user_inputs.txt]')
+    parser.add_argument('--inp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/user_inputs.txt',help='The name and path for the user inputs file location. The format is a space delimited file with keyword arguments.  For more details, see the UserInputs class.  [default = ../Inputs/user_inputs.txt]')
     parser.add_argument('--eta', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_constraints.csv',help='The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/eta_constraints.csv]')
     parser.add_argument('--gs', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/gnowee_settings.csv',help='The name and path for the file containing the Gnowee search settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values.   [default = ../Inputs/gnowee_settings.csv]')
     parser.add_argument('--adv', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/advantg_settings.csv',help='The name and path for the file containing the advantg settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/advantg_settings.csv]')
@@ -183,6 +183,8 @@ def main():
         logger.info("\nLoading user input file located at: {}".format(inpPath))
         inputs = UserInputs(coeusInputPath=inpPath)
         objFunc = inputs.read_coeus_settings()
+        logger.info("{}".format(str(objFunc)))
+        logger.info("{}".format(repr(objFunc)))
     else:
         logger.info("\nNo user supplier input file located.  Program default values to be used instead.")
         
@@ -256,7 +258,7 @@ def main():
     ids=[]
     particles=[]
     for i in range(0,g_set.p):
-        Print_MCNP_Input(eta_params, objFunc.spectrum, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
+        Print_MCNP_Input(eta_params, objFunc.objective, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
         ids.append(i)
         if args.r=='y':
             particles.append(pop[i].rset.nps)
@@ -274,7 +276,7 @@ def main():
 
     # Run MCNP
     for i in ids:
-        Print_MCNP_Input(eta_params, objFunc.spectrum, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
+        Print_MCNP_Input(eta_params, objFunc.objective, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
     Run_Transport(ids, args.qos, args.account, args.partition, args.timeout, nps=particles, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 

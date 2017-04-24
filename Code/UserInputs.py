@@ -65,7 +65,11 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 @date 23April
 """
 
+import logging
+module_logger = logging.getLogger('Coeus.UserInputs')
+
 from ObjectiveFunction import ObjectiveFunction
+from Utilities import Switch
 
 #------------------------------------------------------------------------------#
 class UserInputs(object):
@@ -132,7 +136,7 @@ class UserInputs(object):
         """
         
         # Create the relevant objects
-        objSet = ObjectiveFunctions()
+        objSet = ObjectiveFunction()
         # Open file
         try: 
             f = open(self.coeusInput, 'r') 
@@ -168,11 +172,11 @@ class UserInputs(object):
                         {}".format(splitList[0].strip()))
         
             # Close the file
-            self.f.close()
+            f.close()
         except IOError as e:
             module_logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))    
        
         # Test that the file closed
-        assert self.f.closed==True, "File did not close properly."
+        assert f.closed==True, "File did not close properly."
         
         return objSet

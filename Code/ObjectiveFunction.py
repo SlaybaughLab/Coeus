@@ -11,6 +11,11 @@
 @date 22April
 """
 
+import logging
+module_logger = logging.getLogger('Coeus.ObjectiveFunction')
+
+import numpy as np
+
 #_FUNC_DICT = {"relative_least_squares": relative_least_squares,
 #              "least_squares": least_squares, "u_opt": u_opt}
 
@@ -55,8 +60,10 @@ class ObjectiveFunction:
         # the mapping between the string names and function handles for
         # the objective function evaluations in the class.  This must be
         # updated by the user if a function is added to the class.
-        self._FUNC_DICT = {"relative_least_squares": relative_least_squares,
-              "least_squares": least_squares, "u_opt": u_opt}
+        self._FUNC_DICT = {"relative_least_squares":
+                           self.relative_least_squares,
+                           "least_squares": self.least_squares,
+                           "u_opt": self.u_opt}
         ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
@@ -80,7 +87,7 @@ class ObjectiveFunction:
         @param self: \e pointer \n
             The ObjectiveFunction pointer. \n
         """
-        return "ObjectiveFunction({}, {})".format(self.funcName,
+        return "ObjectiveFunction({}, {})".format(self.func,
                                                   self.funcTally)
 
     def __str__(self):
@@ -92,8 +99,8 @@ class ObjectiveFunction:
         """
 
         header = ["\ObjectiveFunction:"]
-        header += ["Objective Function: {}".format(funcName.__name__)]
-        header += ["Tally Number: {}".format(funcTally)]
+        header += ["Objective Function: {}".format(self.func.__name__)]
+        header += ["Tally Number: {}".format(self.funcTally)]
         return "\n".join(header)+"\n"
 
     def set_obj_func(self, funcName):
