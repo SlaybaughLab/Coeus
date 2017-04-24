@@ -135,25 +135,32 @@ class UserInputs(object):
             object initialized with the user input parameters. \n
         """
         
+        # Initialize the section headers that are valid:
+        sectionHeaders = ['objective function parameters']
+        
         # Create the relevant objects
         objSet = ObjectiveFunction()
         # Open file
         try: 
             f = open(self.coeusInput, 'r') 
             
-            # Read the file line by line and store the values in the ETA_Params object
+            # Read the file line by line and store the values
             for line in f:
-                splitList=line.strip().split(" ")
-                for case in Switch(splitList[0].strip().lower()):
-                    if case('OBJECTIVE FUNCTION PARAMETERS'.lower()):
-                        while True:
-                            splitList = f.next().strip().split()
+                if line.strip().lower() == \
+                   'OBJECTIVE FUNCTION PARAMETERS'.lower():
+                    line = f.next().strip().lower()
+                    while line not in sectionHeaders:
+                        splitList = line.split()
+                        for case in Switch(splitList[0].strip().lower()):
                             if case('function'.lower()):
                                 objSet.set_obj_func(splitList[1].strip())
+                                break
                             if case('tally'.lower()):
                                 objSet.funcTally = splitList[1].strip()
+                                break
                             if case('type'.lower()):
                                 objSet.objType = splitList[1].strip()
+                                break
                             if case('objective'.lower()):
                                 num = int(splitList[1].strip())
                                 objSet.objForm = int(splitList[2].strip())
@@ -161,15 +168,21 @@ class UserInputs(object):
                                 while len(tmp) < num:
                                     splitList = f.next().strip().split()
                                     for i in range(0,len(splitList),2):
-                                        tmp.append(float(splitList[i].strip()),
-                                                   float(splitList[i+1].strip()))
-                                objSet.spectrum = tmp
+                                        tmp.append([float(splitList[i].strip()),
+                                                 float(splitList[i+1].strip())])
+                                objSet.objective = tmp
+                                break
                             if case():
-                                module_logger.warning("A unkown user input was \
-                                            found: {} ".format(splitList[0].strip()))
-                    if case():
-                        module_logger.warning("A unkown section was specified: \
-                        {}".format(splitList[0].strip()))
+                                module_logger.warning("Unkown user input "
+                                "found: {} ".format(splitList[0].strip()))
+                                break
+                        try:
+                            line = f.next().strip().lower()
+                        except StopIteration:
+                            break
+                else:
+                    module_logger.warning("A unkown section was specified: "
+                                              "{}".format(line.strip()))
         
             # Close the file
             f.close()

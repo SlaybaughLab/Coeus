@@ -87,8 +87,12 @@ class ObjectiveFunction:
         @param self: \e pointer \n
             The ObjectiveFunction pointer. \n
         """
-        return "ObjectiveFunction({}, {})".format(self.func,
-                                                  self.funcTally)
+        return "ObjectiveFunction({}, {}, {}, {}, {})".format(
+                                                         self.func.__name__,
+                                                         self.funcTally,
+                                                         self.objType,
+                                                         self.objForm,
+                                                         self.objective)
 
     def __str__(self):
         """!
@@ -98,9 +102,12 @@ class ObjectiveFunction:
             The ObjectiveFunction pointer. \n
         """
 
-        header = ["\ObjectiveFunction:"]
+        header = ["ObjectiveFunction:"]
         header += ["Objective Function: {}".format(self.func.__name__)]
         header += ["Tally Number: {}".format(self.funcTally)]
+        header += ["Objective Function Type: {}".format(self.objType)]
+        header += ["Objective Form: {}".format(self.objForm)]
+        header += ["Objective: {}".format(self.objective)]
         return "\n".join(header)+"\n"
 
     def set_obj_func(self, funcName):
@@ -112,7 +119,7 @@ class ObjectiveFunction:
         @param funcName \e string \n
              A string identifying the objective function to be used. \n
         """
-        self.func=_FUNC_DICT[func_name]
+        self.func=self._FUNC_DICT[funcName]
         
 #-----------------------------------------------------------------------------#
 # The following sections are user modifiable to all for the use of new
