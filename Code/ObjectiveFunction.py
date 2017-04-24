@@ -16,9 +16,6 @@ module_logger = logging.getLogger('Coeus.ObjectiveFunction')
 
 import numpy as np
 
-#_FUNC_DICT = {"relative_least_squares": relative_least_squares,
-#              "least_squares": least_squares, "u_opt": u_opt}
-
 #-----------------------------------------------------------------------------#    
 class ObjectiveFunction:
     """!
@@ -34,6 +31,8 @@ class ObjectiveFunction:
 
         @param self: <em> object pointer </em> \n
             The object pointer. \n
+        @param _FUNCT_DICT: \e dictionary \n
+            A mapping from string function names to function handles. \n
         @param method: \e string \n
             The name of the objective function to evaluate. \n
         @param tallyNum: \e string \n
@@ -67,7 +66,7 @@ class ObjectiveFunction:
         ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        self.func = method 
+        self.func = self.set_obj_func(method)
         ## @var funcTally \e string The MCNP tally number to be used to
         #provide the input for the objective function calculation.
         self.funcTally = tallyNum 
@@ -120,6 +119,7 @@ class ObjectiveFunction:
              A string identifying the objective function to be used. \n
         """
         self.func=self._FUNC_DICT[funcName]
+        assert hasattr(self.func, '__call__'), 'Invalid function handle'
         
 #-----------------------------------------------------------------------------#
 # The following sections are user modifiable to all for the use of new
@@ -201,7 +201,7 @@ class ObjectiveFunction:
                     extrapIndex2 = i + 2
                     while c[extrapIndex1] == 0.0 or c[extrapIndex2] == 0.0:
                         extrapIndex1 += 1
-			extrapIndex2 += 1
+                        extrapIndex2 += 1
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))
