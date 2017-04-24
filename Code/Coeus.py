@@ -299,7 +299,7 @@ def main():
     ######## Partial Inversion ########
     new_pop=Partial_Inversion(pop,mod_rat,mat_lib,g_set)
     (ids,particles)=print_MCNP_input_files('Partial Inversion')
-    run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p), g_set.func)
+    run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p), objFunc)
 
             
     # Iterate until termination criterion met
@@ -311,51 +311,51 @@ def main():
         ######## Levy flight permutation of materials ########
         new_pop=Mat_Levy_Flights(pop, mat_lib, mod_rat, g_set, [eta_params.fissile_mat,'Au'])
         (ids,particles)=print_MCNP_input_files("Levy flight permutation of materials")
-        run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl), g_set.func)
+        run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl), objFunc)
 
             
         ######## Levy flight permutation of cells ########
         new_pop=Cell_Levy_Flights(pop,eta_params,g_set)      
         (ids,particles)=print_MCNP_input_files("Levy flight permutation of cells")
-        run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl), g_set.func)
+        run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl), objFunc)
 
             
         ######## Elite_Crossover ########
         new_pop=Elite_Crossover(pop,mod_rat,eta_params,mat_lib,g_set,[eta_params.fissile_mat,'Au'])
         (ids,particles)=print_MCNP_input_files("Elite Crossover")
-        run_MCNP_on_algo(args,"elite_cross", 0, 1, g_set.func)
+        run_MCNP_on_algo(args,"elite_cross", 0, 1, objFunc)
                 
                 
         ######## Mutate ########
         new_pop=Mutate(pop, eta_params, g_set)
         (ids,particles)=print_MCNP_input_files("Mutation Operator")
-        run_MCNP_on_algo(args,"mutate", 0, int(g_set.p), g_set.func)
+        run_MCNP_on_algo(args,"mutate", 0, int(g_set.p), objFunc)
           
 
         ######## Crossover ########
         new_pop=Crossover(pop,g_set)
         (ids,particles)=print_MCNP_input_files("Crossover")
-        run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe), g_set.func)
+        run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe), objFunc)
             
             
         ######## 2-opt ########
         if eta_params.max_horiz >= 4:
             new_pop=Two_opt(pop,g_set)
             (ids,particles)=print_MCNP_input_files("2-opt")
-            run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe), g_set.func)
+            run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe), objFunc)
             
             
         ######## 3-opt ########
         if eta_params.max_horiz >= 6:
             new_pop=Three_opt(pop,g_set)
             (ids,particles)=print_MCNP_input_files("3-opt")
-            run_MCNP_on_algo(args,"three_op", 0, int(g_set.p), g_set.func)
+            run_MCNP_on_algo(args,"three_op", 0, int(g_set.p), objFunc)
             
             
         ######## Discard Cells ########
         new_pop=Discard_Cells(pop,mat_lib,g_set)
         (ids,particles)=print_MCNP_input_files("Discard Cells")
-        run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd), g_set.func)
+        run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd), objFunc)
         stats.write()
                     
         ######## Test Convergence ########
@@ -378,7 +378,7 @@ def main():
         # Print MCNP input Files
         ids=[]
         for i in range(0,g_set.p):
-            Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
+            Print_MCNP_Input(eta_params,objFunc.objective,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
             ids.append(i)
 
         # Print ADVANTG input Files
