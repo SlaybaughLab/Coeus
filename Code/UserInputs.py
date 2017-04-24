@@ -68,6 +68,8 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 import logging
 module_logger = logging.getLogger('Coeus.UserInputs')
 
+import numpy as np
+
 from ObjectiveFunction import ObjectiveFunction
 from Utilities import Switch
 
@@ -170,7 +172,7 @@ class UserInputs(object):
                                     for i in range(0,len(splitList),2):
                                         tmp.append([float(splitList[i].strip()),
                                                  float(splitList[i+1].strip())])
-                                objSet.objective = tmp
+                                objSet.objective = np.asarray(tmp)
                                 break
                             if case():
                                 module_logger.warning("Unkown user input "

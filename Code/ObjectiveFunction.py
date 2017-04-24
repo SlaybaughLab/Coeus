@@ -147,7 +147,7 @@ class ObjectiveFunction:
         assert len(c)==len(self.objective), ("The length of the candidate "
                                 "and objective  must be equal in u_opt.")
 
-        return np.sum(abs(self.objective-c))
+        return np.sum(abs(self.objective[:,1]-c))
 
     def least_squares(self, c):
         """!
@@ -167,7 +167,7 @@ class ObjectiveFunction:
         assert len(c)==len(self.objective), ("The length of the candidate " 
                               "and objective  must be equal in least_squares.")  
 
-        return np.sum((self.objective-c)**2)
+        return np.sum((self.objective[:,1]-c)**2)
 
     def relative_least_squares(self, c, project=True):  
         """!
@@ -205,4 +205,4 @@ class ObjectiveFunction:
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))
-        return np.sum((self.objective-c)**2/self.objective)
+        return np.sum((self.objective[:,1]-c)**2/self.objective[:,1])
