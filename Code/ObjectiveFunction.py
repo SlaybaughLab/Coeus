@@ -22,8 +22,8 @@ class ObjectiveFunction:
     optimization algorithms.
     """
 
-    def __init__(self, method=None, tallyNum=None, tallyType=None, 
-                 objective=None):
+    def __init__(self, method=None, tallyNum=None, objType=None, 
+                 objForm=None, objective=None):
         """!
         Constructor to build the ObjectiveFunction class.
 
@@ -43,6 +43,8 @@ class ObjectiveFunction:
             1 = "normalized" \n
             2 = "differential" \n
             3 = "normalized_differential" \n
+            4 = "lethargy" \n
+            5 = "normalized_lethargy" \n
         @param objective: <em> integer, float, or numpy array </em> \n
             The desired objective associated with the optimization.  The
             chosen value and type must be compatible with the optiization
@@ -57,7 +59,10 @@ class ObjectiveFunction:
         #provide the input for the objective function calculation.
         self.funcTally = tallyNum 
         ## @var objType \e string The type of objective function calculation.
-        self.objType = tallyType
+        self.objType = objType
+        ## @var objForm \e string The form of objective function.  Only
+        # specified if the objType is "spectrum".
+        self.objForm = objForm
         ## @var objective  <em> integer, float, or numpy array </em> The
         # desired outcome of the optimization.
         self.objective = objective 
@@ -80,8 +85,8 @@ class ObjectiveFunction:
             The ObjectiveFunction pointer. \n
         """
 
-        header = ["\ObjectiveFunction:"]
-        header += ["Objective Function: {}".format(funcName._Name_)]
+        header = ["\ObjectiveFunction:"]_
+        header += ["Objective Function: {}".format(funcName.__name__)]
         header += ["Tally Number: {}".format(funcTally)]
         return "\n".join(header)+"\n"
 
