@@ -736,6 +736,7 @@ class MCNP_Cell:
 
 ##  Print the generated MCNP input deck to file 
 # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+# @param tallySpectrum [Numpy array] Contains the energy structure to be used for the tally.
 # @param geom [MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
 # @param settings [MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
 #        and tally information.
@@ -743,7 +744,7 @@ class MCNP_Cell:
 # @param num int The current parent number being generated
 # @param adv_print boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
 #        ADVANTG outputs. 
-def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):     
+def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,adv_print=True):     
     path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))+"/Results/Population/{}".format(num)
     # Delete previous input file if present
     if os.path.exists(path):
@@ -851,7 +852,7 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c  Tallies  \n")
             inp_file.write("{}".format(settings.tally))
             inp_file.write("E0  \n")
-            for e,p in eta.spectrum:
+            for e,p in tallySpectrum:
                 inp_file.write("      {:6e}\n".format(e))
 
         # Close the file

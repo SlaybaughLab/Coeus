@@ -49,7 +49,7 @@ def print_MCNP_input_files(step):
     idents=[]
     run_particles=[]
     for i in range(0,len(new_pop)):
-        Print_MCNP_Input(eta_params,new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+        Print_MCNP_Input(eta_params, objFunc.spectrum, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
         idents.append(new_pop[i].ident)
         run_particles.append(new_pop[i].rset.nps)
         for m in range(9,len(new_pop[i].geom.matls)):
@@ -256,7 +256,7 @@ def main():
     ids=[]
     particles=[]
     for i in range(0,g_set.p):
-        Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
+        Print_MCNP_Input(eta_params, objFunc.spectrum, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=False)
         ids.append(i)
         if args.r=='y':
             particles.append(pop[i].rset.nps)
@@ -274,7 +274,7 @@ def main():
 
     # Run MCNP
     for i in ids:
-        Print_MCNP_Input(eta_params,pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
+        Print_MCNP_Input(eta_params, objFunc.spectrum, pop[i].geom,pop[i].rset,mat_lib,i,adv_print=True)
     Run_Transport(ids, args.qos, args.account, args.partition, args.timeout, nps=particles, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
