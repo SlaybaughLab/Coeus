@@ -202,9 +202,17 @@ class ObjectiveFunction(object):
                 if c[i] == 0.0:
                     extrapIndex1 = i + 1
                     extrapIndex2 = i + 2
-                    while c[extrapIndex1] == 0.0 or c[extrapIndex2] == 0.0:
-                        extrapIndex1 += 1
-                        extrapIndex2 += 1
+                    if extrapIndex2 < len(c):
+                        while c[extrapIndex1] == 0.0 or c[extrapIndex2] == 0.0:
+                            extrapIndex1 += 1
+                            extrapIndex2 += 1
+                            if extrapIndex2 >= len(c):
+                                extrapIndex1 = i - 2
+                                extrapIndex2 = i - 1
+                                break
+                    else:
+                        extrapIndex1 = i - 2
+                        extrapIndex2 = i - 1
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))
