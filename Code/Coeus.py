@@ -183,8 +183,7 @@ def main():
         logger.info("\nLoading user input file located at: {}".format(inpPath))
         inputs = UserInputs(coeusInputPath=inpPath)
         objFunc = inputs.read_coeus_settings()
-        logger.info("{}".format(str(objFunc)))
-        logger.info("{}".format(repr(objFunc)))
+        logger.debug("{}".format(str(objFunc)))
     else:
         logger.info("\nNo user supplier input file located.  Program default values to be used instead.")
         
