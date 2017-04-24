@@ -513,21 +513,23 @@ class Parent:
 ## Print the generated MCNP input deck to file 
 # @param ids [list of integers] The parents that need to have fitness solutions calculated
 # @param pop [list of parent objects] The population and their design features
-# @param obj array The objective spectrum
+# @param obj ObjectiveFunction Object An object containing all of the parameters required for evaluating the objective function.
 # @param min_fiss float (optional) A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
 #    [Default = 0]
 # @param max_w float (optional) A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
-def Calc_Fitness(ids, pop, obj_func, obj, min_fiss=0, max_w=1000): 
+def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000): 
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
     
     for i in ids:
         tmp_fit=1E15
         index = next((c for c, parent in enumerate(pop) if parent.ident == i), -1)
-        (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', '24', '14')
+        (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', obj.funcTally, '14')
         try:
+            # NEED TO EXPAND OPTIONS HERE TO DO THE TRANSFORM REQUIRED BY the objForm
+            # ATTRIBUTE OF THE OBJECTIVEFUNCTION OBJECT
             tally=to_NormDiff(tally)
-            tmp_fit=obj_func(tally,obj)
-            module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
+            tmp_fit=obj.func(tally)
+            module_logger.debug("Parent ID # {} has fitness = {} from {} before constraints.".format(i,tmp_fit, obj.func.__name__))
 
             # Check constraints
             weight=weight/1000         # conversion to kg
