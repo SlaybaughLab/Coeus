@@ -16,15 +16,15 @@ module_logger = logging.getLogger('Coeus.ObjectiveFunction')
 
 import numpy as np
 
-#-----------------------------------------------------------------------------#    
-class ObjectiveFunction:
+#-----------------------------------------------------------------------------#
+class ObjectiveFunction(object):
     """!
     @ingroup ObjectiveFunctions
     The class creates a ObjectiveFunction object that can be used in
     optimization algorithms.
     """
 
-    def __init__(self, method=None, tallyNum=None, objType=None, 
+    def __init__(self, method=None, tallyNum=None, objType=None,
                  objForm=None, objective=None):
         """!
         Constructor to build the ObjectiveFunction class.
@@ -69,7 +69,7 @@ class ObjectiveFunction:
         self.func = self.set_obj_func(method)
         ## @var funcTally \e string The MCNP tally number to be used to
         #provide the input for the objective function calculation.
-        self.funcTally = tallyNum 
+        self.funcTally = tallyNum
         ## @var objType \e string The type of objective function calculation.
         self.objType = objType
         ## @var objForm \e string The form of objective function.  Only
@@ -77,7 +77,7 @@ class ObjectiveFunction:
         self.objForm = objForm
         ## @var objective  <em> integer, float, or numpy array </em> The
         # desired outcome of the optimization.
-        self.objective = objective 
+        self.objective = objective
 
     def __repr__(self):
         """!
@@ -118,16 +118,16 @@ class ObjectiveFunction:
         @param funcName \e string \n
              A string identifying the objective function to be used. \n
         """
-        self.func=self._FUNC_DICT[funcName]
+        self.func = self._FUNC_DICT[funcName]
         assert hasattr(self.func, '__call__'), 'Invalid function handle'
-        
+
 #-----------------------------------------------------------------------------#
 # The following sections are user modifiable to all for the use of new
 # objective functions that have not yet been implemented.  The same format must
 # be followed to work with the standard Coeus call. If a function is added.
 # it must also be added to the _FUNC_DICT attribute of the class.
 #-----------------------------------------------------------------------------#
- 
+
     def u_opt(self, c):
         """!
         Calculated the fitness of a series of values using the U-Optimality
@@ -144,10 +144,10 @@ class ObjectiveFunction:
              design. \n
         """
 
-        assert len(c)==len(self.objective), ("The length of the candidate "
+        assert len(c) == len(self.objective), ("The length of the candidate "
                                 "and objective  must be equal in u_opt.")
 
-        return np.sum(abs(self.objective[:,1]-c))
+        return np.sum(abs(self.objective[:, 1]-c))
 
     def least_squares(self, c):
         """!
@@ -164,12 +164,12 @@ class ObjectiveFunction:
              design. \n
         """
 
-        assert len(c)==len(self.objective), ("The length of the candidate " 
-                              "and objective  must be equal in least_squares.")  
+        assert len(c) == len(self.objective), ("The length of the candidate "
+                              "and objective  must be equal in least_squares.")
 
-        return np.sum((self.objective[:,1]-c)**2)
+        return np.sum((self.objective[:, 1]-c)**2)
 
-    def relative_least_squares(self, c, project=True):  
+    def relative_least_squares(self, c, project=True):
         """!
         Calculated the fitness of a series of values using the relative least
         squares condition. This provides equal weighting to all bins in the
@@ -187,16 +187,16 @@ class ObjectiveFunction:
 
         @return \e float: The relative_least_squares criteria based fitness for
             a design. \n
-        """ 
+        """
 
-        assert len(c)==len(self.objective), ("The length of the candidate and " 
-                          "objective must be equal in relative_least_squares.")
+        assert len(c) == len(self.objective), ("The length of the candidate "
+                      "and objective must be equal in relative_least_squares.")
 
         # For bins with no tally results, project the fitness using simple
         # linear extrapolation
         if project == True:
             for i in range(len(c)):
-                if c[i]==0.0:
+                if c[i] == 0.0:
                     extrapIndex1 = i + 1
                     extrapIndex2 = i + 2
                     while c[extrapIndex1] == 0.0 or c[extrapIndex2] == 0.0:
@@ -205,4 +205,4 @@ class ObjectiveFunction:
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))
-        return np.sum((self.objective[:,1]-c)**2/self.objective[:,1])
+        return np.sum((self.objective[:, 1]-c)**2/self.objective[:, 1])

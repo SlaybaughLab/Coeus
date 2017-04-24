@@ -14,18 +14,18 @@
 import logging
 module_logger = logging.getLogger('Coeus.Constraints')
 
-import numpy as np
+from math import ceil
 
-#-----------------------------------------------------------------------------#    
-class Constraints:
+#-----------------------------------------------------------------------------#
+class Constraints(object):
     """!
     @ingroup Constraints
     The class creates a Constraints object that can be used in
     optimization algorithms.
     """
 
-    def __init__(self, method=None, constraintType=None, 
-                 constraint = None, penalty=1E15):
+    def __init__(self, method=None, constraint=None, tallyNum=None,
+                 penalty=1E15):
         """!
         Constructor to build the ObjectiveFunction class.
 
@@ -42,20 +42,19 @@ class Constraints:
         @param penalty: \e float \n
             The penalty to be applied if a constraint is violated.  1E15
             is recommended. \n
-            
         """
 
         ## @var _FUNC_DICT <em> dictionary of function handles </em> Stores
         # the mapping between the string names and function handles for
         # the constraint function evaluations in the class.  This must be
         # updated by the user if a function is added to the class.
-        self._FUNC_DICT = {"max_weight":
-                           self.max_weight,
-                           "min_reactions": self.min_reactions}
+        self._FUNC_DICT = {"less_or_equal":
+                           self.less_or_equal,
+                           "greater_than": self.greater_than}
         ## @var func <em> function handle </em> The function handle for
         # the constraint function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        self.func = set_obj_func(method)
+        self.func = self.set_constraint_func(method)
         ## @var constraint \e float The constraint to be enforced.
         self.constraint = constraint
         ## @var tallyNum \e float The tally associated with the constraint.
@@ -71,7 +70,7 @@ class Constraints:
         @param self: \e pointer \n
             The Constraint pointer. \n
         """
-        return "Constraint({}, {}, {}, {})".format(self.func.__name,
+        return "Constraint({}, {}, {}, {})".format(self.func.__name__,
                                               self.constraint,
                                               self.tallyNum,
                                               self.penalty)
@@ -100,9 +99,9 @@ class Constraints:
         @param funcName \e string \n
              A string identifying the constraint function to be used. \n
         """
-        self.func=self._FUNC_DICT[funcName]
+        self.func = self._FUNC_DICT[funcName]
         assert hasattr(self.func, '__call__'), 'Invalid function handle'
-        
+
     def get_penalty(self, violation):
         """!
         Calculate the constraint violation penalty, if any.
@@ -116,7 +115,7 @@ class Constraints:
         @return \e float: The scaled penalty. \n
         """
 
-        return self.penalty*m.ceil(violation)**2
+        return self.penalty*ceil(violation)**2
 
 #-----------------------------------------------------------------------------#
 # The following sections are user modifiable to all for the use of new

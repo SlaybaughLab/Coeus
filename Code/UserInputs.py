@@ -31,32 +31,32 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
     representing the desired objective.  If "spectrum" was specified for the
     type, this is the number of bins for the objective spectrum followed by the
     form of the objective spectrum.  The form responses are:
-    
+
     0 = "mcnp"
     1 = "normalized"
     2 = "differential"
     3 = "normalized_differential"
     4 = "lethargy"
     5 = "normalized lethargy"
-    
+
     Based on the response, the proper calculations will be performed to
     translate the mcnp tally to the correct form for objective function
     calculation. The spectrum is specified on the following line. \n
-    
+
     The spectrum is enetered in the form of energy amount seperated by a single
     (or multiple spaces. A couple of spectrum examples: \n
 
     objective 4
     1 0.25 2 0.5 5 0.2 10 0.05
 
-    or 
+    or
 
     objective 4
     1 0.25
     2 0.5
     5 0.2
     10 0.05
-    
+
     NOTE: The objective spectrum specified needs to be the same structure that
     is used used for the tally number specified.
 
@@ -120,7 +120,7 @@ class UserInputs(object):
             The UserInputs pointer. \n
         """
 
-        header = ["\UserInputs:"]
+        header = ["UserInputs:"]
         header += ["Coeus Input File Path: {}".format(self.coeusInput)]
         header += ["MCNP Input File Path: {}".format(self.mcnpInput)]
         return "\n".join(header)+"\n"
@@ -133,19 +133,19 @@ class UserInputs(object):
         @param self: <em> object pointer </em> \n
             The UserInputs pointer. \n
 
-        @return <em> Objective Function Object </em>: An ObjectiveFunction 
+        @return <em> Objective Function Object </em>: An ObjectiveFunction
             object initialized with the user input parameters. \n
         """
-        
+
         # Initialize the section headers that are valid:
         sectionHeaders = ['objective function parameters']
-        
+
         # Create the relevant objects
         objSet = ObjectiveFunction()
         # Open file
-        try: 
-            f = open(self.coeusInput, 'r') 
-            
+        try:
+            f = open(self.coeusInput, 'r')
+
             # Read the file line by line and store the values
             for line in f:
                 if line.strip().lower() == \
@@ -166,10 +166,10 @@ class UserInputs(object):
                             if case('objective'.lower()):
                                 num = int(splitList[1].strip())
                                 objSet.objForm = int(splitList[2].strip())
-                                tmp =[]
+                                tmp = []
                                 while len(tmp) < num:
                                     splitList = f.next().strip().split()
-                                    for i in range(0,len(splitList),2):
+                                    for i in range(0, len(splitList), 2):
                                         tmp.append([float(splitList[i].strip()),
                                                  float(splitList[i+1].strip())])
                                 objSet.objective = np.asarray(tmp)
@@ -185,13 +185,14 @@ class UserInputs(object):
                 else:
                     module_logger.warning("A unkown section was specified: "
                                               "{}".format(line.strip()))
-        
+
             # Close the file
             f.close()
         except IOError as e:
-            module_logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))    
-       
+            module_logger.error("I/O error({0}): {1}".format(e.errno,
+                                                             e.strerror))
+
         # Test that the file closed
-        assert f.closed==True, "File did not close properly."
-        
+        assert f.closed == True, "File did not close properly."
+
         return objSet
