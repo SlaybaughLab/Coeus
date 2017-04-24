@@ -154,11 +154,11 @@ class UserInputs(object):
                                 num = int(splitList[1].strip())
                                 objSet.objForm = int(splitList[2].strip())
                                 tmp =[]
-                                    while len(tmp) < num:
-                                        splitList = f.next().strip().split()
-                                        for i in range(0,len(splitList),2):
-                                            tmp.append(float(splitList[i].strip()),
-                                                      float(splitList[i+1].strip()))
+                                while len(tmp) < num:
+                                    splitList = f.next().strip().split()
+                                    for i in range(0,len(splitList),2):
+                                        tmp.append(float(splitList[i].strip()),
+                                                   float(splitList[i+1].strip()))
                                 objSet.spectrum = tmp
                             if case():
                                 module_logger.warning("A unkown user input was \

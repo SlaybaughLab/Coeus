@@ -11,8 +11,8 @@
 @date 22April
 """
 
-_FUNC_DICT = {"relative_least_squares": relative_least_squares,
-              "least_squares": least_squares, "u_opt": u_opt}
+#_FUNC_DICT = {"relative_least_squares": relative_least_squares,
+#              "least_squares": least_squares, "u_opt": u_opt}
 
 #-----------------------------------------------------------------------------#    
 class ObjectiveFunction:
@@ -51,6 +51,12 @@ class ObjectiveFunction:
             function chosen. \n
         """
 
+        ## @var _FUNC_DICT <em> dictionary of function handles </em> Stores
+        # the mapping between the string names and function handles for
+        # the objective function evaluations in the class.  This must be
+        # updated by the user if a function is added to the class.
+        self._FUNC_DICT = {"relative_least_squares": relative_least_squares,
+              "least_squares": least_squares, "u_opt": u_opt}
         ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
@@ -85,7 +91,7 @@ class ObjectiveFunction:
             The ObjectiveFunction pointer. \n
         """
 
-        header = ["\ObjectiveFunction:"]_
+        header = ["\ObjectiveFunction:"]
         header += ["Objective Function: {}".format(funcName.__name__)]
         header += ["Tally Number: {}".format(funcTally)]
         return "\n".join(header)+"\n"
@@ -104,7 +110,8 @@ class ObjectiveFunction:
 #-----------------------------------------------------------------------------#
 # The following sections are user modifiable to all for the use of new
 # objective functions that have not yet been implemented.  The same format must
-# be followed to work with the standard Coeus call.
+# be followed to work with the standard Coeus call. If a function is added.
+# it must also be added to the _FUNC_DICT attribute of the class.
 #-----------------------------------------------------------------------------#
  
     def u_opt(self, c):
@@ -123,8 +130,8 @@ class ObjectiveFunction:
              design. \n
         """
 
-        assert len(c)==len(self.objective), "The length of the candidate and \ 
-                                objective  must be equal in Uopt."  
+        assert len(c)==len(self.objective), ("The length of the candidate "
+                                "and objective  must be equal in u_opt.")
 
         return np.sum(abs(self.objective-c))
 
@@ -143,8 +150,8 @@ class ObjectiveFunction:
              design. \n
         """
 
-        assert len(c)==len(self.objective), "The length of the candidate and \ 
-                                objective  must be equal in least_squares."  
+        assert len(c)==len(self.objective), ("The length of the candidate " 
+                              "and objective  must be equal in least_squares.")  
 
         return np.sum((self.objective-c)**2)
 
@@ -168,9 +175,8 @@ class ObjectiveFunction:
             a design. \n
         """ 
 
-        assert len(c)==len(self.objective), "The length of the candidate and \ 
-                                objective  must be equal in \
-                                relative_least_squares." 
+        assert len(c)==len(self.objective), ("The length of the candidate and " 
+                          "objective must be equal in relative_least_squares.")
 
         # For bins with no tally results, project the fitness using simple
         # linear extrapolation
@@ -180,7 +186,8 @@ class ObjectiveFunction:
                     extrapIndex1 = i + 1
                     extrapIndex2 = i + 2
                     while c[extrapIndex1] == 0.0 or c[extrapIndex2] == 0.0:
-                        extrapIndex1, extrapIndex2 += 1
+                        extrapIndex1 += 1
+			extrapIndex2 += 1
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))

@@ -3,16 +3,16 @@
 #SBATCH --job-name=coeus
 #
 # Partition:
-#SBATCH --partition=savio2
+#SBATCH --partition=savio
 #
 # QoS:
-# #SBATCH --qos=nuclear_normal
-#SBATCH --qos=savio_normal
+#SBATCH --qos=nuclear_savio_normal
+# #SBATCH --qos=savio_normal
 # #SBATCH --qos=savio_debug
 #
 # Account:
-# #SBATCH --account=co_nuclear
-#SBATCH --account=fc_neutronics
+#SBATCH --account=co_nuclear
+# #SBATCH --account=fc_neutronics
 #
 # Processors:
 #SBATCH --nodes=1
@@ -28,4 +28,4 @@
 
 . .bash_profile
 ## Run command
-python Coeus.py --r=n --qos=savio_normal --account=fc_neutronics --timeout=00:30:00 --partition=savio2
+python Coeus.py --r=n --qos=nuclear_savio_normal --account=co_nuclear --timeout=00:30:00 --partition=savio
