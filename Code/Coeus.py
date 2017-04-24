@@ -27,6 +27,7 @@ from ADVANTG_Utilities import ADVANTG_Settings, Print_ADVANTG_Input
 from NuclearData import Build_Matlib, Calc_Moderating_Ratio
 from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input, Read_Tally_Output
 from Utilities import Run_Transport, Event, Meta_Stats
+from UserInputs import UserInputs
 
 import time
 import shutil
@@ -62,7 +63,8 @@ def print_MCNP_input_files(step):
 # @param algo denotes the algorithm we are on
 # @param update_gen 
 # @param update_feval 
-def run_MCNP_on_algo(args, algo, update_gen, update_feval, obj_func):
+# @param objFunc
+def run_MCNP_on_algo(args, algo, update_gen, update_feval, objFunc):
     global stats, logger, history, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set
     slurmArgs=[args.qos, args.account, args.partition, args.timeout]
     if len(ids)>0:
@@ -70,7 +72,7 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval, obj_func):
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
     
         # Calculate Fitness
-        Calc_Fitness(ids, new_pop, obj_func, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
+        Calc_Fitness(ids, new_pop, objFunc, eta_params.min_fiss, eta_params.max_weight)
         (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, slurmArgs, eta_params, mat_lib, Run_Transport, rr=False) 
         pop=history.update(pop, update_gen, update_feval)
         stats.update(algo,(changes, update_feval + feval))
@@ -88,9 +90,8 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval, obj_func):
 ##     This order will be followed for each of the settings files so that some may be ommitted if desired. \n 
 
 ##     Parameters\n      
-# @param obj_path('obj'):str [default = ../Inputs/obj_spectrum.csv] 
-#     The name and path for the objective function (spectra) file location. The format is a comma delimited spectrum
-#     with the first column being the upper bin boundaries and the second column the bin flux/fluence.
+# @param input_path('inp'):str [default = ../Inputs/user_inputs.txt] 
+#     The name and path for the user input file location. The format is a space delimited key word file as specified in the UserInputs class.
 # @param eta_constraints_path('eta'):str [default = ../Inputs/eta_constraints.csv] 
 #     The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input 
 #     file. All keywords are optional.  Non-specified keywords will default to preset program values. 
@@ -114,7 +115,7 @@ def run_MCNP_on_algo(args, algo, update_gen, update_feval, obj_func):
 #     the population must have full initialization inputs to work. 
 
 def main():
-    global stats, logger, history, start_time, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set
+    global stats, logger, history, start_time, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set, objFunc
     start_time=time.time()     #Start Clock
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
         
@@ -143,7 +144,7 @@ def main():
     logger.info('Reading inputs and initializing settings:')
     parser = argparse.ArgumentParser()
     parser.add_argument('--r', nargs='?', default='n', help='Boolean indicator for if an initial population is supplied.  This initial population must be in the form of MCNP input decks in the Coeus standard directories.  Options are y or n.  [default = n]')
-    parser.add_argument('--obj', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/obj_spectrum.csv',help='The name and path for the objective function (spectra) file location. The format is a comma delimited spectrum with the first column being the upper bin boundaries and the second column the bin flux/fluence.  [default = ../Inputs/obj_spectrum.csv]')
+    parser.add_argument('--inp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/user_inputs.csv',help='The name and path for the user inputs file location. The format is a space delimited file with keyword arguments.  For more details, see the UserInputs class.  [default = ../Inputs/user_inputs.txt]')
     parser.add_argument('--eta', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_constraints.csv',help='The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/eta_constraints.csv]')
     parser.add_argument('--gs', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/gnowee_settings.csv',help='The name and path for the file containing the Gnowee search settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values.   [default = ../Inputs/gnowee_settings.csv]')
     parser.add_argument('--adv', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/advantg_settings.csv',help='The name and path for the file containing the advantg settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/advantg_settings.csv]')
@@ -159,8 +160,8 @@ def main():
     args = parser.parse_args()    
 
     # Assign optional inputs to variables:
-    if args.obj:
-        obj_path=args.obj 
+    if args.inp:
+        inpPath=args.inp 
     if args.eta:
         eta_path=args.eta
     if args.gs:
@@ -177,12 +178,13 @@ def main():
     # Create ETA_Params object
     eta_params=ETA_Parameters()
        
-    # Test path for objective function. Call read_obj if file exists
-    if os.path.isfile(obj_path): 
-        logger.info("\nLoading objective spectra file located at: {}".format(obj_path))
-        ETA_Parameters.read_obj(eta_params,obj_path)
+    # Test path for user input file.  Create the object if file exists.
+    if os.path.isfile(inpPath): 
+        logger.info("\nLoading user input file located at: {}".format(inpPath))
+        inputs = UserInputs(coeusInputPath=inpPath)
+        objFunc = inputs.read_coeus_settings()
     else:
-        logger.info("\nNo user supplier objective spectra file located.  Program default values to be used instead.")
+        logger.info("\nNo user supplier input file located.  Program default values to be used instead.")
         
     # Test path for constraint file. Call read_constraint if file exists
     if os.path.isfile(eta_path): 
@@ -277,7 +279,7 @@ def main():
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
 
     # Calculate Fitness
-    Calc_Fitness(ids, pop, eta_params.spectrum[:,1], eta_params.min_fiss, eta_params.max_weight)
+    Calc_Fitness(ids, pop, objFunc, eta_params.min_fiss, eta_params.max_weight)
 
     # Save the output files
     for c in pop:
