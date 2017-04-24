@@ -66,7 +66,10 @@ class ObjectiveFunction(object):
         ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        self.func = self.set_obj_func(method)
+        if method != None:
+	    self.func = self.set_obj_func(method)
+        else:
+            self.func = method
         ## @var funcTally \e string The MCNP tally number to be used to
         #provide the input for the objective function calculation.
         self.funcTally = tallyNum

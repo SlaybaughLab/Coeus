@@ -54,7 +54,10 @@ class Constraints(object):
         ## @var func <em> function handle </em> The function handle for
         # the constraint function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        self.func = self.set_constraint_func(method)
+        if method != None:
+            self.func = self.set_constraint_func(method)
+        else:
+            self.func = method
         ## @var constraint \e float The constraint to be enforced.
         self.constraint = constraint
         ## @var tallyNum \e float The tally associated with the constraint.
