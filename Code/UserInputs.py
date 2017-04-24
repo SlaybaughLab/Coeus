@@ -36,6 +36,8 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
     1 = "normalized"
     2 = "differential"
     3 = "normalized_differential"
+    4 = "lethargy"
+    5 = "normalized lethargy"
     
     Based on the response, the proper calculations will be performed to
     translate the mcnp tally to the correct form for objective function
