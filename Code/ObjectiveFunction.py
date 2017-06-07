@@ -67,7 +67,7 @@ class ObjectiveFunction(object):
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
         if method != None:
-	    self.func = self.set_obj_func(method)
+            self.set_obj_func(method)
         else:
             self.func = method
         ## @var funcTally \e string The MCNP tally number to be used to
