@@ -16,7 +16,7 @@ The Coeus user inputs will is constructed as follows:
 
 There is one valid section name.  The section name must be:
 
-OBJECTIVE FUCNTION PARAMETERS
+OBJECTIVE FUNCTION PARAMETERS
 
 The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 
@@ -37,7 +37,7 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
     2 = "differential"
     3 = "normalized_differential"
     4 = "lethargy"
-    5 = "normalized lethargy"
+    5 = "normalized_lethargy"
 
     Based on the response, the proper calculations will be performed to
     translate the mcnp tally to the correct form for objective function
