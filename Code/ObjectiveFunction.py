@@ -216,4 +216,5 @@ class ObjectiveFunction(object):
                     c[i] = c[extrapIndex1]-(extrapIndex1-i)\
                             *(c[extrapIndex2]-c[extrapIndex1]
                               /(extrapIndex2-extrapIndex1))
-        return np.sum((self.objective[:, 1]-c)**2/self.objective[:, 1])
+        return np.sum(((self.objective[:, 1]-c)/self.objective[:, 1])**2\
+                      *self.objective[:, 1]/sum(self.objective[:, 1]))
