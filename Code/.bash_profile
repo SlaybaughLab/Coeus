@@ -18,7 +18,15 @@ module load mpi4py
 # Aliases
 
 alias groupdir="cd /global/home/groups/co_nuclear"
+
+alias stat='squeue | grep youdongz'
+
 alias nuc='squeue -q nuclear_normal'
+
+alias scratch="cd /global/scratch/youdongz/"
+
+# wwall -j jobid
+
 
 # User specific environment and startup programs
 PATH=$PATH:$HOME/bin:/global/home/groups/co_nuclear/bin:/global/home/groups/co_nuclear/ADVANTG/bin
@@ -28,7 +36,6 @@ export PATH
 export DATAPATH
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/global/home/groups/co_nuclear/pyne/lib
+export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs
 
-PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs/pp-1.6.5
-PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/python-pkgs/pyDOE-0.3.8-py2.7.egg
 export PYTHONPATH=$PYTHONPATH:/global/home/groups/co_nuclear/pyne/lib/python2.7/site-packages

@@ -26,5 +26,6 @@
 # SLURM Error File
 #SBATCH --error=slurm.err
 
+. .bash_profile
 ## Run command
-python Coeus.py --r=n
+python Coeus.py --r=n --qos=savio_lowprio --account=co_nuclear --timeout=00:30:00 --partition=savio
