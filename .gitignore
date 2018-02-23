@@ -8,6 +8,23 @@ Code/Sampling/pyDOE*
 
 ## Other Files
 *.doc
-*.pdf
 *.$$$
 *.log
+*pptx
+*_UCB_SW_Discl*
+
+## Doxygen files
+docs/html/*
+docs/latex/*
+
+## Latex Files
+*.bib
+*.tex
+*.gz
+*.xml
+*.log
+*.out
+*.blg
+*.bcf
+*.bbl
+*.aux
