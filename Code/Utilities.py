@@ -555,7 +555,7 @@ def Uopt(c,d):
 # @param d the objective design
 # @return The least-squares design based fitness
 def LeastSquares(c,d):
-    
+
     assert len(c)==len(d), "The length of the candidate and objective design must be equal in LeastSquares."  
    
     return np.sum((d-c)**2)
