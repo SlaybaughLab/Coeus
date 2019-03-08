@@ -1,17 +1,5 @@
-###This document outlines possible use cases.  It is not intended to be exaustive, but instead to define some specific examples and how they would interact with the code and current capabilities. The tecnhical nuclear forensics describes the base case that the code was developed for.
-
-##Technical Nuclear Forensics (TNF):
-###Overview
-For TNF, the goal is to generate target spectra to replicate those from a nuclear weapons to get the correct fission and activation products (debris) for post-detonation attribution.  This case envisioned the National Ignition Facility (NIF) as the starting source, and most of the constraints are derived from fielding at this facility.  The search space has been simplified (2D, no optimization of the envelop, 1D search for foil location) to match this problem.  
-###Geometry
-The Coeus inputs allow for the geometry to be fully specified in 2D for this case. The user has control over all of the key components for the outer envelop, structural material thickness, foil holder, placement in the target chamber, and snout mount.
-###Constraints
-The contraints considered are weight and number of fissions (reactions).  These are set through the user inputs.  The Read_MCNP_Output function gets the weight and reactions from a set tally structure.  The weight is implemented as a hard constraint, and the # of fissions is incorporated as a soft contraint in the objective function calculation.  
-###Objective Function
-The objective function is calculated in the RelativeLeastSquares function.  It is a weighted sum of the squares of the differences between the two spectra.  
-###Other Considerations
-
 ##Boron Neutron Capture Therapy(BNCT)
+
 ###Overview
 BNCT is a method to irradiate tumors in the brain.  The goal here is to maximize dose to the tumor and minimize dose to the patient. This problem can be attacked in two ways.  
 1) You can assume you know the ideal spectrum based on other calculations. In this case, you are trying to optimize the spectrum out the back end of the ETA. 
