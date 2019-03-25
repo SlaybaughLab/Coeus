@@ -6,6 +6,7 @@
 ## Status Updates
 
 * [Update: 2019/03/08](#update-20190308)
+* [Update: 2019/03/22](#update-20190322)
 
 ***
 
@@ -34,6 +35,25 @@
 
 #### Postponed Goals: 
  - None
+
+***
+[Index](#top)
+
+### Update 2019/03/22 
+
+#### Meeting Notes:
+  
+ 
+#### Goals from last meeting:
+  - **DONE:** Tasks assigned
+  - **Started:** Sandra geometry writer
+ 
+#### Upcoming goals:
+  - James needs to define Gnowee variable interface.
+  - James/Darren to create Overleaf template for paper
+
+#### Postponed Goals: 
+  - Upgrade objfunt branch to stable version 2.0
 
 ***
 [Index](#top)
