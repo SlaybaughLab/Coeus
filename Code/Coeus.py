@@ -1,19 +1,20 @@
-#!/usr/bin/env python
+"""!
+@file Coeus.py
+@package Coeus
 
+@brief The main program for Coeus. Coeus is a fully functional and encapsulated 
+design tool for nuclear design problems. Designs are optimized to achieve
+design criteria using user defined contraint and objective functions using the 
+Gnowee metaheuristic algorithm.  ADVANTG and MCNP are used to perform the
+radiation transport calculations. 
 
-## Program : Coeus.py.
+Coeus is designed to run on a cluster.  Local runs on a PC are not longer
+supported.
 
-## Contains : The main program for Coeus. Coeus is a fully functional and encapsulated design tool 
-#            for Energy Tuning Assemblies.  Designs are optimized to set design criteria using contraints
-#            and spectrum objective functions using the Gnowee metaheuristic algorithm.  ADVANTG and MCNP
-#            are used to perform the radiation transport calculations.  
+@author James Bevins
 
-##            Coeus is designed to run on a cluster.  Use Coeus_local to run on a desktop.  
-
-## Author : James Bevins
-
-## Last Modified: 24Oct16
-
+@date 19April19
+"""
 
 
 import numpy as np
@@ -34,22 +35,30 @@ import shutil
 import logging
 import os
 import sys
-sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
 
 import argparse
 
 
- 
+#-----------------------------------------------------------------------------#
 # Local Function definitions
 
-## Print MCNP input Files for each algorithm
-# @param step denotes which algorithm we are printing for
-def print_MCNP_input_files(step):
+"""!
+Prints the radiation transport input files given a set of Gnowee generated
+new parameters.
+
+@param step: \e string \n
+	The current operator name. \n
+@param radCode: \e string \n
+	Sting indicating the name of the radiation transport code to be used. \n
+"""
+def print_transport_input(step, radCode='MCNP'):
     global logger, history, start_time, new_pop, eta_params, mat_lib, objFunc
-    idents=[]
-    run_particles=[]
+    idents, run_particles=[],[]
+	
+	# Loop over updated population and print MCNP input files
     for i in range(0,len(new_pop)):
-        Print_MCNP_Input(eta_params, objFunc.objective, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+		if radCode == "MCNP":
+			Print_MCNP_Input(eta_params, objFunc.objective, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
         idents.append(new_pop[i].ident)
         run_particles.append(new_pop[i].rset.nps)
         for m in range(9,len(new_pop[i].geom.matls)):
@@ -298,7 +307,7 @@ def main():
 
     ######## Partial Inversion ########
     new_pop=Partial_Inversion(pop,mod_rat,mat_lib,g_set)
-    (ids,particles)=print_MCNP_input_files('Partial Inversion')
+    (ids,particles)=print_transport_input('Partial Inversion')
     run_MCNP_on_algo(args,"part_inv", 0, int(g_set.p), objFunc)
 
             
@@ -310,51 +319,51 @@ def main():
         
         ######## Levy flight permutation of materials ########
         new_pop=Mat_Levy_Flights(pop, mat_lib, mod_rat, g_set, [eta_params.fissile_mat,'Au'])
-        (ids,particles)=print_MCNP_input_files("Levy flight permutation of materials")
+        (ids,particles)=print_transport_input("Levy flight permutation of materials")
         run_MCNP_on_algo(args,"mat_levy", 0, int(g_set.p*g_set.fl), objFunc)
 
             
         ######## Levy flight permutation of cells ########
         new_pop=Cell_Levy_Flights(pop,eta_params,g_set)      
-        (ids,particles)=print_MCNP_input_files("Levy flight permutation of cells")
+        (ids,particles)=print_transport_input("Levy flight permutation of cells")
         run_MCNP_on_algo(args,"cell_levy", 0, int(g_set.p*g_set.fl), objFunc)
 
             
         ######## Elite_Crossover ########
         new_pop=Elite_Crossover(pop,mod_rat,eta_params,mat_lib,g_set,[eta_params.fissile_mat,'Au'])
-        (ids,particles)=print_MCNP_input_files("Elite Crossover")
+        (ids,particles)=print_transport_input("Elite Crossover")
         run_MCNP_on_algo(args,"elite_cross", 0, 1, objFunc)
                 
                 
         ######## Mutate ########
         new_pop=Mutate(pop, eta_params, g_set)
-        (ids,particles)=print_MCNP_input_files("Mutation Operator")
+        (ids,particles)=print_transport_input("Mutation Operator")
         run_MCNP_on_algo(args,"mutate", 0, int(g_set.p), objFunc)
           
 
         ######## Crossover ########
         new_pop=Crossover(pop,g_set)
-        (ids,particles)=print_MCNP_input_files("Crossover")
+        (ids,particles)=print_transport_input("Crossover")
         run_MCNP_on_algo(args,"crossover", 0, int(g_set.p*g_set.fe), objFunc)
             
             
         ######## 2-opt ########
         if eta_params.max_horiz >= 4:
             new_pop=Two_opt(pop,g_set)
-            (ids,particles)=print_MCNP_input_files("2-opt")
+            (ids,particles)=print_transport_input("2-opt")
             run_MCNP_on_algo(args,"two_opt", 0, int(g_set.p*g_set.fe), objFunc)
             
             
         ######## 3-opt ########
         if eta_params.max_horiz >= 6:
             new_pop=Three_opt(pop,g_set)
-            (ids,particles)=print_MCNP_input_files("3-opt")
+            (ids,particles)=print_transport_input("3-opt")
             run_MCNP_on_algo(args,"three_op", 0, int(g_set.p), objFunc)
             
             
         ######## Discard Cells ########
         new_pop=Discard_Cells(pop,mat_lib,g_set)
-        (ids,particles)=print_MCNP_input_files("Discard Cells")
+        (ids,particles)=print_transport_input("Discard Cells")
         run_MCNP_on_algo(args,"discard", 1, int(g_set.p*g_set.fd), objFunc)
         stats.write()
                     
