@@ -8,7 +8,7 @@
 
 @author James Bevins, Youdong Zhang
 
-@date 22April
+@date 19Apr19
 """
 
 import logging
@@ -65,6 +65,8 @@ class Constraints(object):
         ## @var penalty \e float The penalty to be applied if the constraint
         # is violated
         self.penalty = penalty
+		
+		logger.info('User defined inputs: {}'.format(print(self))
 
     def __repr__(self):
         """!

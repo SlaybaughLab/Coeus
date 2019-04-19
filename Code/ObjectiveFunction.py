@@ -8,7 +8,7 @@
 
 @author James Bevins, Youdong Zhang
 
-@date 22April
+@date 19Apr19
 """
 
 import logging
@@ -81,6 +81,8 @@ class ObjectiveFunction(object):
         ## @var objective  <em> integer, float, or numpy array </em> The
         # desired outcome of the optimization.
         self.objective = objective
+		
+		logger.info('User defined inputs: {}'.format(print(self))
 
     def __repr__(self):
         """!
@@ -128,7 +130,7 @@ class ObjectiveFunction(object):
 # The following sections are user modifiable to all for the use of new
 # objective functions that have not yet been implemented.  The same format must
 # be followed to work with the standard Coeus call. If a function is added.
-# it must also be added to the _FUNC_DICT attribute of the class.
+# it must also be added to the _FUNC_DICT attribute of the class on line 62.
 #-----------------------------------------------------------------------------#
 
     def u_opt(self, c):
@@ -200,6 +202,8 @@ class ObjectiveFunction(object):
         if project == True:
             for i in range(len(c)):
                 if c[i] == 0.0:
+				   	logger.warning('User defined tally contains bins with '
+					                'zero counts')
                     extrapIndex1 = i + 1
                     extrapIndex2 = i + 2
                     if extrapIndex2 < len(c):
