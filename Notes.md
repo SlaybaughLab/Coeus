@@ -7,6 +7,7 @@
 
 * [Update: 2019/03/08](#update-20190308)
 * [Update: 2019/03/22](#update-20190322)
+* [Update: 2019/05/23](#update-20190523)
 
 ***
 
@@ -54,6 +55,25 @@
 
 #### Postponed Goals: 
   - Upgrade objfunt branch to stable version 2.0
+
+***
+[Index](#top)
+
+### Update 2019/05/23 
+
+#### Meeting Notes:
+  
+ 
+#### Goals from last meeting:
+ 
+#### Upcoming goals:
+
+#### Postponed Goals: 
+  - Universe checking function
+  - Remove <> in input variable specification
+  - Add materials library to simplify material input
+  - Add additional math functions
+  - Add combinatorial variables: first material, then cell
 
 ***
 [Index](#top)
