@@ -984,8 +984,8 @@ def Read_MCNP_Output(path, tnum, rnum):
         # Close the file
         f.close()
    	 
-   	 # Test that the file closed
-    	assert f.closed==True, "File ({}) did not close properly.".format(path)    
+   	    # Test that the file closed
+        assert f.closed==True, "File ({}) did not close properly.".format(path)    
 
     except IOError as e:
         module_logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))

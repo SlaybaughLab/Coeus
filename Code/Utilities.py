@@ -5,7 +5,7 @@
 #
 ## Author : James Bevins
 #
-## Last Modified: 17Oct16
+## Last Modified: 27May19
 
 import logging
 module_logger = logging.getLogger('Coeus.Utilities')
@@ -209,7 +209,7 @@ def Run_CmdLine(cmd,cwdir):
     except:
         module_logger.error('Simulation not even started')
     
-    print output     
+    print(output)     
         
   
 ##Runs a multi-threaded transport calculation. Doesn't work for clusters.
@@ -407,11 +407,11 @@ def Run_Transport(lst, qos, account, partition, timeout, nps=[],code='mcnp6'):
     module_logger.info("job ids: {}".format(job_id_list))
     def monitor():
         output = []
-	for jobid in job_id_list:
+        for jobid in job_id_list:
             job = sub.Popen("squeue | grep " + jobid, cwd=path, stdout=sub.PIPE,shell=True).communicate()[0].strip().split()
-	    if job:
-		output.append(job[0])
-	return output
+            if job:
+                output.append(job[0])
+        return output
 
     output=monitor()
     module_logger.info("monitor output={}\n".format(output))
@@ -526,8 +526,6 @@ def to_Norm(spectrum):
 def to_NormDiff(spectrum):
     # Initialize variables
     diff=np.zeros(len(spectrum[:,0]))
-    intdiff=np.zeros(len(spectrum[:,0]))
-    normdiff=np.zeros(len(spectrum[:,0]))
     result=np.zeros(len(spectrum[:,0]))
     
     # Calculate the differential flux

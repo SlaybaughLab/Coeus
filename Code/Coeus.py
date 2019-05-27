@@ -8,26 +8,82 @@ design criteria using user defined contraint and objective functions using the
 Gnowee metaheuristic algorithm.  ADVANTG and MCNP are used to perform the
 radiation transport calculations. 
 
-Coeus is designed to run on a cluster.  Local runs on a PC are not longer
-supported.
+Coeus is designed to run on a cluster with a job submission script.  Local runs
+on a PC are not longer supported.
+
+All inputs are optional.  The program will load run inputs in the following
+order: \n 
+
+    1) User specified path \n 
+    2) Run directory defaults (Note: naming convention for files to be loaded
+       from run directory must follow default naming convention shown in
+       parameters)\n 
+    3) Preset program defaults.  \n 
+
+This order will be followed for each of the settings files so that some may be 
+ommitted if desired. \n 
+
+@param input_path('inp'):str [default = ../Inputs/user_inputs.txt] 
+    The name and path for the user input file location. The format is a space 
+    delimited key word file as specified in the UserInputs class.
+@param eta_constraints_path('eta'):str 
+    [default = ../Inputs/eta_constraints.csv] 
+    The name and path for the file containing the ETA design constraints. The 
+    format is a comma delimited key word input file. All keywords are optional.
+    Non-specified keywords will default to preset program values. 
+@param gnowee_settings_path('gs'):str [default = ../Inputs/gnowee_settings.csv] 
+    The name and path for the file containing the Gnowee search settings. The 
+    format is a comma delimited key word input file. All keywords are optional.  
+    Non-specified keywords will default to preset program values. 
+@param advantg_settings_path('adv'):str 
+    [default = ../Inputs/advantg_settings.csv] 
+    The name and path for the file containing the advantg settings. 
+    The format is a comma delimited key word input file. All keywords are 
+    optional.  Non-specified keywords will default to preset program values. 
+@param mcnp_settings_path('mcnp'):str [default = ../Inputs/mcnp_settings.csv] 
+    The name and path for the file containing the mcnp settings. 
+    The format is a comma delimited key word input file. All keywords are 
+    optional.  Non-specified keywords will default to preset program values.
+@param material_lib_path('mat'):str 
+    [default = ../Inputs/eta_materials_compendium.csv]
+    The name and path for the file containing the materials to be included in 
+    the problem. The format is a comma delimited key word input file.
+@param source_path('src'):str [default = ../Inputs/source.csv]
+    The name and path for the file containing the starting neutron source 
+    distribution. The format is a comma delimited key word input file. All 
+    keywords are optional.  Non-specified keywords will default to preset 
+    program values. \n 
+@param restart('r'):boolean
+    Optional input to indicate the that search process will start with a 
+    preinitialized population.  All members of  the population must have full 
+    initialization inputs to work. 
 
 @author James Bevins
 
-@date 19April19
+@date 27May19
 """
 
 
 import numpy as np
-import copy as cp
 
 from ETA_Utilities import ETA_Parameters
-from Gnowee_Utilities import Gnowee_Settings, Parent, Calc_Fitness, Pop_Update, Timeline
-from Metaheuristics import Mat_Levy_Flights, Cell_Levy_Flights, Elite_Crossover, Partial_Inversion, Two_opt
+
+from Gnowee_Utilities import Gnowee_Settings, Parent, Calc_Fitness, Pop_Update
+from Gnowee_Utilities import Timeline
+
+from Metaheuristics import Mat_Levy_Flights, Cell_Levy_Flights 
+from Metaheuristics import Elite_Crossover, Partial_Inversion, Two_opt
 from Metaheuristics import Crossover, Three_opt, Discard_Cells, Mutate
+
 from ADVANTG_Utilities import ADVANTG_Settings, Print_ADVANTG_Input
-from NuclearData import Build_Matlib, Calc_Moderating_Ratio
-from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input, Read_Tally_Output
-from Utilities import Run_Transport, Event, Meta_Stats
+
+# Delete in near future.  Maybe modify Build_Matlib for mat library
+#from NuclearData import Build_Matlib, Calc_Moderating_Ratio
+
+from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input
+
+from Utilities import Run_Transport, Meta_Stats
+
 from UserInputs import UserInputs
 
 import time
@@ -49,7 +105,7 @@ new parameters.
 @param step: \e string \n
 	The current operator name. \n
 @param radCode: \e string \n
-	Sting indicating the name of the radiation transport code to be used. \n
+	String indicating the name of the radiation transport code to be used. \n
 """
 def print_transport_input(step, radCode='MCNP'):
     global logger, history, start_time, new_pop, eta_params, mat_lib, objFunc
@@ -57,79 +113,80 @@ def print_transport_input(step, radCode='MCNP'):
 	
 	# Loop over updated population and print MCNP input files
     for i in range(0,len(new_pop)):
-		if radCode == "MCNP":
-			Print_MCNP_Input(eta_params, objFunc.objective, new_pop[i].geom,new_pop[i].rset,mat_lib,new_pop[i].ident,adv_print=True)
+        if radCode == "MCNP":
+    	    Print_MCNP_Input(eta_params, objFunc.objective,
+							 new_pop[i].geom,new_pop[i].rset,
+							 mat_lib, new_pop[i].ident, adv_print=True)
+							 
+		# Create inputs to the job scheduler to define run parameters
         idents.append(new_pop[i].ident)
         run_particles.append(new_pop[i].rset.nps)
-        for m in range(9,len(new_pop[i].geom.matls)):
+		
+		# Delete?
+        for m in range(9, len(new_pop[i].geom.matls)):
             if new_pop[i].geom.matls[m]==eta_params.fissile_mat:
+                print("Line 82 Coeus.py")
                 sys.exit()
-    logger.info('Gen {} {} finished at {} sec\n'.format(history.tline[-1].g,step,time.time() - start_time))
+    logger.info('Gen {} {} finished at {} sec\n'.format(history.tline[-1].g,
+	            step, time.time() - start_time))
     return idents, run_particles
 
-## Run MCNP for each algorithm
-# @param args arguments for Run_transport
-# @param algo denotes the algorithm we are on
-# @param update_gen 
-# @param update_feval 
-# @param objFunc
-def run_MCNP_on_algo(args, algo, update_gen, update_feval, objFunc):
-    global stats, logger, history, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set
+"""!
+Runs the transport code for each operator provided a set of population members
+to be evaluated.
+
+@param args: \e object \n
+	User input arguments for the job scheduler needed for run_transport. \n
+@param algo: \e string \n
+	String indicating the name of the algorithm being used. \n
+@param updateGen: \e integer \n
+	Flag used to update the generation number. \n
+@param updateFeval: \e integer \n
+	Flag used to update the number of function evaluation. \n
+@param objFunc: \e string \n
+	The objective function used to calculate the fitness. \n
+@param radCode: \e string \n
+	String indicating the name of the radiation transport code to be used. \n
+"""
+def run_MCNP_on_algo(args, algo, updateGen, updateFeval, objFunc,
+                     radCode='MCNP'):
+    global stats, logger, history, ids, particles, pop, new_pop, eta_params
+    global mat_lib, mcnp_set
+    
     slurmArgs=[args.qos, args.account, args.partition, args.timeout]
+    
     if len(ids)>0:
         Run_Transport(ids, *slurmArgs, nps=particles, code='mcnp6.mpi')
-        logger.info('Finished running MCNP at {} sec\n'.format(time.time() - start_time))
+        logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
+                                                               start_time))
     
         # Calculate Fitness
-        Calc_Fitness(ids, new_pop, objFunc, eta_params.min_fiss, eta_params.max_weight)
-        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, slurmArgs, eta_params, mat_lib, Run_Transport, rr=False) 
-        pop=history.update(pop, update_gen, update_feval)
-        stats.update(algo,(changes, update_feval + feval))
+        Calc_Fitness(ids, new_pop, objFunc, eta_params.min_fiss,
+                     eta_params.max_weight)
+        (changes,feval)=Pop_Update(pop, new_pop, mcnp_set.nps, slurmArgs,
+                                  eta_params, mat_lib, Run_Transport, rr=False) 
+        pop=history.update(pop, updateGen, updateFeval)
+        stats.update(algo,(changes, updateFeval + feval))
     
-
-##     Entry point for the Coeus program. \n 
-
-##     All inputs are optional.  The program will load run inputs in the following order: \n 
-
-##     1) User specified path \n 
-##     2) Run directory defaults (Note: naming convention for files to be loaded from run directory must follow
-##     default naming convention shown in parameters)\n 
-##     3) Preset program defaults.  \n 
-
-##     This order will be followed for each of the settings files so that some may be ommitted if desired. \n 
-
-##     Parameters\n      
-# @param input_path('inp'):str [default = ../Inputs/user_inputs.txt] 
-#     The name and path for the user input file location. The format is a space delimited key word file as specified in the UserInputs class.
-# @param eta_constraints_path('eta'):str [default = ../Inputs/eta_constraints.csv] 
-#     The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input 
-#     file. All keywords are optional.  Non-specified keywords will default to preset program values. 
-# @param gnowee_settings_path('gs'):str [default = ../Inputs/gnowee_settings.csv] 
-#     The name and path for the file containing the Gnowee search settings. The format is a comma delimited key word input file.
-#     All keywords are optional.  Non-specified keywords will default to preset program values. 
-# @param advantg_settings_path('adv'):str [default = ../Inputs/advantg_settings.csv] 
-#     The name and path for the file containing the advantg settings. The format is a comma delimited key word input file.
-#     All keywords are optional.  Non-specified keywords will default to preset program values. 
-# @param mcnp_settings_path('mcnp'):str [default = ../Inputs/mcnp_settings.csv] 
-#     The name and path for the file containing the mcnp settings. The format is a comma delimited key word input file.
-#     All keywords are optional.  Non-specified keywords will default to preset program values.
-# @param material_lib_path('mat'):str [default = ../Inputs/eta_materials_compendium.csv]
-#     The name and path for the file containing the materials to be included in the problem. The format is a comma delimited 
-#     key word input file.
-# @param source_path('src'):str [default = ../Inputs/source.csv]
-#     The name and path for the file containing the starting neutron source distribution. The format is a comma delimited 
-#     key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. \n 
-# @param restart('r'):boolean
-#     Optional input to indicate the that search process will start with a preinitialized population.  All members of 
-#     the population must have full initialization inputs to work. 
+#-----------------------------------------------------------------------------#
 
 def main():
-    global stats, logger, history, start_time, ids, particles, pop, new_pop, eta_params, mat_lib, mcnp_set, objFunc
+    global stats, logger, history, start_time, ids, particles, pop, new_pop
+    global eta_params, mat_lib, mcnp_set, objFunc
+    
     start_time=time.time()     #Start Clock
-    rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),os.pardir))+"/Results/Population/"
+    
+    rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),
+                                        os.pardir))+"/Results/Population/"
         
     # Set logging options
-    if os.path.exists('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):    
+    if os.path.exists('../Results'):
+        print('folder success!')
+    if os.path.isfile('../Results/logfile.log'):
+        print('file success!')
+        
+    if os.path.exists('{}/Results'.format(os.path.abspath(os.path.join(
+                      os.path.abspath(os.getcwd()), os.pardir)))):    
         if os.path.isfile('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):
             os.remove('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
     else:
