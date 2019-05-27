@@ -14,13 +14,11 @@ import logging
 module_logger = logging.getLogger('METACODE.SamplingMethods')
 
 import scipy
-from scipy import special
 from scipy import integrate
 from Utilities import Switch
-from pyDOE import *
+from doe_lhs import lhs
 
 import numpy as np
-import copy as cp
 import math
 import argparse
 import random
@@ -375,7 +373,7 @@ if __name__ == "__main__":
         help="Columns to remove as a list N1 N2 ... Nm")
 
     args = parser.parse_args()
-    module_logger.debug((nolh(conf=args.conf, remove=args.remove)))
+    module_logger.debug((NOLH(conf=args.conf, remove=args.remove)))
 
 #---------------------------------------------------------------------------------------#  
 def Get_CDR_Permutations(dim,debug=False):  
