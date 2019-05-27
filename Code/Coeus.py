@@ -78,7 +78,7 @@ from Metaheuristics import Crossover, Three_opt, Discard_Cells, Mutate
 from ADVANTG_Utilities import ADVANTG_Settings, Print_ADVANTG_Input
 
 # Delete in near future.  Maybe modify Build_Matlib for mat library
-#from NuclearData import Build_Matlib, Calc_Moderating_Ratio
+#from NuclearData import Build_Matlib #, Calc_Moderating_Ratio
 
 from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input
 
@@ -174,89 +174,98 @@ def main():
     global stats, logger, history, start_time, ids, particles, pop, new_pop
     global eta_params, mat_lib, mcnp_set, objFunc
     
-    start_time=time.time()     #Start Clock
+    # Start Clock
+    start_time=time.time()    
     
+    # Set Run directory path    
     rundir=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),
-                                        os.pardir))+"/Results/Population/"
+                                        os.pardir))+'/Results/Population/'
         
     # Set logging options
     if os.path.exists('../Results'):
-        print('folder success!')
-    if os.path.isfile('../Results/logfile.log'):
-        print('file success!')
-        
-    if os.path.exists('{}/Results'.format(os.path.abspath(os.path.join(
-                      os.path.abspath(os.getcwd()), os.pardir)))):    
-        if os.path.isfile('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir)))):
-            os.remove('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+        if os.path.isfile('../Results/logfile.log'):
+            os.remove('../Results/logfile.log')
     else:
-        os.mkdir('{}/Results'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+        os.mkdir('../Results')
     logger = logging.getLogger('Coeus')
-    fh = logging.FileHandler('{}/Results/logfile.log'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh = logging.FileHandler('../Results/logfile.log')
+    formatter = logging.Formatter(
+                       '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     logger.setLevel(logging.INFO)
     logger.info('Started Coeus:\n')
 
     # Create the output folder
-    if os.path.exists('{}/Results/Population'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))==False:    
-        os.mkdir('{}/Results/Population'.format(os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))))
+    if os.path.exists('../Results/Population')==False:    
+        os.mkdir('../Results/Population')
         
     # Set print options to print full numpy arrays
-    np.set_printoptions(threshold='nan')
+    np.set_printoptions(threshold=sys.maxsize)
         
     # Parse the input arguments
     logger.info('Reading inputs and initializing settings:')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--r', nargs='?', default='n', help='Boolean indicator for if an initial population is supplied.  This initial population must be in the form of MCNP input decks in the Coeus standard directories.  Options are y or n.  [default = n]')
-    parser.add_argument('--inp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/user_inputs.txt',help='The name and path for the user inputs file location. The format is a space delimited file with keyword arguments.  For more details, see the UserInputs class.  [default = ../Inputs/user_inputs.txt]')
-    parser.add_argument('--eta', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_constraints.csv',help='The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/eta_constraints.csv]')
-    parser.add_argument('--gs', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/gnowee_settings.csv',help='The name and path for the file containing the Gnowee search settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values.   [default = ../Inputs/gnowee_settings.csv]')
-    parser.add_argument('--adv', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/advantg_settings.csv',help='The name and path for the file containing the advantg settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/advantg_settings.csv]')
-    parser.add_argument('--mcnp', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/mcnp_settings.csv',help='The name and path for the file containing the mcnp settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/mcnp_settings.csv]')
-    parser.add_argument('--mat', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/eta_materials_compendium.csv',help='The name and path for the file containing the materials to be included in the problem. The format is a comma delimited key word input file. [default = ../Inputs/eta_materials_compendium.csv]')
-    parser.add_argument('--src', nargs='?', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/Inputs/source.csv',help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
+    parser.add_argument('--r', nargs='?', default='n',
+                        help='Boolean indicator for if an initial population is supplied.  This initial population must be in the form of MCNP input decks in the Coeus standard directories.  Options are y or n.  [default = n]')
+    parser.add_argument('--inp', nargs='?', 
+                        default='../Inputs/user_inputs.txt',
+                        help='The name and path for the user inputs file location. The format is a space delimited file with keyword arguments.  For more details, see the UserInputs class.  [default = ../Inputs/user_inputs.txt]')
+    parser.add_argument('--eta', nargs='?', 
+                        default='../Inputs/eta_constraints.csv',
+                        help='The name and path for the file containing the ETA design constraints. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/eta_constraints.csv]')
+    parser.add_argument('--gs', nargs='?', 
+                        default='../Inputs/gnowee_settings.csv',
+                        help='The name and path for the file containing the Gnowee search settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values.   [default = ../Inputs/gnowee_settings.csv]')
+    parser.add_argument('--adv', nargs='?', 
+                        default='../Inputs/advantg_settings.csv',
+                        help='The name and path for the file containing the advantg settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/advantg_settings.csv]')
+    parser.add_argument('--mcnp', nargs='?', 
+                        default='../Inputs/mcnp_settings.csv',
+                        help='The name and path for the file containing the mcnp settings. The format is a comma delimited key word input file. All keywords are optional.  Non-specified keywords will default to preset program values. [default = ../Inputs/mcnp_settings.csv]')
+    parser.add_argument('--mat', nargs='?', 
+                        default='../Inputs/eta_materials_compendium.csv',
+                        help='The name and path for the file containing the materials to be included in the problem. The format is a comma delimited key word input file. [default = ../Inputs/eta_materials_compendium.csv]')
+    parser.add_argument('--src', nargs='?', 
+                        default='../Inputs/source.csv',
+                        help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
+    parser.add_argument('--log', nargs='?', default='INFO',
+                        help='Valid levels are "DEBUG", "INFO", "WARNING", "ERROR", and "CRITICAL" in ascending order.')
     parser.add_argument('--qos', nargs='?', default='savio_lowprio')
     parser.add_argument('--account', nargs='?', default='co_nuclear')
     parser.add_argument('--partition', nargs='?', default='savio')
     parser.add_argument('--timeout', nargs='?', default='02:30:00')
 
-
-    args = parser.parse_args()    
+  
 
     # Assign optional inputs to variables:
-    if args.inp:
-        inpPath=args.inp 
-    if args.eta:
-        eta_path=args.eta
-    if args.gs:
-        gs_path=args.gs
-    if args.adv:
-        advantg_path=args.adv
-    if args.mcnp:
-        mcnp_path=args.mcnp
-    if args.mat:
-        materials_library_path=args.mat
-    if args.src:
-        source_path=args.src
+    args = parser.parse_args()  
 
+    # Modify logging level based on user input
+    try:
+        logger.setLevel(args.log.upper())
+        logger.info('\nLogger set to {} level.'.format(
+                                                  logger.getEffectiveLevel()))
+    except:
+        logger.info('\nNo valid logger level specifed. Deault "INFO" used.')
+    
     # Create ETA_Params object
     eta_params=ETA_Parameters()
        
     # Test path for user input file.  Create the object if file exists.
-    if os.path.isfile(inpPath): 
-        logger.info("\nLoading user input file located at: {}".format(inpPath))
-        inputs = UserInputs(coeusInputPath=inpPath)
+    if os.path.isfile(args.inp): 
+        logger.info("\nLoading input file located at: {}".format(args.inp))
+        inputs = UserInputs(coeusInputPath=args.inp)
         objFunc = inputs.read_coeus_settings()
         logger.debug("{}".format(str(objFunc)))
     else:
-        logger.info("\nNo user supplier input file located.  Program default values to be used instead.")
+        logger.info("\nNo user supplier input file located.  Program default \
+                    values to be used instead.")
         
     # Test path for constraint file. Call read_constraint if file exists
-    if os.path.isfile(eta_path): 
-        logger.info("\nLoading ETA constraints file located at: {}".format(eta_path))
-        ETA_Parameters.read_constraints(eta_params,eta_path)
+    if os.path.isfile(args.eta): 
+        logger.info("\nLoading ETA constraints file located at: {}".format(args.eta))
+        ETA_Parameters.read_constraints(eta_params,args.eta)
     else:
         logger.info("\nNo user supplier ETA constraints file located.  Program default values to be used instead.")
         
@@ -265,9 +274,9 @@ def main():
     g_set=Gnowee_Settings()
         
     # Test path for Gnowee settings file. Call read_settings if file exists
-    if os.path.isfile(gs_path): 
-        logger.info("\nLoading Gnowee settings file located at: {}".format(gs_path))
-        Gnowee_Settings.read_settings(g_set,gs_path)
+    if os.path.isfile(args.gs): 
+        logger.info("\nLoading Gnowee settings file located at: {}".format(args.gs))
+        Gnowee_Settings.read_settings(g_set,args.gs)
     else:
         logger.info("\nNo user supplier Gnowee Search settings file located.  Program default values to be used instead.")
         
@@ -275,9 +284,9 @@ def main():
     advantg_set=ADVANTG_Settings()
        
     # Test path for ADVANTG settings file. Call read_settings if file exists
-    if os.path.isfile(advantg_path): 
-        logger.info("\nLoading ADVANTG settings file located at: {}".format(advantg_path))
-        ADVANTG_Settings.read_settings(advantg_set, advantg_path)
+    if os.path.isfile(args.adv): 
+        logger.info("\nLoading ADVANTG settings file located at: {}".format(args.adv))
+        ADVANTG_Settings.read_settings(advantg_set, args.adv)
     else:
         logger.info("\nNo user supplier ADVANTG settings file located.  Program default values to be used instead.")
 
@@ -286,21 +295,21 @@ def main():
     mcnp_set=MCNP_Settings(eta_params)
      
     # Test path for MCNP settings file. Call read_settings if file exists
-    if os.path.isfile(mcnp_path): 
-        logger.info("\nLoading MCNP settings file located at: {}".format(mcnp_path))
-        MCNP_Settings.read_settings(mcnp_set, mcnp_path)
+    if os.path.isfile(args.mcnp): 
+        logger.info("\nLoading MCNP settings file located at: {}".format(args.mcnp))
+        MCNP_Settings.read_settings(mcnp_set, args.mcnp)
     else:
         logger.info("\nNo user supplier MCNP settings file located.  Program default values to be used instead.")
         
     # Test path for source file. Call read_source if file exists
-    if os.path.isfile(source_path): 
-        logger.info("\nLoading source file located at: {}\n".format(source_path))
-        MCNP_Settings.read_source(mcnp_set, source_path)
+    if os.path.isfile(args.src): 
+        logger.info("\nLoading source file located at: {}\n".format(args.src))
+        MCNP_Settings.read_source(mcnp_set, args.src)
     else:
         logger.info("\nNo user supplier source file located.  Program default values to be used instead.\n")       
         
     # Build Materials Library
-    mat_lib=Build_Matlib(materials_library_path)
+#    mat_lib=Build_Matlib(args.mat)
         
     # Initialize the population
     pop=[]

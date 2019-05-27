@@ -13,7 +13,6 @@
 import logging
 module_logger = logging.getLogger('Coeus.MCNP_Utilities')
 
-import bisect
 import sys
 import os
 
@@ -21,7 +20,6 @@ import Utilities as util
 import numpy as np
 import copy as cp
 
-from math import ceil
 from math import sin, cos, tan, atan, radians
 
 class MCNP_Settings:
@@ -102,7 +100,7 @@ class MCNP_Settings:
             module_logger.error("File not found was: {0}".format(filename))  
        
         # Test that the file closed
-        assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
+        assert self.f.closed==True, "File ({}) did not close properly.".format(filename)
         
     ## Parses an source input csv file. 
     #    The first column contains the upper energy bin boundaries. 
@@ -126,7 +124,7 @@ class MCNP_Settings:
             module_logger.error("File not found was: {0}".format(filename))  
        
         # Test that the file closed
-        assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
+        assert self.f.closed==True, "File ({}) did not close properly.".format(filename)
     
     ## Sets the standard tallies to be used. 
     # @param cell int the cell for volume tallies

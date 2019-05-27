@@ -62,7 +62,7 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 
 @author James Bevins
 
-@date 23April
+@date 23April19
 """
 
 import logging
@@ -150,7 +150,8 @@ class UserInputs(object):
             for line in f:
                 if line.strip().lower() == \
                    'OBJECTIVE FUNCTION PARAMETERS'.lower():
-                    line = f.next().strip().lower()
+                    print(line)
+                    line = f.readline().strip().lower()
                     while line not in sectionHeaders:
                         splitList = line.split()
                         for case in Switch(splitList[0].strip().lower()):
@@ -194,5 +195,7 @@ class UserInputs(object):
 
         # Test that the file closed
         assert f.closed == True, "File did not close properly."
+        
+        module_logger.info('The Objective Function: {}'.format(print(objSet)))
 
         return objSet

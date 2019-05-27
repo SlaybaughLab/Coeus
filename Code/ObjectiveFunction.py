@@ -81,8 +81,6 @@ class ObjectiveFunction(object):
         ## @var objective  <em> integer, float, or numpy array </em> The
         # desired outcome of the optimization.
         self.objective = objective
-		
-		logger.info('User defined inputs: {}'.format(print(self))
 
     def __repr__(self):
         """!
@@ -202,8 +200,8 @@ class ObjectiveFunction(object):
         if project == True:
             for i in range(len(c)):
                 if c[i] == 0.0:
-				   	logger.warning('User defined tally contains bins with '
-					                'zero counts')
+                    module_logger.warning('User defined tally contains bins '
+					                'with zero counts')
                     extrapIndex1 = i + 1
                     extrapIndex2 = i + 2
                     if extrapIndex2 < len(c):
