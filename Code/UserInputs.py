@@ -150,10 +150,15 @@ class UserInputs(object):
             for line in f:
                 if line.strip().lower() == \
                    'OBJECTIVE FUNCTION PARAMETERS'.lower():
-                    print(line)
                     line = f.readline().strip().lower()
                     while line not in sectionHeaders:
-                        splitList = line.split()
+                        # Stop at end of file
+                        try:
+                            splitList = line.split()
+                            splitList[0]
+                        except IndexError:
+                            break
+                        
                         for case in Switch(splitList[0].strip().lower()):
                             if case('function'.lower()):
                                 objSet.set_obj_func(splitList[1].strip())
@@ -169,18 +174,20 @@ class UserInputs(object):
                                 objSet.objForm = int(splitList[2].strip())
                                 tmp = []
                                 while len(tmp) < num:
-                                    splitList = f.next().strip().split()
+                                    splitList = f.readline().strip().split()
                                     for i in range(0, len(splitList), 2):
                                         tmp.append([float(splitList[i].strip()),
-                                                 float(splitList[i+1].strip())])
+                                                float(splitList[i+1].strip())])
                                 objSet.objective = np.asarray(tmp)
                                 break
                             if case():
                                 module_logger.warning("Unkown user input "
                                 "found: {} ".format(splitList[0].strip()))
                                 break
+                        
+                        # Stop at end of file
                         try:
-                            line = f.next().strip().lower()
+                            line = f.readline().strip().lower() 
                         except StopIteration:
                             break
                 else:

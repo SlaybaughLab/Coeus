@@ -70,25 +70,32 @@ class MCNP_Settings:
             # Read the file line by line and store the values in the ETA_Params object
             for line in self.f:
                 if phys==True:
+                    print("True Phys")
                     if line.strip().lower()=='/':
                         phys=False
                     else:
                         self.phys=self.phys+line.strip()+'\n'
-                if nps==True:
+                elif nps==True:
+                    print("True nps")
                     if line.strip().lower()=='/':
                         nps=False
                     else:
                         self.nps=float(line.strip())
                 else:
+                    splitList = line.split()
+                    print(splitList)
                     for case in util.Switch(line.strip().lower()):
                         if case('Physics:'.lower()): 
+                            print('phys')
                             phys=True
                             self.phys=""
                             break
                         if case('NPS:'.lower()): 
+                            print('nps')
                             nps=True
                             break
                         if case(''): 
+                            print('blank')
                             phys=False
                             nps=False
                             break
@@ -740,9 +747,9 @@ class MCNP_Cell:
 #        and tally information.
 # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes. 
 # @param num int The current parent number being generated
-# @param adv_print boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
+# @param advPrint boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
 #        ADVANTG outputs. 
-def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,adv_print=True):     
+def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,advPrint=True):     
     path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))+"/Results/Population/{}".format(num)
     # Delete previous input file if present
     if os.path.exists(path):
@@ -815,7 +822,7 @@ def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,adv_print=True):
             
             # If ADVANTG files exist, read and print ADVANTG edits
             if os.path.exists(path+"/inp_edits.txt") \
-               and os.path.exists(path+"/wwinp") and adv_print==True:
+               and os.path.exists(path+"/wwinp") and advPrint==True:
                 adv=''
                 try:
                     with open(path+"/inp_edits.txt", "r") as f:
@@ -839,8 +846,8 @@ def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,adv_print=True):
                 inp_file.write("{}".format(adv))
                 
             # If only one exists, output an error    
-            elif adv_print==True and (os.path.exists("inp_edits.txt") and os.path.exists("wwinp")==False) or \
-                 adv_print==True and (os.path.exists("inp_edits.txt")==False and os.path.exists("wwinp")):
+            elif advPrint==True and (os.path.exists("inp_edits.txt") and os.path.exists("wwinp")==False) or \
+                 advPrint==True and (os.path.exists("inp_edits.txt")==False and os.path.exists("wwinp")):
                 module_logger.error("ADVANTG input edits exist, but there is no corresponding wwinp file.")
                 sys.exit
                 
