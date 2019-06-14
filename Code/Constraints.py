@@ -8,13 +8,14 @@
 
 @author James Bevins, Youdong Zhang
 
-@date 19Apr19
+@date 14Jun19
 """
 
 import logging
-module_logger = logging.getLogger('Coeus.Constraints')
 
 from math import ceil
+
+module_logger = logging.getLogger('Coeus.Constraints')
 
 #-----------------------------------------------------------------------------#
 class Constraints(object):
@@ -54,7 +55,7 @@ class Constraints(object):
         ## @var func <em> function handle </em> The function handle for
         # the constraint function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        if method != None:
+        if method is not None:
             self.func = self.set_constraint_func(method)
         else:
             self.func = method
@@ -65,8 +66,8 @@ class Constraints(object):
         ## @var penalty \e float The penalty to be applied if the constraint
         # is violated
         self.penalty = penalty
-		
-		logger.info('User defined inputs: {}'.format(print(self))
+
+        module_logger.info('User defined inputs: {}'.format(print(self)))
 
     def __repr__(self):
         """!
@@ -143,8 +144,8 @@ class Constraints(object):
 
         if candidate <= self.constraint:
             return 0
-        else:
-            return self.get_penalty(candidate-self.constraint)
+
+        return self.get_penalty(candidate-self.constraint)
 
     def greater_than(self, candidate):
         """!
@@ -160,5 +161,5 @@ class Constraints(object):
 
         if candidate > self.constraint:
             return 0
-        else:
-            return self.get_penalty(self.constraint - candidate)
+
+        return self.get_penalty(self.constraint - candidate)
