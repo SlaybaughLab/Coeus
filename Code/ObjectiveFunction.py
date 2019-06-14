@@ -12,9 +12,10 @@
 """
 
 import logging
-module_logger = logging.getLogger('Coeus.ObjectiveFunction')
 
 import numpy as np
+
+module_logger = logging.getLogger('Coeus.ObjectiveFunction')
 
 #-----------------------------------------------------------------------------#
 class ObjectiveFunction(object):
@@ -66,7 +67,7 @@ class ObjectiveFunction(object):
         ## @var func <em> function handle </em> The function handle for
         # the objective function to be used for the optimization.  The
         # function must be specified as a method of the class.
-        if method != None:
+        if method is not None:
             self.set_obj_func(method)
         else:
             self.func = method
@@ -197,7 +198,7 @@ class ObjectiveFunction(object):
 
         # For bins with no tally results, project the fitness using simple
         # linear extrapolation
-        if project == True:
+        if project:
             for i in range(len(c)):
                 if c[i] == 0.0:
                     module_logger.warning('User defined tally contains bins '
