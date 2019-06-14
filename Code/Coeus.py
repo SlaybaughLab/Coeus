@@ -28,6 +28,12 @@ ommitted if desired. \n
 @date 27May19
 """
 
+import time
+import shutil
+import logging
+import os
+import sys
+import argparse
 
 import numpy as np
 
@@ -51,29 +57,32 @@ from Utilities import Run_Transport, Meta_Stats
 
 from UserInputs import UserInputs
 
-import time
-import shutil
-import logging
-import os
-import sys
-
-import argparse
-
+#-----------------------------------------------------------------------------#
+# Global variables initial definition
+stats = Meta_Stats()
+logger = logging.getLogger('Coeus')
+history = Timeline()
+startTime = time.time()
+ids, particles, pop, newPop = [], [], [], []
+etaParams = ETA_Parameters()
+mcnpSet = MCNP_Settings()
+matLib = Build_Matlib()
 
 #-----------------------------------------------------------------------------#
 # Local Function definitions
+def _print_transport_input(step, objFunc, radCode='MCNP'):
+    """!
+    Prints the radiation transport input files given a set of Gnowee generated
+    new parameters.
 
-"""!
-Prints the radiation transport input files given a set of Gnowee generated
-new parameters.
-
-@param step: \e string \n
-	The current operator name. \n
-@param radCode: \e string \n
-	String indicating the name of the radiation transport code to be used. \n
-"""
-def print_transport_input(step, radCode='MCNP'):
-    global logger, history, startTime, newPop, etaParams, matLib, objFunc
+    @param step: \e string \n
+    	The current operator name. \n
+    @param objFunc: \e object \n
+    	An ObjectiveFunction object used to calculate the fitness. \n
+    @param radCode: \e string \n
+    	Indicates the name of the radiation transport code to be used. \n
+    """
+    global logger, history, startTime, newPop, etaParams, newPop, matib
     idents, runParticles = [], []
 
 	# Loop over updated population and print MCNP input files
@@ -91,32 +100,34 @@ def print_transport_input(step, radCode='MCNP'):
 	            step, time.time() - startTime))
     return idents, runParticles
 
-"""!
-Runs the transport code for each operator provided a set of population members
-to be evaluated.
-
-@param args: \e object \n
-	User input arguments for the job scheduler needed for run_transport. \n
-@param algo: \e string \n
-	String indicating the name of the algorithm being used. \n
-@param updateGen: \e integer \n
-	Flag used to update the generation number. \n
-@param updateFeval: \e integer \n
-	Flag used to update the number of function evaluation. \n
-@param objFunc: \e string \n
-	The objective function used to calculate the fitness. \n
-@param radCode: \e string \n
-	String indicating the name of the radiation transport code to be used. \n
-"""
-def run_MCNP_on_algo(args, algo, updateGen, updateFeval, objFunc,
+def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
                      radCode='MCNP'):
-    global stats, logger, history, ids, particles, pop, newPop, etaParams
-    global matLib, mcnpSet
+    """!
+    Runs the transport code for each operator provided a set of population
+    members to be evaluated.
+
+    @param args: \e object \n
+    	User input arguments for the job scheduler needed for run_transport. \n
+    @param algo: \e string \n
+    	String indicating the name of the algorithm being used. \n
+    @param updateGen: \e integer \n
+    	Flag used to update the generation number. \n
+    @param updateFeval: \e integer \n
+    	Flag used to update the number of function evaluation. \n
+    @param objFunc: \e object \n
+    	An ObjectiveFunction object used to calculate the fitness. \n
+    @param radCode: \e string \n
+    	String indicating the name of the radiation transport code to be used.
+        \n
+    """
+    global stats, history, logger, ids, particles, pop, newPop, etaParams
+    global mcnpSet, matib
 
     slurmArgs = [args.qos, args.account, args.partition, args.timeout]
 
-    if len(ids) > 0:
-        Run_Transport(ids, *slurmArgs, nps=particles, code='mcnp6.mpi')
+    if not ids:
+        if radCode == "MCNP":
+            Run_Transport(ids, *slurmArgs, nps=particles, code='mcnp6.mpi')
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                                startTime))
 
@@ -130,11 +141,13 @@ def run_MCNP_on_algo(args, algo, updateGen, updateFeval, objFunc,
 
 #-----------------------------------------------------------------------------#
 def main():
-    global stats, logger, history, startTime, ids, particles, pop, newPop
-    global etaParams, matLib, mcnpSet, objFunc
+    """!
+    Runs the Coeus optimization algorithm.
 
-    # Start Clock
-    startTime = time.time()
+    Need to add robust description.
+    """
+    global stats, logger, history, startTime, ids, particles, pop, newPop
+    global etaParams, mcnpSet, matib
 
     # Set Run directory path
     rundir = os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),
@@ -146,7 +159,6 @@ def main():
             os.remove('../Results/logfile.log')
     else:
         os.mkdir('../Results')
-    logger = logging.getLogger('Coeus')
     fh = logging.FileHandler('../Results/logfile.log')
     formatter = logging.Formatter(
                        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -156,9 +168,9 @@ def main():
     logger.info('Started Coeus:\n')
 
     # Create the output folder
-    if os.path.exists('../Results/Population') == False:
+    if not os.path.exists('../Results/Population'):
         os.mkdir('../Results/Population')
-    
+
     # Set print options to print full numpy arrays
     np.set_printoptions(threshold=sys.maxsize)
 
@@ -191,11 +203,14 @@ def main():
     parser.add_argument('--log', nargs='?', default='INFO',
                         help='Valid levels are "DEBUG", "INFO", "WARNING", "ERROR", and "CRITICAL" in ascending order.')
     parser.add_argument('--qos', nargs='?', default='savio_lowprio',
-                        help='The Quality of Service (QOS) for a specified account.')
+                        help='The Quality of Service (QOS) for a specified \
+                             account.')
     parser.add_argument('--account', nargs='?', default='co_nuclear',
-                        help='Job submission account for all of the slave jobs.')
+                        help='Job submission account for all of the slave \
+                        jobs.')
     parser.add_argument('--partition', nargs='?', default='savio',
-                        help='Job submission partition for all of the slave jobs.')
+                        help='Job submission partition for all of the slave \
+                        jobs.')
     parser.add_argument('--timeout', nargs='?', default='02:30:00',
                         help='Job timout for all of the slave jobs.')
 
@@ -207,18 +222,14 @@ def main():
         logger.setLevel(args.log.upper())
         logger.info('\nLogger set to {} level.'.format(
                                                   logger.getEffectiveLevel()))
-    except:
+    except ValueError:
         logger.info('\nNo valid logger level specifed. Deault "INFO" used.')
-
-    # Create etaParams object
-    etaParams = ETA_Parameters()
 
     # Test path for user input file.  Create the object if file exists.
     if os.path.isfile(args.inp):
         logger.info("\nLoading input file located at: {}".format(args.inp))
         inputs = UserInputs(coeusInputPath=args.inp)
         objFunc = inputs.read_coeus_settings()
-        logger.debug("{}".format(str(objFunc)))
     else:
         logger.info("\nNo user supplier input file located.  Program default \
                     values to be used instead.")
@@ -278,10 +289,8 @@ def main():
                                  Program default values to be used instead.\n")
 
     # Build Materials Library
-    matLib = Build_Matlib(args.mat)
+#    matLib = Build_Matlib(args.mat)
 
-    # Initialize the population
-    pop = []
     # Create baseline ETA geometry based on ETA constraints
     baseEta = MCNP_Geometry()
     baseEta.init_geom(etaParams, matLib)
@@ -302,11 +311,9 @@ def main():
                 '.format(time.time() - startTime))
 
     # Print initial MCNP input Files
-    ids = []
-    particles = []
     for i in range(0, gSet.p):
         Print_MCNP_Input(etaParams, objFunc.objective, pop[i].geom,
-                         pop[i].rset, matLib, i, adv_print=False)
+                         pop[i].rset, matLib, i, advPrint=False)
         ids.append(i)
         if args.r == 'y':
             particles.append(pop[i].rset.nps)
@@ -329,7 +336,7 @@ def main():
     # Run MCNP
     for i in ids:
         Print_MCNP_Input(etaParams, objFunc.objective, pop[i].geom,
-                         pop[i].rset, matLib, i, adv_print=True)
+                         pop[i].rset, matLib, i, advPrint=True)
     Run_Transport(ids, args.qos, args.account, args.partition, args.timeout,
                   nps=particles, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
@@ -344,26 +351,24 @@ def main():
                         rundir+str(c.ident)+'/ETA.out')
 
     # Create and store first event in timeline and Meta_Stats
-    stats = Meta_Stats()
     stats.write(header=True)
-    history = Timeline()
     pop = history.update(pop, 1, gSet.p)
     logger.info('Calculated fitness, saved files, and added to timeline at {} \
                 sec\n'.format(time.time() - startTime))
 
     #! Modify to remove PyNE dependence
     # Calculate Moderating ratios
-    mod_rat = Calc_Moderating_Ratio(matLib)
+#    modRat = Calc_Moderating_Ratio(matLib)
 
     ######## Partial Inversion ########
-    newPop = Partial_Inversion(pop, mod_rat, matLib, gSet)
-    (ids, particles) = print_transport_input('Partial Inversion')
-    run_MCNP_on_algo(args, "part_inv", 0, int(gSet.p), objFunc)
+#    newPop = Partial_Inversion(pop, mod_rat, matLib, gSet)
+    (ids, particles) = _print_transport_input('Partial Inversion', objFunc)
+    _run_transport_on_algo(args, "part_inv", 0, int(gSet.p), objFunc)
 
     # Iterate until termination criterion met
     converge = False
     while history.tline[-1].g <= gSet.gm and history.tline[-1].e <= gSet.em \
-          and converge == False:
+          and not converge:
 
         logger.info('Generation {} with {} function evaluations completed \
                     started at {} sec\n'.format(history.tline[-1].g,
@@ -371,51 +376,54 @@ def main():
                                                 time.time() - startTime))
 
         ######## Levy flight permutation of materials ########
-        newPop = Mat_Levy_Flights(pop, matLib, mod_rat, gSet,
+        newPop = Mat_Levy_Flights(pop, matLib, modRat, gSet,
                                  [etaParams.fissile_mat, 'Au'])
-        (ids, particles) = print_transport_input("Levy flight permutation of \
-                                              materials")
-        run_MCNP_on_algo(args, "mat_levy", 0, int(gSet.p*gSet.fl), objFunc)
+        (ids, particles) = _print_transport_input("Levy flight permutation of \
+                                              materials", objFunc)
+        _run_transport_on_algo(args, "mat_levy", 0, int(gSet.p*gSet.fl),
+                               objFunc)
 
         ######## Levy flight permutation of cells ########
         newPop = Cell_Levy_Flights(pop, etaParams, gSet)
-        (ids, particles) = print_transport_input("Levy flight permutation of \
-                                              cells")
-        run_MCNP_on_algo(args, "cell_levy", 0, int(gSet.p*gSet.fl), objFunc)
+        (ids, particles) = _print_transport_input("Levy flight permutation of \
+                                              cells", objFunc)
+        _run_transport_on_algo(args, "cell_levy", 0, int(gSet.p*gSet.fl),
+                               objFunc)
 
         ######## Elite_Crossover ########
-        newPop = Elite_Crossover(pop, mod_rat, etaParams, matLib, gSet,
+        newPop = Elite_Crossover(pop, modRat, etaParams, matLib, gSet,
                                 [etaParams.fissile_mat, 'Au'])
-        (ids, particles) = print_transport_input("Elite Crossover")
-        run_MCNP_on_algo(args, "elite_cross", 0, 1, objFunc)
+        (ids, particles) = _print_transport_input("Elite Crossover", objFunc)
+        _run_transport_on_algo(args, "elite_cross", 0, 1, objFunc)
 
         ######## Mutate ########
         newPop = Mutate(pop, etaParams, gSet)
-        (ids, particles) = print_transport_input("Mutation Operator")
-        run_MCNP_on_algo(args, "mutate", 0, int(gSet.p), objFunc)
+        (ids, particles) = _print_transport_input("Mutation Operator", objFunc)
+        _run_transport_on_algo(args, "mutate", 0, int(gSet.p), objFunc)
 
         ######## Crossover ########
         newPop = Crossover(pop, gSet)
-        (ids, particles) = print_transport_input("Crossover")
-        run_MCNP_on_algo(args, "crossover", 0, int(gSet.p*gSet.fe), objFunc)
+        (ids, particles) = _print_transport_input("Crossover", objFunc)
+        _run_transport_on_algo(args, "crossover", 0, int(gSet.p*gSet.fe),
+                               objFunc)
 
         ######## 2-opt ########
         if etaParams.max_horiz >= 4:
             newPop = Two_opt(pop, gSet)
-            (ids, particles) = print_transport_input("2-opt")
-            run_MCNP_on_algo(args, "two_opt", 0, int(gSet.p*gSet.fe),
+            (ids, particles) = _print_transport_input("2-opt", objFunc)
+            _run_transport_on_algo(args, "two_opt", 0, int(gSet.p*gSet.fe),
                              objFunc)
 
         ######## 3-opt ########
         if etaParams.max_horiz >= 6:
             newPop = Three_opt(pop, gSet)
-            (ids, particles) = print_transport_input("3-opt")
-            run_MCNP_on_algo(args, "three_op", 0, int(gSet.p), objFunc)
+            (ids, particles) = _print_transport_input("3-opt", objFunc)
+            _run_transport_on_algo(args, "three_op", 0, int(gSet.p), objFunc)
 
         ######## Discard Cells ########
         newPop = Discard_Cells(pop, matLib, gSet)
-        (ids, particles) = print_transport_input("Discard Cells")
-        run_MCNP_on_algo(args, "discard", 1, int(gSet.p*gSet.fd), objFunc)
+        (ids, particles) = _print_transport_input("Discard Cells", objFunc)
+        _run_transport_on_algo(args, "discard", 1, int(gSet.p*gSet.fd), objFunc)
         stats.write()
 
         ######## Test Convergence ########
@@ -423,8 +431,10 @@ def main():
         if history.tline[-1].g > gSet.sl:
             if history.tline[-1].g > history.tline[-2].g+gSet.sl:
                 converge = True
-                logger.info("Generational Stall {}".format(str(history.tline[-1])))
-            elif (history.tline[-2].f-history.tline[-1].f)/history.tline[-2].f < gSet.ct:
+                logger.info("Generational Stall {}".format(
+                                                       str(history.tline[-1])))
+            elif (history.tline[-2].f-history.tline[-1].f)/ \
+                 history.tline[-2].f < gSet.ct:
                 if history.tline[-1].g > history.tline[-2].g+gSet.sl:
                     converge = True
                     logger.info("Generational Convergence")
@@ -440,7 +450,7 @@ def main():
         for i in range(0, gSet.p):
             Print_MCNP_Input(etaParams, objFunc.objective,
                              pop[i].geom, pop[i].rset, matLib, i,
-                             adv_print=False)
+                             advPrint=False)
             ids.append(i)
 
         # Print ADVANTG input Files

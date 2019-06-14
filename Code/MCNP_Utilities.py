@@ -70,32 +70,26 @@ class MCNP_Settings:
             # Read the file line by line and store the values in the ETA_Params object
             for line in self.f:
                 if phys==True:
-                    print("True Phys")
                     if line.strip().lower()=='/':
                         phys=False
                     else:
                         self.phys=self.phys+line.strip()+'\n'
                 elif nps==True:
-                    print("True nps")
                     if line.strip().lower()=='/':
                         nps=False
                     else:
                         self.nps=float(line.strip())
                 else:
                     splitList = line.split()
-                    print(splitList)
                     for case in util.Switch(line.strip().lower()):
                         if case('Physics:'.lower()): 
-                            print('phys')
                             phys=True
                             self.phys=""
                             break
                         if case('NPS:'.lower()): 
-                            print('nps')
                             nps=True
                             break
                         if case(''): 
-                            print('blank')
                             phys=False
                             nps=False
                             break
