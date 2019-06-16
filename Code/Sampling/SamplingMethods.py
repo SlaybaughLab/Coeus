@@ -1,295 +1,279 @@
-#######################################################################################################
-#
-# Module : SamplingMethods.py
-#
-# Contains : Different methods to perform phase space sampling and random walks and visualization tools
-#
-# Author : James Bevins
-#
-# Last Modified: 29Apr16
-#
-#######################################################################################################
+"""!
+@file SamplingMethods.py
+@package Coeus
+
+@defgroup SamplingMethods SamplingMethods
+
+@brief Different methods to perform phase space sampling and random walks and
+visualization tools.
+
+@author James Bevins
+
+@date 16June19
+"""
 
 import logging
-module_logger = logging.getLogger('METACODE.SamplingMethods')
+import math
+import argparse
+import random
+
+import numpy as np
 
 import scipy
 from scipy import integrate
 from Utilities import Switch
-from doe_lhs import lhs
+from DOE import lhs
 
-import numpy as np
-import math
-import argparse
-import random
-#---------------------------------------------------------------------------------------#
-def Initial_Samples(lb,ub,method,n=25,debug=False):  
+module_logger = logging.getLogger('METACODE.SamplingMethods')
+
+#-----------------------------------------------------------------------------#
+def Initial_Samples(lb, ub, method, n=25):
+    """!
+    Generate a set of samples in a given phase space.
+
+    @param lb: \e array \n
+        The lower bounds of the design variable(s). \n
+    @param ub: \e array \n
+        The upper bounds of the design variable(s). \n
+    @param method: \e string \n
+        String representing the chosen sampling method. \n
+    @param n: \e integer \n
+        The number of samples to be generated.  Ignored for nolh algorithms.
+        (Default=25). \n
+
+    @return \e array: The list of coordinates for the sampled phase space. \n
     """
-    Generate a set of samples in a given phase space
-   
-    Parameters
-    ==========
-    lb : array
-        The lower bounds of the design variable(s)
-    ub : array
-        The upper bounds of the design variable(s)
-    method : string    
-        String representing the chosen sampling method
-   
-    Optional
-    ========   
-    n : int
-        The number of samples to be generated.  Ignored for nolh algorithms. (Default=25)
-    debug : boolean
-        If True, progress statements will be displayed every iteration
-        (Default: False)
-   
-    Returns
-    =======
-    s : array
-        The list of coordinates for the sampled phase space
-    """  
-    
-    assert len(ub)==len(lb), 'Boundaries best have different # of design variables in Initial_Samples function.'
+
+    assert len(ub) == len(lb), 'Boundaries best have different # of design \
+                                variables in Initial_Samples function.'
     if method != "random":
-        assert len(ub)>=2 and len(ub)<=29, 'The Phase space dimensions are outside of the bounds for Initial_Samples.'
-    assert method=='random' or method=='nolh' or method=='nolh-rp' or method=='nolh-cdr' or method=='lhc', \
-           'An invalid method was specified for the initial sampling.'
-    
+        assert len(ub) >= 2 and len(ub) <= 29, 'The Phase space dimensions \
+                                    are outside of the bounds for \
+                                    Initial_Samples.'
+    assert method in ['random', 'nolh', 'nolh-rp', 'nolh-cdr', 'lhc'], \
+                    'An invalid method was specified for the initial sampling.'
+
     for case in Switch(method):
-        if case('random'): 
-            s=np.zeros((n,len(lb)))
-            for i in range(0,n,1):
-                s[i,:]=(lb+(ub-lb)*np.random.rand(len(lb)))  
+        # Random draw from uniform distribution
+        if case('random'):
+            s = np.zeros((n, len(lb)))
+            for i in range(0, n, 1):
+                s[i, :] = (lb+(ub-lb)*np.random.rand(len(lb)))
             break
-        # Standard nearly-orthoganal latin hypercube call   
+
+        # Standard nearly-orthoganal latin hypercube (LHC) call
         if case('nolh'):
             dim = len(ub)
             m, q, r = params(dim)
             conf = range(q)
-            if r!=0:
+            if r != 0:
                 remove = range(dim - r, dim)
                 nolh = NOLH(conf, remove)
             else:
                 nolh = NOLH(conf)
-            s=np.array([list(lb+(ub-lb)*nolh[i,:]) for i in range(len(nolh[:,0]))])
-            break           
-        # Nearly-orthoganal latin hypercube call with random permutation for removed colummns  
+            s = np.array([list(lb+(ub-lb)*nolh[i, :]) for i in range(
+                len(nolh[:, 0]))])
+            break
+
+        # Nearly-orthoganal LHC with random permutation for removed colummns
         if case('nolh-rp'):
             dim = len(ub)
             m, q, r = params(dim)
             conf = random.sample(range(q), q)
-            if r!=0:
+            if r != 0:
                 remove = random.sample(range(q-1), r)
                 nolh = NOLH(conf, remove)
             else:
                 nolh = NOLH(conf)
-            s=np.array([list(lb+(ub-lb)*nolh[i,:]) for i in range(len(nolh[:,0]))])
-            break          
-        # Nearly-orthoganal latin hypercube call with Cioppa and De Rainville permutations 
+            s = np.array([list(lb+(ub-lb)*nolh[i, :]) for i in range(len(
+                nolh[:, 0]))])
+            break
+
+        # Nearly-orthoganal LHC with Cioppa and De Rainville permutations
         if case('nolh-cdr'):
             dim = len(ub)
             m, q, r = params(dim)
-            (conf,remove)=Get_CDR_Permutations(len(ub))
-            if remove!=[]:
+            (conf, remove) = Get_CDR_Permutations(len(ub))
+            if remove != []:
                 nolh = NOLH(conf, remove)
             else:
                 nolh = NOLH(conf)
-            s=np.array([list(lb+(ub-lb)*nolh[i,:]) for i in range(len(nolh[:,0]))])
+            s = np.array([list(lb+(ub-lb)*nolh[i, :]) for i in range(len(
+                nolh[:, 0]))])
             break
-        # Latin hypercube sampling 
+
+        # Latin hypercube sampling
         if case('lhc'):
-            tmp=lhs(len(lb),samples=n,criterion="center") #Other valid criterion are 'corr','center','maximum','centermaximum'
-            s=np.array([list(lb+(ub-lb)*tmp[i,:]) for i in range(len(tmp[:,0]))])
+             #Alt valid criterion are 'corr','center','maximum','centermaximum'
+            tmp = lhs(len(lb), samples=n, criterion="center")
+            s = np.array([list(lb+(ub-lb)*tmp[i, :]) for i in range(len(
+                tmp[:, 0]))])
             break
-        if case(): 
-            module_logger.warning("Somehow you evaded my assert statement - good job!  However, you still need to use a valid method string.")
-        
-        module_logger.debug('Initial Samples: {}'.format(s)) 
+
+        # Catch all
+        if case():
+            module_logger.warning("Somehow you evaded my assert statement - \
+                                  good job!  However, you still need to use a \
+                                  valid method string.")
+
+        module_logger.debug('Initial Samples: {}'.format(s))
     return s
 
-#---------------------------------------------------------------------------------------#
-def integrand(x,a,b,g):
-    return np.exp(-g*x**(a))*np.cos(x*b)
-    
-def Levy_Function(bins,alpha=1.5,gamma=1,debug=False):
+#-----------------------------------------------------------------------------#
+def Levy_Function(bins, alpha=1.5, gamma=1):
+    """!
+    Generate the levy function.
+
+    @param bins: \e array \n
+        The bin values used to generate the disribution. \n
+    @param alpha: \e float \n
+        Levy exponent - defines the index of the distribution and controls
+        scale properties of the stochastic process (Default: 1.5). \n
+    @param gamma: \e scalar \n
+        Gamma - Scale unit of process for Levy flights (Default: 1). \n
+
+    @return \e array: Array representing the levy flights for each member. \n
     """
-    Generate the levy function.  
-   
-    Parameters
-    ==========
-    bins : array
-        The bin values used to generate the disribution
-  
-    Optional
-    alpha : scalar
-        Levy exponent - defines the index of the distribution and controls scale properties of the stochastic process
-        (Default: 1.5)
-    gamma : scalar
-        Gamma - Scale unit of process for Levy flights (Default: 1)
-    debug : boolean
-        If True, progress statements will be displayed every iteration
-        (Default: False)
-   
-    Returns
-    =======
-    l : array
-        Array representing the levy flights for each nest
-    """
-    
-    assert len(bins) >=1, 'The length of the bins must be positive and at least one.'    
-    assert alpha > 0.3 and alpha <1.99, 'Valid range for alpha is [0.3:1.99].'
+
+    def _integrand(x, a, b, g):
+        return np.exp(-g*x**(a))*np.cos(x*b)
+
+    assert len(bins) >= 1, 'The length of the bins must be positive and at \
+                            least one.'
+    assert 0.3 < alpha < 1.99, 'Valid range for alpha is [0.3:1.99].'
     assert gamma >= 0, 'Gamma must be positive'
-       
-    l=np.zeros_like(bins) 
-    for i in range(0,len(bins)):
-        l[i]=1.0/math.pi*integrate.quad(integrand,0,np.inf, args=(alpha,bins[i],gamma))[0]
-    return l  
 
-#---------------------------------------------------------------------------------------#
-def Levy(nc,nr=0,alpha=1.5,gamma=1,n=1,debug=False):
-    """
-    Sample the Levy distribution to generate Levy flights steps
-   
-    Parameters
-    ==========
-    nc : int
-        The number of columns of Levy values for the return array
-  
-    Optional
-    ========   
-    nr : int
-        The number of rows of Levy values for the return array
-    alpha : scalar
-        Levy exponent - defines the index of the distribution and controls scale properties of the stochastic process
-        (Default: 1.5)
-    gamma : scalar
-        Gamma - Scale unit of process for Levy flights (Default: 1)
-    n : integer
-        Number of independent variables - can be used to reduce Levy flight variance (Default: 1)
-    debug : boolean
-        If True, progress statements will be displayed every iteration
-        (Default: False)
-   
-    Returns
-    =======
-    z : array
-        Array representing the levy flights for each nest
-    """
-    
-    assert alpha > 0.3 and alpha <1.99, 'Valid range for alpha is [0.3:1.99].'
-    assert gamma >= 0, 'Gamma must be positive'
-    assert n >=1, 'n Must be positive'
-        
-    # Calculate Levy distribution via Mantegna Algorithm
-    # Fast, accurate algorithm for numerical simulation of Levy stable stochastic processes
-    invalpha=1./alpha
-    sigx=((scipy.special.gamma(1.+alpha)*np.sin(np.pi*alpha/2.))/(scipy.special.gamma((1.+alpha)/2)
-                                                                  *alpha*2.**((alpha-1.)/2.)))**invalpha
-    if nr!=0:
-        v = sigx*np.random.randn(n,nr,nc)/(abs(np.random.randn(n,nr,nc))**invalpha)
-    else:
-        v = sigx*np.random.randn(n,nc)/(abs(np.random.randn(n,nc))**invalpha)
-    kappa = (alpha*scipy.special.gamma((alpha+1.)/(2.*alpha)))/scipy.special.gamma(invalpha) \
-         *((alpha*scipy.special.gamma((alpha+1.)/2.))/(scipy.special.gamma(1.+alpha)*np.sin(np.pi*alpha/2.)))**invalpha
-    p =  [-17.7767,113.3855,-281.5879,337.5439,-193.5494,44.8754] 
-    c = np.polyval(p, alpha)
-    w = ((kappa-1.)*np.exp(-abs(v)/c)+1.)*v
-    
-    if n>1: 
-        z = (1/n**invalpha)*sum(w) 
-    else:
-        z = w 
-
-    z = gamma**invalpha*z
-    if nr!=0:
-        z=z.reshape(nr,nc)
-    else:
-        z=z.reshape(nc)
-          
-    module_logger.debug("In Levy flight algorithm: \n 1/alpha: {}\n X Standard Deviation: {}\n K(alpha): {}\n C(alpha):  {}".format(invalpha,sigx,kappa,c))
-
-    return z  
-
-#---------------------------------------------------------------------------------------#
-def TLF(alpha=1.5,gamma=1.,num_samp=1,cut_point=20.,debug=False):
-    
-    """
-    Generates and samples from a truncated levy flight distribution. Produces a Levy Equivalent 
-    distribution on the interval (0,1)
-   
-    Parameters
-    ==========
-  
-    Optional
-    ========   
-    alpha : scalar
-        Levy exponent - defines the index of the distribution and controls scale properties of the stochastic process
-        (Default: 1.5)
-    gamma : scalar
-        Gamma - Scale unit of process for Levy flights (Default: 1.)
-    num_samp : integer
-        Number of Levy flights to sample (Default: 1)
-    cut_point : scalar
-        Point at which to cut sampled Levy values and resample
-    debug : boolean
-        If True, progress statements will be displayed every iteration
-        (Default: False)
-   
-    Returns
-    =======
-    levy : array
-        Array representing the levy flights on the interval (0,1)
-    """
-    
-    # Draw num_samp samples from the Levy distribution
-    levy=abs(Levy(1,num_samp)/cut_point).reshape(num_samp)
-    
-    module_logger.debug("Prior to resampling, the maximum sampled value is: {}. {} of the samples are above the cut point.".format(np.max(levy),(levy>1.0).sum()/num_samp))
-    
-    # Resample values above the range (0,1)
-    for i in range(len(levy)):
-        while levy[i]>1:
-            levy[i]=abs(Levy(1,1)/cut_point).reshape(1)
-            
+    levy = np.zeros_like(bins)
+    for i in range(0, len(bins)):
+        levy[i] = 1.0/math.pi*integrate.quad(_integrand, 0, np.inf,
+                                          args=(alpha, bins[i], gamma))[0]
     return levy
 
-#---------------------------------------------------------------------------------------# 
-def NOLH(conf, remove=None):
+#-----------------------------------------------------------------------------#
+def Levy(nc, nr=0, alpha=1.5, gamma=1, n=1):
+    """!
+     Sample the Levy distribution to generate Levy flights steps using the
+     Mantegna Algorithm: "Fast, accurate algorithm for numerical simulation
+     of Levy stable stochastic processes"
+
+    @param nc: \e integer \n
+        The number of columns of Levy values for the return array. \n
+    @param nr: \e integer \n
+        The number of rows of Levy values for the return array
+        (Default: 0). \n
+    @param alpha: \e float \n
+        Levy exponent - defines the index of the distribution and controls
+        scale properties of the stochastic process (Default: 1.5). \n
+    @param gamma: \e scalar \n
+        Gamma - Scale unit of process for Levy flights (Default: 1). \n
+
+    @return \e array: Array representing the levy flights for each member. \n
     """
-    This library allows to generate Nearly Orthogonal Latin Hypercubes (NOLH) according to
-    Cioppa (2007) and De Rainville et al. (2012) and reference therein.
+
+    assert 0.3 < alpha < 1.99, 'Valid range for alpha is [0.3:1.99].'
+    assert gamma >= 0, 'Gamma must be positive'
+    assert n >= 1, 'n Must be positive'
+
+    invalpha = 1./alpha
+    sigx = ((scipy.special.gamma(1.+alpha)*np.sin(np.pi*alpha/2.)) / \
+            (scipy.special.gamma((1.+alpha)/2)* \
+             alpha*2.**((alpha-1.)/2.)))**invalpha
+    if nr > 0:
+        v = sigx*np.random.randn(n, nr, nc)/ \
+            (abs(np.random.randn(n, nr, nc))**invalpha)
+    else:
+        v = sigx*np.random.randn(n, nc)/(abs(np.random.randn(n, nc))**invalpha)
+
+    kappa = (alpha*scipy.special.gamma((alpha+1.)/(2.*alpha)))/ \
+            scipy.special.gamma(invalpha)* \
+            ((alpha*scipy.special.gamma((alpha+1.)/2.))/ \
+            (scipy.special.gamma(1.+alpha)*np.sin(np.pi*alpha/2.)))**invalpha
+    p = [-17.7767, 113.3855, -281.5879, 337.5439, -193.5494, 44.8754]
+    c = np.polyval(p, alpha)
+    w = ((kappa-1.)*np.exp(-abs(v)/c)+1.)*v
+
+    if n > 1:
+        z = (1/n**invalpha)*sum(w)
+    else:
+        z = w
+
+    z = gamma**invalpha*z
+    if nr > 0:
+        z = z.reshape(nr, nc)
+    else:
+        z = z.reshape(nc)
+
+    module_logger.debug("In Levy flight algorithm: \n 1/alpha: {}\n X \
+                        Standard Deviation: {}\n K(alpha): {}\n C(alpha):  \
+                        {}".format(invalpha, sigx, kappa, c))
+
+    return z
+
+#-----------------------------------------------------------------------------#
+def TLF(alpha=1.5, gamma=1., numSamp=1, cutPoint=20.):
+    """!
+    Generates and samples from a truncated levy flight distribution. Produces a
+    Levy Equivalent distribution on the interval (0,1).
+
+    @param alpha: \e float \n
+        Levy exponent - defines the index of the distribution and controls
+        scale properties of the stochastic process (Default: 1.5). \n
+    @param gamma: \e scalar \n
+        Gamma - Scale unit of process for Levy flights (Default: 1). \n
+    @param numSamp: \e integer \n
+        Number of Levy flights to sample (Default: 1). \n
+    @param cutPoint: \e integer \n
+        Point at which to cut sampled Levy values and resample
+        (Default: 20). \n
+
+    @return \e array: Array representing the levy flights on the interval
+        (0,1). \n
+    """
+
+    # Draw numSamp samples from the Levy distribution
+    levy = abs(Levy(1, numSamp, alpha, gamma)/cutPoint).reshape(numSamp)
+
+    module_logger.debug("Prior to resampling, the maximum sampled value is: \
+                        {}. {} of the samples are above the cut point.".format(
+                        np.max(levy), (levy > 1.0).sum()/numSamp))
+
+    # Resample values above the range (0,1)
+    for i in range(len(levy)):
+        while levy[i] > 1:
+            levy[i] = abs(Levy(1, 1, alpha, gamma)/cutPoint).reshape(1)
+
+    return levy
+
+#-----------------------------------------------------------------------------#
+def NOLH(conf, remove=None):
+    """!
+    This library allows to generate Nearly Orthogonal Latin Hypercubes (NOLH)
+    according to Cioppa (2007) and De Rainville et al. (2012) and reference
+    therein.
 
     https://pypi.python.org/pypi/pynolh
 
-    Constructs a Nearly Orthogonal Latin Hypercube (NOLH) of order *m* from a configuration vector
-    *conf*. The configuration vector may contain either the numbers in $[0 q-1]$ or $[1 q]$ where 
-    $q = 2^{m-1}$. The columns to be *removed* are also in $[0 d-1]$ or $[1 d]$ where $d = m + 
-    \binom{m-1}{2}$ is the NOLH dimensionality.
-    
-    The whole library is incorporated here with minimal modification for commonality and 
-    consolidation of methods. 
-    
-    Parameters
-    ==========
-    conf : array
-        Configuration vector
-   
-    Optional
-    ========   
-    remove : array
-        Array containing the indexes of the colummns to be removed from conf vetor
-        (Default: NONE)
-   
-    Returns
-    =======
-    nolh : array
-        Array containing nearly orthogonal latin hypercube sampling.
+    Constructs a Nearly Orthogonal Latin Hypercube (NOLH) of order *m* from a
+    configuration vector *conf*. The configuration vector may contain either
+    the numbers in $[0 q-1]$ or $[1 q]$ where $q = 2^{m-1}$. The columns to be
+    *removed* are also in $[0 d-1]$ or $[1 d]$ where $d = m + \binom{m-1}{2}$
+    is the NOLH dimensionality.
+
+    The whole library is incorporated here with minimal modification for
+    commonality and consolidation of methods.
+
+    @param conf: \e array \n
+        Configuration vector. \n
+    @param remove: \e array \n
+        Array containing the indexes of the colummns to be removed from conf
+        vetor (Default: NONE). \n
+
+    @return \e array: Array containing nearly orthogonal latin hypercube
+        sampling. \n
     """
-    
+
     I = np.identity(2, dtype=int)
-    R = np.array(((0, 1),
-                     (1, 0)), dtype=int)
+    R = np.array(((0, 1), (1, 0)), dtype=int)
 
     if 0 in conf:
         conf = np.array(conf) + 1
@@ -297,10 +281,10 @@ def NOLH(conf, remove=None):
         if remove is not None:
             remove = np.array(remove) + 1
 
-
     q = len(conf)
     m = math.log(q, 2) + 1
     s = m + (math.factorial(m - 1) / (2 * math.factorial(m - 3)))
+
     # Factorial checks if m is an integer
     m = int(m)
 
@@ -314,10 +298,10 @@ def NOLH(conf, remove=None):
                 Ai = np.kron(Ai, R)
 
         A[:, :, i-1] = Ai
-    
+
     M = np.zeros((q, s), dtype=int)
     M[:, 0] = conf
-    
+
     col = 1
     for i in range(0, m - 1):
         for j in range(i + 1, m):
@@ -342,21 +326,34 @@ def NOLH(conf, remove=None):
             col += 1
 
     T = M * S
-    
+
     keep = np.ones(s, dtype=bool)
     if remove is not None:
         keep[np.array(remove) - 1] = [False] * len(remove)
-    
-    return (np.concatenate((T, np.zeros((1, s)), -T), axis=0)[:, keep] + q) / (2.0 * q)
 
+    return (np.concatenate((T, np.zeros((1, s)), -T), axis=0)[:, keep] + q) / \
+           (2.0 * q)
+
+#-----------------------------------------------------------------------------#
 def params(dim):
-    """Returns the NOLH order $m$, the required configuration length $q$
+    """!
+    Returns the NOLH order $m$, the required configuration length $q$
     and the number of columns to remove to obtain the desired dimensionality.
+
+    @param dim: \e integer \n
+        The dimension of the phase space. \n
+
+    @return \e array: Array containing nearly orthogonal latin hypercube
+        sampling. \n
     """
+
     m = 3
-    s = 1     #Original version has three here, but this failed each time the # of samples required switched (ie at dim=3,7,11,etc)
+
+    # Original version has three here, but this failed each time the # of
+    # samples required switched (ie at dim=3,7,11,etc)
+    s = 1
     q = 2**(m-1)
-    
+
     while s < dim:
         m += 1
         s = m + math.factorial(m - 1) / (2 * math.factorial(m - 3))
@@ -375,31 +372,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     module_logger.debug((NOLH(conf=args.conf, remove=args.remove)))
 
-#---------------------------------------------------------------------------------------#  
-def Get_CDR_Permutations(dim,debug=False):  
+#-----------------------------------------------------------------------------#
+def Get_CDR_Permutations(dim):
+    """!
+    Generate a set of samples in a given phase space.
+
+    @param dim: \e integer \n
+        The dimension of the phase space. \n
+
+    @return \e array: Configuration vector. \n
+    @return \e array: Array containing the indexes of the colummns to be
+        removed from conf vector. \n
     """
-    Generate a set of samples in a given phase space
-   
-    Parameters
-    ==========
-    dim : integer
-        The dimension of the phase space
-   
-    Optional
-    ========   
-    debug : boolean
-        If True, progress statements will be displayed every iteration
-        (Default: False)
-   
-    Returns
-    =======
-    conf : array
-        Configuration vector
-    remove : array
-        Array containing the indexes of the colummns to be removed from conf vetor
-    """  
-    
-    assert dim>=2 and dim<=29, 'The Phase space dimensions are outside of the bounds for CDR Permutations.' 
+
+    assert 2 <= dim <= 29, 'The Phase space dimensions are outside of the \
+                                bounds for CDR Permutations.'
 
     # Permutation and columns to remove given by Cioppa
     C_CONF = {
@@ -409,19 +396,23 @@ def Get_CDR_Permutations(dim,debug=False):
         5 : ([1, 2, 8, 4, 5, 6, 7, 3], [1, 6]),
         6 : ([1, 2, 8, 4, 5, 6, 7, 3], [1]),
         7 : ([1, 2, 8, 4, 5, 6, 7, 3], [])
-    }  
-    
+    }
+
     # Permutation and columns to remove given by De Rainville et al.
     EA_CONF = {
-        8  : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10], [1, 3, 10]),
-        9  : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10], [6, 10]),
+        8  : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10],
+              [1, 3, 10]),
+        9  : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10],
+              [6, 10]),
         10 : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10], [10]),
         11 : ([4, 14, 1, 2, 16, 13, 5, 8, 12, 9, 6, 7, 11, 3, 15, 10], []),
 
         12 : ([5, 13, 19, 23, 28, 10, 12, 32, 17, 2, 30, 15, 6, 31, 21, 8, 24,
-               29, 9, 14, 11, 22, 18, 25, 3, 1, 20, 7, 27, 16, 26, 4], [2, 4, 5, 11]),
+               29, 9, 14, 11, 22, 18, 25, 3, 1, 20, 7, 27, 16, 26, 4],
+              [2, 4, 5, 11]),
         13 : ([5, 13, 19, 23, 28, 10, 12, 32, 17, 2, 30, 15, 6, 31, 21, 8, 24,
-               29, 9, 14, 11, 22, 18, 25, 3, 1, 20, 7, 27, 16, 26, 4], [3, 6, 14]),
+               29, 9, 14, 11, 22, 18, 25, 3, 1, 20, 7, 27, 16, 26, 4],
+               [3, 6, 14]),
         14 : ([5, 13, 19, 23, 28, 10, 12, 32, 17, 2, 30, 15, 6, 31, 21, 8, 24,
                29, 9, 14, 11, 22, 18, 25, 3, 1, 20, 7, 27, 16, 26, 4], [4, 5]),
         15 : ([5, 13, 19, 23, 28, 10, 12, 32, 17, 2, 30, 15, 6, 31, 21, 8, 24,
@@ -432,19 +423,23 @@ def Get_CDR_Permutations(dim,debug=False):
         17 : ([7, 8, 51, 3, 40, 44, 29, 19, 61, 43, 26, 48, 20, 52, 4, 49, 2,
                57, 31, 30, 24, 23, 56, 50, 18, 59, 63, 37, 38, 21, 54, 9, 46,
                27, 36, 1, 10, 42, 13, 55, 15, 25, 22, 45, 41, 39, 53, 34, 6, 5,
-               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60], [8, 11, 12, 14, 17]),
+               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60],
+               [8, 11, 12, 14, 17]),
         18 : ([7, 8, 51, 3, 40, 44, 29, 19, 61, 43, 26, 48, 20, 52, 4, 49, 2,
                57, 31, 30, 24, 23, 56, 50, 18, 59, 63, 37, 38, 21, 54, 9, 46,
                27, 36, 1, 10, 42, 13, 55, 15, 25, 22, 45, 41, 39, 53, 34, 6, 5,
-               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60], [8, 11, 12, 17]),
+               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60],
+               [8, 11, 12, 17]),
         19 : ([7, 8, 51, 3, 40, 44, 29, 19, 61, 43, 26, 48, 20, 52, 4, 49, 2,
                57, 31, 30, 24, 23, 56, 50, 18, 59, 63, 37, 38, 21, 54, 9, 46,
                27, 36, 1, 10, 42, 13, 55, 15, 25, 22, 45, 41, 39, 53, 34, 6, 5,
-               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60], [10, 15, 22]),
+               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60],
+               [10, 15, 22]),
         20 : ([7, 8, 51, 3, 40, 44, 29, 19, 61, 43, 26, 48, 20, 52, 4, 49, 2,
                57, 31, 30, 24, 23, 56, 50, 18, 59, 63, 37, 38, 21, 54, 9, 46,
                27, 36, 1, 10, 42, 13, 55, 15, 25, 22, 45, 41, 39, 53, 34, 6, 5,
-               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60], [8, 12]),
+               2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60],
+               [8, 12]),
         21 : ([7, 8, 51, 3, 40, 44, 29, 19, 61, 43, 26, 48, 20, 52, 4, 49, 2,
                57, 31, 30, 24, 23, 56, 50, 18, 59, 63, 37, 38, 21, 54, 9, 46,
                27, 36, 1, 10, 42, 13, 55, 15, 25, 22, 45, 41, 39, 53, 34, 6, 5,
@@ -455,73 +450,73 @@ def Get_CDR_Permutations(dim,debug=False):
                2, 58, 16, 28, 64, 14, 47, 33, 12, 35, 62, 17, 11, 60], []),
 
         23 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [18, 20, 21, 24, 27, 29]),
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [18, 20, 21, 24, 27, 29]),
         24 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [4, 15, 18, 24, 27]),
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [4, 15, 18, 24, 27]),
         25 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [21, 26, 27, 29]),
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [21, 26, 27, 29]),
         26 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [26, 27, 29]),
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [26, 27, 29]),
         27 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
                85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
                50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
                75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
                125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
                95, 120, 6, 102], [27, 29]),
         28 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [20]),
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [20]),
         29 : ([9, 108, 39, 107, 62, 86, 110, 119, 46, 43, 103, 71, 123, 91, 10,
-               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74, 76,
-               90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55, 79, 32,
-               109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115, 25, 92,
-               85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96, 18, 97,
-               50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64, 105, 68,
-               75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122, 127, 36,
-               125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29, 113, 72, 5,
-               95, 120, 6, 102], [])
+               13, 126, 63, 83, 47, 100, 54, 23, 16, 124, 45, 27, 4, 93, 74,
+               76, 90, 30, 81, 77, 53, 116, 49, 104, 6, 70, 82, 26, 118, 55,
+               79, 32, 109, 57, 31, 22, 101, 44, 87, 121, 7, 37, 56, 89, 115,
+               25, 92, 85, 20, 58, 52, 3, 11, 106, 17, 117, 38, 78, 28, 59, 96,
+               18, 97, 50, 114, 112, 60, 84, 1, 12, 61, 98, 128, 14, 42, 64,
+               105, 68, 75, 111, 34, 141, 65, 99, 2, 19, 33, 35, 94, 51, 122,
+               127, 36, 125, 80, 73, 8, 24, 21, 88, 48, 69, 66, 40, 15, 29,
+               113, 72, 5, 95, 120, 6, 102], [])
     }
-    
+
     # Create dictionary
     CONF = dict()
     CONF.update(C_CONF)
     CONF.update(EA_CONF)
-    
+
     return CONF[dim][0], CONF[dim][1]
