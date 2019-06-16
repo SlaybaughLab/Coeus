@@ -1,3 +1,6 @@
+PROBLEM DEFINITION
+transport-code mcnp6
+
 OBJECTIVE FUNCTION PARAMETERS
 function relative_least_squares
 tally 24

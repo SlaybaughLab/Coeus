@@ -84,7 +84,8 @@ class UserInputs(object):
     """
 
     ##
-    def __init__(self, coeusInputPath=None, mcnpInputPath=None):
+    def __init__(self, coeusInputPath=None, transInputPath=None,
+                 advantgInputPath=None):
         """!
         Constructor to build the UserInputs class. If paths is specified, the
         object attributes are populated.
@@ -93,16 +94,25 @@ class UserInputs(object):
             The objeUserInputsct pointer. \n
         @param coeusInputPath: \e string \n
             The path to the coues input file. \n
-        @param mcnpInputPath: \e string \n
-            The path to the mcnp input file. \n
+        @param transInputPath: \e string \n
+            The path to the trans input file. \n
+        @param advantgInputPath: \e string \n
+            The path to the advantg input file. \n
         """
 
         ## @var coeusInput: \e string
-        # A path for the Coeus input file.
+        # A path for the Coeus input file. \n
         self.coeusInput = coeusInputPath
-        ## @var mcnpInputPath: \e string
-        # A path for the MCNP input file.
-        self.mcnpInput = mcnpInputPath
+        ## @var transInputPath: \e string
+        # A path for the transport input file. \n
+        self.transInput = transInputPath
+        ## @var advantgInputPath: \e string
+        # A path for the transport input file. \n
+        self.advantgInput = advantgInputPath
+
+        ## @var code: \e string
+        # The transport code used. \n
+        self.code = 'mcnp6'
 
     def __repr__(self):
         """!
@@ -111,7 +121,10 @@ class UserInputs(object):
         @param self: <em> object pointer </em> \n
             The UserInputs pointer. \n
         """
-        return "UserInputs({}, {})".format(self.coeusInput, self.mcnpInput)
+        return "UserInputs({}, {}, {}, {})".format(self.coeusInput,
+                                                   self.transInput,
+                                                   self.advantgInput,
+                                                   self.code)
 
     def __str__(self):
         """!
@@ -123,7 +136,9 @@ class UserInputs(object):
 
         header = ["UserInputs:"]
         header += ["Coeus Input File Path: {}".format(self.coeusInput)]
-        header += ["MCNP Input File Path: {}".format(self.mcnpInput)]
+        header += ["Transport Input File Path: {}".format(self.transInput)]
+        header += ["ADVANTG Input File Path: {}".format(self.advantgInput)]
+        header += ["Transport Code Used: {}".format(self.code)]
         return "\n".join(header)+"\n"
 
     def read_coeus_settings(self):
@@ -139,7 +154,8 @@ class UserInputs(object):
         """
 
         # Initialize the section headers that are valid:
-        sectionHeaders = ['objective function parameters']
+        sectionHeaders = ['problem definition',
+                          'objective function parameters']
 
         # Create the relevant objects
         objSet = ObjectiveFunction()
@@ -149,6 +165,32 @@ class UserInputs(object):
 
             # Read the file line by line and store the values
             for line in f:
+                if line.strip().lower() == 'PROBLEM DEFINITION'.lower():
+                    line = f.readline().strip().lower()
+                    while line not in sectionHeaders:
+                        # Stop at end of block
+                        try:
+                            splitList = line.split()
+                        except IndexError:
+                            break
+                        if not splitList:
+                            break
+
+                        for case in Switch(splitList[0].strip().lower()):
+                            if case('transport-code'):
+                                self.code = splitList[1].strip()
+                                break
+                            if case():
+                                module_logger.warning("Unkown user input "
+                                "found: {} ".format(splitList[0].strip()))
+                                break
+
+                        # Stop at end of file
+                        try:
+                            line = f.readline().strip().lower()
+                        except StopIteration:
+                            break
+
                 if line.strip().lower() == \
                    'OBJECTIVE FUNCTION PARAMETERS'.lower():
                     line = f.readline().strip().lower()
@@ -158,18 +200,20 @@ class UserInputs(object):
                             splitList = line.split()
                         except IndexError:
                             break
+                        if not splitList:
+                            break
 
                         for case in Switch(splitList[0].strip().lower()):
-                            if case('function'.lower()):
+                            if case('function'):
                                 objSet.set_obj_func(splitList[1].strip())
                                 break
-                            if case('tally'.lower()):
+                            if case('tally'):
                                 objSet.funcTally = splitList[1].strip()
                                 break
-                            if case('type'.lower()):
+                            if case('type'):
                                 objSet.objType = splitList[1].strip()
                                 break
-                            if case('objective'.lower()):
+                            if case('objective'):
                                 num = int(splitList[1].strip())
                                 objSet.objForm = int(splitList[2].strip())
                                 tmp = []
@@ -203,6 +247,6 @@ class UserInputs(object):
         # Test that the file closed
         assert f.closed, "File did not close properly."
 
-        module_logger.info('The Objective Function: {}'.format(print(objSet)))
+        module_logger.info('The Objective Function: {}'.format(objSet))
 
         return objSet
