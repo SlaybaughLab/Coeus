@@ -62,18 +62,19 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 
 @author James Bevins
 
-@date 23April19
+@date 16June19
 """
 
 import logging
-module_logger = logging.getLogger('Coeus.UserInputs')
 
 import numpy as np
 
 from ObjectiveFunction import ObjectiveFunction
 from Utilities import Switch
 
-#------------------------------------------------------------------------------#
+module_logger = logging.getLogger('Coeus.UserInputs')
+
+#-----------------------------------------------------------------------------#
 class UserInputs(object):
     """!
     @ingroup UserInputs
@@ -127,8 +128,8 @@ class UserInputs(object):
 
     def read_coeus_settings(self):
         """!
-        Reads the input file and creates the corresponding objects and populates
-        their attributes.
+        Reads the input file and creates the corresponding objects and
+        populates their attributes.
 
         @param self: <em> object pointer </em> \n
             The UserInputs pointer. \n
@@ -155,10 +156,9 @@ class UserInputs(object):
                         # Stop at end of file
                         try:
                             splitList = line.split()
-                            splitList[0]
                         except IndexError:
                             break
-                        
+
                         for case in Switch(splitList[0].strip().lower()):
                             if case('function'.lower()):
                                 objSet.set_obj_func(splitList[1].strip())
@@ -184,10 +184,10 @@ class UserInputs(object):
                                 module_logger.warning("Unkown user input "
                                 "found: {} ".format(splitList[0].strip()))
                                 break
-                        
+
                         # Stop at end of file
                         try:
-                            line = f.readline().strip().lower() 
+                            line = f.readline().strip().lower()
                         except StopIteration:
                             break
                 else:
@@ -201,8 +201,8 @@ class UserInputs(object):
                                                              e.strerror))
 
         # Test that the file closed
-        assert f.closed == True, "File did not close properly."
-        
+        assert f.closed, "File did not close properly."
+
         module_logger.info('The Objective Function: {}'.format(print(objSet)))
 
         return objSet
