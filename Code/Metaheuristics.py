@@ -15,7 +15,6 @@ module_logger = logging.getLogger('Coeus.Metaheuristics')
 
 import os
 import sys
-sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
 
 import copy as cp
 import numpy as np
