@@ -52,7 +52,7 @@ class Switch(object):
             The Switch class pointer. \n
         """
         yield self.match
-        return self.match
+        raise StopIteration
 
     def match(self, *args):
         """!
@@ -190,7 +190,7 @@ class WeightedRandomGenerator(object):
         return self.next()
 
 #-----------------------------------------------------------------------------#
-class MetaStats():
+class MetaStats(object):
     """!
     @ingroup Utilities
     Stores and prints effectiveness stats for each metaheuristic search method.
@@ -326,7 +326,7 @@ class MetaStats():
         assert f.closed, "File did not close properly."
 
 #-----------------------------------------------------------------------------#
-def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
+def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
     """!
     Build a Slurm Batch script using the Jobs Array feature to run transport
     calculations.
@@ -340,8 +340,8 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
         blank, calculation will be performed to assign all availiable cpus
         evenly. \n
     @param code: \e string \n
-        An indicator for which code to run; options = 'mcnp6', 'mcnp6.mpi',
-        'advantg'. [Default = 'mcnp6'] \n
+        An indicator for which code to run; options = 'mcnp', 'mcnp6',
+        'mcnp6.mpi', 'advantg'. [Default = 'mcnp6'] \n
     """
     module_logger.debug("In Run Transport, the lst input = {}, nps = {}, and \
                         code is = {}".format(lst, nps, code))
@@ -364,22 +364,20 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
         if not os.path.isdir("{}/Results/Population/{}/tmp/".format(path, i)):
             os.mkdir("{}/Results/Population/{}/tmp/".format(path, i))
         else:
-            sub.Popen("rm -r {}/Results/Population/{}/tmp/*".format(path, i),
+            sub.Popen("rm -rf {}/Results/Population/{}/tmp/*".format(path, i),
                       cwd=path, stdout=sub.PIPE, shell=True)
 
-    # Run MCNP
-    if code in ["mcnp6", "mcnp6.mpi"]:
-        # Define number of tasks to assign to each run
-        cores = mp.cpu_count()
-        module_logger.debug("The number of cores avaliable is = {}".format(
-                            cores))
+    # Define number of tasks to assign to each run
+    cores = mp.cpu_count()
+    module_logger.info("The number of cores avaliable is = {}".format(cores))
 
+    # Run MCNP
+    tasks = []
+    if code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
         if nps == []:
-            tasks = cores/len(lst)
-            if tasks == 0:
-                tasks = 1
+            for item in lst:
+                tasks.append(cores)
         else:
-            tasks = []
             for n in nps:
                 if n <= 1E6:
                     tasks.append(cores)
@@ -457,6 +455,7 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
 
     # Execute batch
     # runFiles should contains the second ID part of mcnp jobs
+    module_logger.info("The runFiles are: {}".format(runFiles))
     for i in range(0, len(runFiles)):
         cmd = "sbatch {}".format(runFiles[i])
         if code == 'advantg':
@@ -466,16 +465,18 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
                                shell=True).communicate()[0].strip().split()
             module_logger.info("ADVANTG job submission communication: {}\
                                ".format(jobOut))
-        elif code in ["mcnp6", "mcnp6.mpi"]:
+        elif code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
             jobOut = sub.Popen(cmd, cwd=os.path.abspath(os.getcwd()),
                                stdin=sub.PIPE, stdout=sub.PIPE,
                                stderr=sub.PIPE,
                                shell=True).communicate()[0].strip().split()
+            module_logger.info("MCNP job submission communication: {}\
+                               ".format(jobOut))
         if jobOut:
             job_id_list.append(jobOut[3])
 
     # Monitor for completion
-    time.sleep(15)
+    time.sleep(10)
     module_logger.info("job ids: {}".format(job_id_list))
     def monitor():
         output = []
@@ -489,7 +490,7 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
 
     output = monitor()
     module_logger.info("monitor output={}\n".format(output))
-    while not output:
+    while output:
         output = monitor()
         module_logger.debug("\n\n\nLen(full_out)={}, Line 1 of Squeue output \
                             = {}".format(len(output), output))
@@ -497,8 +498,8 @@ def run_Transport(lst, batchArgs, nps=[], code='mcnp6'):
 
     # Copy ADVANTG generated inputs to correct directory
     if code == 'advantg':
+        time.sleep(40)
         for i in lst:
-            time.sleep(5)
             path = os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),
                                    os.pardir)) + \
                                    "/Results/Population/"+str(i)+"/"
@@ -555,7 +556,7 @@ def build_batch(lst, tasks, code, qos, account, partition, timeout, scheduler,
 
     # Determine whether to specify tasks
     t_str = ''
-    if code == 'mcnp6':
+    if code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
         t_str = 'tasks {}'.format(tasks)
 
     # Set filename
@@ -569,7 +570,7 @@ def build_batch(lst, tasks, code, qos, account, partition, timeout, scheduler,
                 f.write("#SBATCH --time=" + timeout +"\n")
                 f.write("# Job name:\n")
 
-                if code in ["mcnp6.mpi", "mcnp6"]:
+                if code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
                     f.write("#SBATCH --job-name=mc{}\n".format(tasks))
                 elif code == "advantg":
                     f.write("#SBATCH --job-name=adv{}\n".format(tasks))
@@ -585,9 +586,11 @@ def build_batch(lst, tasks, code, qos, account, partition, timeout, scheduler,
                 f.write("# Processors:\n")
                 f.write("#SBATCH --ntasks={}\n".format(tasks))
 
-                if code in ["mcnp6.mpi", "mcnp6"]:
+                if code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
                     if code == "mcnp6.mpi":
                         code = "mpirun mcnp6.mpi"
+                    elif code == "mcnp":
+                        code = "mcnp6"
 
                     f.write("#SBATCH --output=../logs/arrayJob_%A_%a.out\n")
                     f.write("#SBATCH --error=../logs/arrayJob_%A_%a.err\n")

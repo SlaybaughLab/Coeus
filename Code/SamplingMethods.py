@@ -24,7 +24,7 @@ from scipy import integrate
 from Utilities import Switch
 from DOE import lhs
 
-module_logger = logging.getLogger('METACODE.SamplingMethods')
+module_logger = logging.getLogger('Coeus.SamplingMethods')
 
 #-----------------------------------------------------------------------------#
 def Initial_Samples(lb, ub, method, n=25):

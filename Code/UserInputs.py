@@ -166,7 +166,7 @@ class UserInputs(object):
             # Read the file line by line and store the values
             for line in f:
                 if line.strip().lower() == 'PROBLEM DEFINITION'.lower():
-                    line = f.readline().strip().lower()
+                    line = f.next().strip().lower()
                     while line not in sectionHeaders:
                         # Stop at end of block
                         try:
@@ -187,13 +187,13 @@ class UserInputs(object):
 
                         # Stop at end of file
                         try:
-                            line = f.readline().strip().lower()
+                            line = f.next().strip().lower()
                         except StopIteration:
                             break
 
                 if line.strip().lower() == \
                    'OBJECTIVE FUNCTION PARAMETERS'.lower():
-                    line = f.readline().strip().lower()
+                    line = f.next().strip().lower()
                     while line not in sectionHeaders:
                         # Stop at end of file
                         try:
@@ -218,7 +218,7 @@ class UserInputs(object):
                                 objSet.objForm = int(splitList[2].strip())
                                 tmp = []
                                 while len(tmp) < num:
-                                    splitList = f.readline().strip().split()
+                                    splitList = f.next().strip().split()
                                     for i in range(0, len(splitList), 2):
                                         tmp.append([float(splitList[i].strip()),
                                                 float(splitList[i+1].strip())])
@@ -231,7 +231,7 @@ class UserInputs(object):
 
                         # Stop at end of file
                         try:
-                            line = f.readline().strip().lower()
+                            line = f.next().strip().lower()
                         except StopIteration:
                             break
                 else:
