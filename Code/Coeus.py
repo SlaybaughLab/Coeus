@@ -53,13 +53,13 @@ from NuclearData import Build_Matlib, Calc_Moderating_Ratio
 
 from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input
 
-from Utilities import Run_Transport, Meta_Stats
+from Utilities import run_transport, MetaStats
 
 from UserInputs import UserInputs
 
 #-----------------------------------------------------------------------------#
 # Global variables initial definition
-stats = Meta_Stats()
+stats = MetaStats()
 logger = logging.getLogger('Coeus')
 history = Timeline()
 startTime = time.time()
@@ -123,19 +123,20 @@ def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
     global stats, history, logger, ids, particles, pop, newPop, etaParams
     global mcnpSet, matib
 
-    slurmArgs = [args.qos, args.account, args.partition, args.timeout]
+    batchArgs = [args.qos, args.account, args.partition, args.timeout,
+                 args.scheduler]
 
     if not ids:
         if radCode == "MCNP":
-            Run_Transport(ids, *slurmArgs, nps=particles, code='mcnp6.mpi')
+            run_transport(ids, *batchArgs, nps=particles, code='mcnp6.mpi')
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                                startTime))
 
         # Calculate Fitness
         Calc_Fitness(ids, newPop, objFunc, etaParams.min_fiss,
                      etaParams.max_weight)
-        (changes, feval) = Pop_Update(pop, newPop, mcnpSet.nps, slurmArgs,
-                                  etaParams, matLib, Run_Transport, rr=False)
+        (changes, feval) = Pop_Update(pop, newPop, mcnpSet.nps, batchArgs,
+                                  etaParams, matLib, run_transport, rr=False)
         pop = history.update(pop, updateGen, updateFeval)
         stats.update(algo, (changes, updateFeval + feval))
 
@@ -202,6 +203,8 @@ def main():
                         help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
     parser.add_argument('--log', nargs='?', default='INFO',
                         help='Valid levels are "DEBUG", "INFO", "WARNING", "ERROR", and "CRITICAL" in ascending order.')
+    parser.add_argument('--scheduler', nargs='?', default='slurm',
+                        help='The job scheduler used for job submission.')
     parser.add_argument('--qos', nargs='?', default='savio_lowprio',
                         help='The Quality of Service (QOS) for a specified \
                              account.')
@@ -216,6 +219,8 @@ def main():
 
     # Assign optional inputs to variables:
     args = parser.parse_args()
+    batchArgs = [args.qos, args.account, args.partition, args.timeout,
+                 args.scheduler]
 
     # Modify logging level based on user input
     try:
@@ -328,8 +333,7 @@ def main():
                                                      time.time() - startTime))
 
     # Run ADVANTG
-    Run_Transport(ids, code='advantg', qos=args.qos, account=args.account,
-                  partition=args.partition, timeout=args.timeout)
+    run_transport(ids, *batchArgs, code='advantg')
     logger.info('Finished running ADVANTG at {} sec\n'.format(time.time() -
                                                               startTime))
 
@@ -337,8 +341,7 @@ def main():
     for i in ids:
         Print_MCNP_Input(etaParams, objFunc.objective, pop[i].geom,
                          pop[i].rset, matLib, i, advPrint=True)
-    Run_Transport(ids, args.qos, args.account, args.partition, args.timeout,
-                  nps=particles, code='mcnp6.mpi')
+    run_transport(ids, *batchArgs, code='mcnp6.mpi')
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                           startTime))
 
@@ -350,7 +353,7 @@ def main():
         shutil.copyfile(rundir+str(c.ident)+'/tmp/ETA.out',
                         rundir+str(c.ident)+'/ETA.out')
 
-    # Create and store first event in timeline and Meta_Stats
+    # Create and store first event in timeline and MetaStats
     stats.write(header=True)
     pop = history.update(pop, 1, gSet.p)
     logger.info('Calculated fitness, saved files, and added to timeline at {} \
@@ -459,8 +462,7 @@ def main():
                                 cluster=True)
 
         # Run ADVANTG
-        Run_Transport(ids, code='advantg', qos=args.qos, account=args.account,
-                      partition=args.partition, timeout=args.timeout)
+        run_transport(ids, *batchArgs, code='advantg')
 
     #Determine execution time
     logger.info('The optimization history is:{}\n'.format(history.tline))

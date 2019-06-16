@@ -20,7 +20,7 @@ module_logger = logging.getLogger('Coeus.ObjectiveFunction')
 #-----------------------------------------------------------------------------#
 class ObjectiveFunction(object):
     """!
-    @ingroup ObjectiveFunctions
+    @ingroup ObjectiveFunction
     The class creates a ObjectiveFunction object that can be used in
     optimization algorithms.
     """

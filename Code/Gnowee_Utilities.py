@@ -25,7 +25,7 @@ import numpy as np
 
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
-from Utilities import Switch, to_NormDiff, FuncThreadWithReturn, Event
+from Utilities import Switch, to_NormDiff, Event
 from math import tan, radians, log
 from random import random
 
