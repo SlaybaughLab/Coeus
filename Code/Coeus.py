@@ -25,7 +25,7 @@ ommitted if desired. \n
 
 @author James Bevins
 
-@date 14Jun19
+@date 16Jun19
 """
 
 import time
@@ -70,7 +70,7 @@ matLib = Build_Matlib()
 
 #-----------------------------------------------------------------------------#
 # Local Function definitions
-def _print_transport_input(step, objFunc, radCode='MCNP'):
+def _print_transport_input(step, objFunc, radCode):
     """!
     Prints the radiation transport input files given a set of Gnowee generated
     new parameters.
@@ -87,7 +87,7 @@ def _print_transport_input(step, objFunc, radCode='MCNP'):
 
 	# Loop over updated population and print MCNP input files
     for i in range(0, len(newPop)):
-        if radCode == "MCNP":
+        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6"]:
             Print_MCNP_Input(etaParams, objFunc.objective,
                             newPop[i].geom, newPop[i].rset,
 							matLib, newPop[i].ident, advPrint=True)
@@ -101,7 +101,7 @@ def _print_transport_input(step, objFunc, radCode='MCNP'):
     return idents, runParticles
 
 def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
-                     radCode='MCNP'):
+                           radCode):
     """!
     Runs the transport code for each operator provided a set of population
     members to be evaluated.
@@ -127,8 +127,8 @@ def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
                  args.scheduler]
 
     if not ids:
-        if radCode == "MCNP":
-            run_transport(ids, *batchArgs, nps=particles, code='mcnp6.mpi')
+        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6"]:
+            run_transport(ids, batchArgs, nps=particles, code='mcnp6.mpi')
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                                startTime))
 
@@ -294,7 +294,7 @@ def main():
                                  Program default values to be used instead.\n")
 
     # Build Materials Library
-#    matLib = Build_Matlib(args.mat)
+    matLib = Build_Matlib(args.mat)
 
     # Create baseline ETA geometry based on ETA constraints
     baseEta = MCNP_Geometry()
@@ -333,7 +333,7 @@ def main():
                                                      time.time() - startTime))
 
     # Run ADVANTG
-    run_transport(ids, *batchArgs, code='advantg')
+    run_transport(ids, batchArgs, code='advantg')
     logger.info('Finished running ADVANTG at {} sec\n'.format(time.time() -
                                                               startTime))
 
@@ -341,7 +341,7 @@ def main():
     for i in ids:
         Print_MCNP_Input(etaParams, objFunc.objective, pop[i].geom,
                          pop[i].rset, matLib, i, advPrint=True)
-    run_transport(ids, *batchArgs, code='mcnp6.mpi')
+    run_transport(ids, batchArgs, nps=particles, code=inputs.code)
     logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                           startTime))
 
@@ -361,12 +361,14 @@ def main():
 
     #! Modify to remove PyNE dependence
     # Calculate Moderating ratios
-#    modRat = Calc_Moderating_Ratio(matLib)
+    modRat = Calc_Moderating_Ratio(matLib)
 
     ######## Partial Inversion ########
-#    newPop = Partial_Inversion(pop, mod_rat, matLib, gSet)
-    (ids, particles) = _print_transport_input('Partial Inversion', objFunc)
-    _run_transport_on_algo(args, "part_inv", 0, int(gSet.p), objFunc)
+    newPop = Partial_Inversion(pop, modRat, matLib, gSet)
+    (ids, particles) = _print_transport_input('Partial Inversion', objFunc,
+                                              radCode=inputs.code)
+    _run_transport_on_algo(args, "part_inv", 0, int(gSet.p), objFunc,
+                           radCode=inputs.code)
 
     # Iterate until termination criterion met
     converge = False
@@ -382,51 +384,63 @@ def main():
         newPop = Mat_Levy_Flights(pop, matLib, modRat, gSet,
                                  [etaParams.fissile_mat, 'Au'])
         (ids, particles) = _print_transport_input("Levy flight permutation of \
-                                              materials", objFunc)
+                                              materials", objFunc,
+                                              radCode=inputs.code)
         _run_transport_on_algo(args, "mat_levy", 0, int(gSet.p*gSet.fl),
-                               objFunc)
+                               objFunc, radCode=inputs.code)
 
         ######## Levy flight permutation of cells ########
         newPop = Cell_Levy_Flights(pop, etaParams, gSet)
         (ids, particles) = _print_transport_input("Levy flight permutation of \
-                                              cells", objFunc)
+                                              cells", objFunc,
+                                              radCode=inputs.code)
         _run_transport_on_algo(args, "cell_levy", 0, int(gSet.p*gSet.fl),
-                               objFunc)
+                               objFunc, radCode=inputs.code)
 
         ######## Elite_Crossover ########
         newPop = Elite_Crossover(pop, modRat, etaParams, matLib, gSet,
                                 [etaParams.fissile_mat, 'Au'])
-        (ids, particles) = _print_transport_input("Elite Crossover", objFunc)
-        _run_transport_on_algo(args, "elite_cross", 0, 1, objFunc)
+        (ids, particles) = _print_transport_input("Elite Crossover", objFunc,
+                                                  radCode=inputs.code)
+        _run_transport_on_algo(args, "elite_cross", 0, 1, objFunc,
+                               radCode=inputs.code)
 
         ######## Mutate ########
         newPop = Mutate(pop, etaParams, gSet)
-        (ids, particles) = _print_transport_input("Mutation Operator", objFunc)
-        _run_transport_on_algo(args, "mutate", 0, int(gSet.p), objFunc)
+        (ids, particles) = _print_transport_input("Mutation Operator", objFunc,
+                                                  radCode=inputs.code)
+        _run_transport_on_algo(args, "mutate", 0, int(gSet.p), objFunc,
+                               radCode=inputs.code)
 
         ######## Crossover ########
         newPop = Crossover(pop, gSet)
-        (ids, particles) = _print_transport_input("Crossover", objFunc)
+        (ids, particles) = _print_transport_input("Crossover", objFunc,
+                                                  radCode=inputs.code)
         _run_transport_on_algo(args, "crossover", 0, int(gSet.p*gSet.fe),
-                               objFunc)
+                               objFunc, radCode=inputs.code)
 
         ######## 2-opt ########
         if etaParams.max_horiz >= 4:
             newPop = Two_opt(pop, gSet)
-            (ids, particles) = _print_transport_input("2-opt", objFunc)
+            (ids, particles) = _print_transport_input("2-opt", objFunc,
+                                                      radCode=inputs.code)
             _run_transport_on_algo(args, "two_opt", 0, int(gSet.p*gSet.fe),
-                             objFunc)
+                             objFunc, radCode=inputs.code)
 
         ######## 3-opt ########
         if etaParams.max_horiz >= 6:
             newPop = Three_opt(pop, gSet)
-            (ids, particles) = _print_transport_input("3-opt", objFunc)
-            _run_transport_on_algo(args, "three_op", 0, int(gSet.p), objFunc)
+            (ids, particles) = _print_transport_input("3-opt", objFunc,
+                                                      radCode=inputs.code)
+            _run_transport_on_algo(args, "three_op", 0, int(gSet.p), objFunc,
+                                   radCode=inputs.code)
 
         ######## Discard Cells ########
         newPop = Discard_Cells(pop, matLib, gSet)
-        (ids, particles) = _print_transport_input("Discard Cells", objFunc)
-        _run_transport_on_algo(args, "discard", 1, int(gSet.p*gSet.fd), objFunc)
+        (ids, particles) = _print_transport_input("Discard Cells", objFunc,
+                                                  radCode=inputs.code)
+        _run_transport_on_algo(args, "discard", 1, int(gSet.p*gSet.fd),
+                               objFunc, radCode=inputs.code)
         stats.write()
 
         ######## Test Convergence ########
@@ -462,7 +476,7 @@ def main():
                                 cluster=True)
 
         # Run ADVANTG
-        run_transport(ids, *batchArgs, code='advantg')
+        run_transport(ids, batchArgs, code='advantg')
 
     #Determine execution time
     logger.info('The optimization history is:{}\n'.format(history.tline))
