@@ -82,7 +82,7 @@ def _print_transport_input(step, objFunc, radCode):
     @param radCode: \e string \n
     	Indicates the name of the radiation transport code to be used. \n
     """
-    global logger, history, startTime, newPop, etaParams, newPop, matib
+    global logger, history, startTime, newPop, etaParams, newPop, matLib
     idents, runParticles = [], []
 
 	# Loop over updated population and print MCNP input files
@@ -121,7 +121,7 @@ def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
         \n
     """
     global stats, history, logger, ids, particles, pop, newPop, etaParams
-    global mcnpSet, matib
+    global mcnpSet, matLib
 
     batchArgs = [args.qos, args.account, args.partition, args.timeout,
                  args.scheduler]
@@ -148,7 +148,7 @@ def main():
     Need to add robust description.
     """
     global stats, logger, history, startTime, ids, particles, pop, newPop
-    global etaParams, mcnpSet, matib
+    global etaParams, mcnpSet, matLib
 
     # Set Run directory path
     rundir = os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),

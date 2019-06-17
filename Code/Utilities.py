@@ -498,7 +498,7 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
 
     # Copy ADVANTG generated inputs to correct directory
     if code == 'advantg':
-        time.sleep(40)
+        time.sleep(10)
         for i in lst:
             path = os.path.abspath(os.path.join(os.path.abspath(os.getcwd()),
                                    os.pardir)) + \
@@ -636,9 +636,6 @@ def to_Norm(spectrum):
     flux = np.zeros(len(spectrum[:, 0]))
     return flux/np.sum(flux)
 
-## Converts a MCNP tallied flux to a Normalized Differential flux
-# @param spectrum The input flux spectrum
-# @return The output normalized differential flux spectrum
 #-----------------------------------------------------------------------------#
 def to_NormDiff(spectrum):
     """!
