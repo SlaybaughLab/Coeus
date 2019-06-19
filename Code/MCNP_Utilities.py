@@ -13,7 +13,6 @@
 import logging
 module_logger = logging.getLogger('Coeus.MCNP_Utilities')
 
-import bisect
 import sys
 import os
 
@@ -21,7 +20,6 @@ import Utilities as util
 import numpy as np
 import copy as cp
 
-from math import ceil
 from math import sin, cos, tan, atan, radians
 
 class MCNP_Settings:
@@ -76,12 +74,13 @@ class MCNP_Settings:
                         phys=False
                     else:
                         self.phys=self.phys+line.strip()+'\n'
-                if nps==True:
+                elif nps==True:
                     if line.strip().lower()=='/':
                         nps=False
                     else:
                         self.nps=float(line.strip())
                 else:
+                    splitList = line.split()
                     for case in util.Switch(line.strip().lower()):
                         if case('Physics:'.lower()): 
                             phys=True
@@ -102,7 +101,7 @@ class MCNP_Settings:
             module_logger.error("File not found was: {0}".format(filename))  
        
         # Test that the file closed
-        assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
+        assert self.f.closed==True, "File ({}) did not close properly.".format(filename)
         
     ## Parses an source input csv file. 
     #    The first column contains the upper energy bin boundaries. 
@@ -126,7 +125,7 @@ class MCNP_Settings:
             module_logger.error("File not found was: {0}".format(filename))  
        
         # Test that the file closed
-        assert self.f.closed==True, "File ({}) did not close properly.".format(fname)
+        assert self.f.closed==True, "File ({}) did not close properly.".format(filename)
     
     ## Sets the standard tallies to be used. 
     # @param cell int the cell for volume tallies
@@ -736,14 +735,15 @@ class MCNP_Cell:
 
 ##  Print the generated MCNP input deck to file 
 # @param eta [ETA parameters object] An object that contains all of the constraints required to initialize the geometry
+# @param tallySpectrum [Numpy array] Contains the energy structure to be used for the tally.
 # @param geom [MCNP_Geometry object] The geometry for running the MCNP radiation trasport code. Contains the surfaces, cells, and material information
 # @param settings [MCNP_Settings object] An object representing the settings for running the MCNP radiation trasport code. Contains the source, physics, 
 #        and tally information.
 # @param mats [dictionary of material objects] A materials library containing all relevant nulcear data required to run radiation transport codes. 
 # @param num int The current parent number being generated
-# @param adv_print boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
+# @param advPrint boolean (optional) An optional indicator to determine whether to print weight window and source bias information in the input file from 
 #        ADVANTG outputs. 
-def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):     
+def Print_MCNP_Input(eta,tallySpectrum, geom,settings,mats,num,advPrint=True):     
     path=os.path.abspath(os.path.join(os.path.abspath(os.getcwd()), os.pardir))+"/Results/Population/{}".format(num)
     # Delete previous input file if present
     if os.path.exists(path):
@@ -816,7 +816,7 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             
             # If ADVANTG files exist, read and print ADVANTG edits
             if os.path.exists(path+"/inp_edits.txt") \
-               and os.path.exists(path+"/wwinp") and adv_print==True:
+               and os.path.exists(path+"/wwinp") and advPrint==True:
                 adv=''
                 try:
                     with open(path+"/inp_edits.txt", "r") as f:
@@ -840,8 +840,8 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
                 inp_file.write("{}".format(adv))
                 
             # If only one exists, output an error    
-            elif adv_print==True and (os.path.exists("inp_edits.txt") and os.path.exists("wwinp")==False) or \
-                 adv_print==True and (os.path.exists("inp_edits.txt")==False and os.path.exists("wwinp")):
+            elif advPrint==True and (os.path.exists("inp_edits.txt") and os.path.exists("wwinp")==False) or \
+                 advPrint==True and (os.path.exists("inp_edits.txt")==False and os.path.exists("wwinp")):
                 module_logger.error("ADVANTG input edits exist, but there is no corresponding wwinp file.")
                 sys.exit
                 
@@ -851,7 +851,7 @@ def Print_MCNP_Input(eta,geom,settings,mats,num,adv_print=True):
             inp_file.write("c  Tallies  \n")
             inp_file.write("{}".format(settings.tally))
             inp_file.write("E0  \n")
-            for e,p in eta.spectrum:
+            for e,p in tallySpectrum:
                 inp_file.write("      {:6e}\n".format(e))
 
         # Close the file
@@ -983,8 +983,8 @@ def Read_MCNP_Output(path, tnum, rnum):
         # Close the file
         f.close()
    	 
-   	 # Test that the file closed
-    	assert f.closed==True, "File ({}) did not close properly.".format(path)    
+   	    # Test that the file closed
+        assert f.closed==True, "File ({}) did not close properly.".format(path)    
 
     except IOError as e:
         module_logger.error("I/O error({0}): {1}".format(e.errno, e.strerror))

@@ -7,7 +7,7 @@
 #
 # Author : James Bevins
 #
-# Last Modified: 17Oct16
+# Last Modified: 22April17
 #
 #######################################################################################################
 
@@ -18,14 +18,13 @@ import shutil
 import time
 import os
 import sys
-sys.path.insert(0,os.path.abspath(os.getcwd())+'/Sampling')
 
 import copy as cp
 import numpy as np
 
 from SamplingMethods import Initial_Samples
 from MCNP_Utilities import MCNP_Surface, MCNP_Cell, Read_Tally_Output, Read_MCNP_Output, Print_MCNP_Input
-from Utilities import Switch, to_NormDiff, RelativeLeastSquares, FuncThreadWithReturn, Event
+from Utilities import Switch, to_NormDiff, Event
 from math import tan, radians, log
 from random import random
 
@@ -88,9 +87,9 @@ class Gnowee_Settings:
         self.sf=scaling_factor
         
     def __repr__(self):
-        return "Gnowee Settings({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(self.p, self.s,
+        return "Gnowee Settings({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(self.p, self.s,
                 self.fd, self.fe, self.fl, self.gm, self.em, self.ct, self.sl, self.of, self.ot, self.a, self.g, self.n, \
-                self.sf)
+                self.sf, self.func)
     
     
     def __str__(self):
@@ -202,7 +201,6 @@ class Gnowee_Settings:
         # Test that the file closed
         assert self.f.closed==True, "File did not close properly."
 
-  
 class Parent:
 
     ## Creates a parent object representing a current design
@@ -514,7 +512,7 @@ class Parent:
 ## Print the generated MCNP input deck to file 
 # @param ids [list of integers] The parents that need to have fitness solutions calculated
 # @param pop [list of parent objects] The population and their design features
-# @param obj array The objective spectrum
+# @param obj ObjectiveFunction Object An object containing all of the parameters required for evaluating the objective function.
 # @param min_fiss float (optional) A constraint specifying the minimum number fo fissions. Implemented as a soft constraint.
 #    [Default = 0]
 # @param max_w float (optional) A constraint specifying the maximum weight of the assembly.  Implemented as a hard constraint.
@@ -524,11 +522,13 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
     for i in ids:
         tmp_fit=1E15
         index = next((c for c, parent in enumerate(pop) if parent.ident == i), -1)
-        (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', '24', '14')
+        (tally,fissions,weight)=Read_MCNP_Output(rundir+str(i)+'/tmp/ETA.out', obj.funcTally, '14')
         try:
+            # NEED TO EXPAND OPTIONS HERE TO DO THE TRANSFORM REQUIRED BY the objForm
+            # ATTRIBUTE OF THE OBJECTIVEFUNCTION OBJECT
             tally=to_NormDiff(tally)
-            tmp_fit=RelativeLeastSquares(tally,obj)
-            module_logger.debug("Parent ID # {} has fitness = {} from RLS".format(i,tmp_fit))
+            tmp_fit=obj.func(tally)
+            module_logger.debug("Parent ID # {} has fitness = {} from {} before constraints.".format(i,tmp_fit, obj.func.__name__))
 
             # Check constraints
             weight=weight/1000         # conversion to kg
@@ -544,10 +544,10 @@ def Calc_Fitness(ids, pop, obj, min_fiss=0, max_w=1000):
 
             if weight > max_w:
                 tmp_fit+=1E15
-            module_logger.info("Parent ID # {} has fitness = {} from RLS+fissions+weight".format(i,tmp_fit))
+            module_logger.debug("Parent ID # {} has fitness = {} from RLS+fissions+weight".format(i,tmp_fit))
         
         except:
-            module_logger.info("WARNING: Parent ID # {} MCNP run failed.".format(i,tmp_fit))
+            module_logger.warning("WARNING: Parent ID # {} MCNP run failed.".format(i,tmp_fit))
             pass
         
         # Save fitness
