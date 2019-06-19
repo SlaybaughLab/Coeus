@@ -148,8 +148,8 @@ class ObjectiveFunction(object):
              design. \n
         """
 
-        assert len(c) == len(self.objective), ("The length of the candidate "
-                                "and objective  must be equal in u_opt.")
+        assert len(c) == len(self.objective), ('The length of the candidate '
+                                'and objective  must be equal in u_opt.')
 
         return np.sum(abs(self.objective[:, 1]-c))
 
@@ -168,8 +168,8 @@ class ObjectiveFunction(object):
              design. \n
         """
 
-        assert len(c) == len(self.objective), ("The length of the candidate "
-                              "and objective  must be equal in least_squares.")
+        assert len(c) == len(self.objective), ('The length of the candidate '
+                              'and objective  must be equal in least_squares.')
 
         return np.sum((self.objective[:, 1]-c)**2)
 
@@ -193,8 +193,8 @@ class ObjectiveFunction(object):
             a design. \n
         """
 
-        assert len(c) == len(self.objective), ("The length of the candidate "
-                      "and objective must be equal in relative_least_squares.")
+        assert len(c) == len(self.objective), ('The length of the candidate '
+                      'and objective must be equal in relative_least_squares.')
 
         # For bins with no tally results, project the fitness using simple
         # linear extrapolation

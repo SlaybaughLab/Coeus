@@ -87,7 +87,7 @@ def _print_transport_input(step, objFunc, radCode):
 
 	# Loop over updated population and print MCNP input files
     for i in range(0, len(newPop)):
-        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6"]:
+        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6", "mcnp6.mpi"]:
             Print_MCNP_Input(etaParams, objFunc.objective,
                             newPop[i].geom, newPop[i].rset,
 							matLib, newPop[i].ident, advPrint=True)
@@ -100,13 +100,13 @@ def _print_transport_input(step, objFunc, radCode):
 	            step, time.time() - startTime))
     return idents, runParticles
 
-def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
+def _run_transport_on_algo(jobArgs, algo, updateGen, updateFeval, objFunc,
                            radCode):
     """!
     Runs the transport code for each operator provided a set of population
     members to be evaluated.
 
-    @param args: \e object \n
+    @param jobArgs: \e object \n
     	User input arguments for the job scheduler needed for run_transport. \n
     @param algo: \e string \n
     	String indicating the name of the algorithm being used. \n
@@ -123,19 +123,17 @@ def _run_transport_on_algo(args, algo, updateGen, updateFeval, objFunc,
     global stats, history, logger, ids, particles, pop, newPop, etaParams
     global mcnpSet, matLib
 
-    batchArgs = [args.qos, args.account, args.partition, args.timeout,
-                 args.scheduler]
-
-    if not ids:
-        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6"]:
-            run_transport(ids, batchArgs, nps=particles, code='mcnp6.mpi')
+    if ids:
+        if radCode.lower() in ["mcnp", "mcnp5", "mcnp6", "mcnp6.mpi"]:
+            logger.info('Running transport \n')
+            run_transport(ids, jobArgs, nps=particles, code=radCode)
         logger.info('Finished running MCNP at {} sec\n'.format(time.time() -
                                                                startTime))
 
         # Calculate Fitness
         Calc_Fitness(ids, newPop, objFunc, etaParams.min_fiss,
                      etaParams.max_weight)
-        (changes, feval) = Pop_Update(pop, newPop, mcnpSet.nps, batchArgs,
+        (changes, feval) = Pop_Update(pop, newPop, mcnpSet.nps, jobArgs,
                                   etaParams, matLib, run_transport, rr=False)
         pop = history.update(pop, updateGen, updateFeval)
         stats.update(algo, (changes, updateFeval + feval))
@@ -202,18 +200,19 @@ def main():
                         default='../Inputs/source.csv',
                         help='The name and path for the file containing the starting neutron source distribution. The format is a comma delimited key word input file. All keywords are optional. Non-specified keywords will default to preset program values. [default = ../Inputs/source.csv]')
     parser.add_argument('--log', nargs='?', default='INFO',
-                        help='Valid levels are "DEBUG", "INFO", "WARNING", "ERROR", and "CRITICAL" in ascending order.')
+                        help='Valid levels are "DEBUG", "INFO", "WARNING", '
+                              '"ERROR", and "CRITICAL" in ascending order.')
     parser.add_argument('--scheduler', nargs='?', default='slurm',
                         help='The job scheduler used for job submission.')
     parser.add_argument('--qos', nargs='?', default='savio_lowprio',
-                        help='The Quality of Service (QOS) for a specified \
-                             account.')
+                        help='The Quality of Service (QOS) for a specified '
+                             'account.')
     parser.add_argument('--account', nargs='?', default='co_nuclear',
-                        help='Job submission account for all of the slave \
-                        jobs.')
+                        help='Job submission account for all of the slave '
+                        'jobs.')
     parser.add_argument('--partition', nargs='?', default='savio',
-                        help='Job submission partition for all of the slave \
-                        jobs.')
+                        help='Job submission partition for all of the slave '
+                        'jobs.')
     parser.add_argument('--timeout', nargs='?', default='02:30:00',
                         help='Job timout for all of the slave jobs.')
 
@@ -236,8 +235,8 @@ def main():
         inputs = UserInputs(coeusInputPath=args.inp)
         objFunc = inputs.read_coeus_settings()
     else:
-        logger.info("\nNo user supplier input file located.  Program default \
-                    values to be used instead.")
+        logger.info('\nNo user supplier input file located.  Program default '
+                    'values to be used instead.')
 
     # Test path for constraint file. Call read_constraint if file exists
     if os.path.isfile(args.eta):
@@ -245,20 +244,20 @@ def main():
                                                                      args.eta))
         ETA_Parameters.read_constraints(etaParams, args.eta)
     else:
-        logger.info("\nNo user supplier ETA constraints file located.  \
-                    Program default values to be used instead.")
+        logger.info('\nNo user supplier ETA constraints file located.  '
+                    'Program default values to be used instead.')
 
     # Create Gnowee Settings object
     gSet = Gnowee_Settings()
 
     # Test path for Gnowee settings file. Call read_settings if file exists
     if os.path.isfile(args.gs):
-        logger.info("\nLoading Gnowee settings file located at: {}".format(
+        logger.info('\nLoading Gnowee settings file located at: {}'.format(
                                                                       args.gs))
         Gnowee_Settings.read_settings(gSet, args.gs)
     else:
-        logger.info("\nNo user supplier Gnowee Search settings file located. \
-                    Program default values to be used instead.")
+        logger.info('\nNo user supplier Gnowee Search settings file located. '
+                    'Program default values to be used instead.')
 
     # Create ADVANTG Settings object
     advantgSet = ADVANTG_Settings()
@@ -269,8 +268,8 @@ def main():
                                                                      args.adv))
         ADVANTG_Settings.read_settings(advantgSet, args.adv)
     else:
-        logger.info("\nNo user supplier ADVANTG settings file located.  \
-                                   Program default values to be used instead.")
+        logger.info('\nNo user supplier ADVANTG settings file located. '
+                    'Program default values to be used instead.')
 
 
     # Create MCNP Settings object
@@ -278,20 +277,20 @@ def main():
 
     # Test path for MCNP settings file. Call read_settings if file exists
     if os.path.isfile(args.mcnp):
-        logger.info("\nLoading MCNP settings file located at: {}".format(
+        logger.info('\nLoading MCNP settings file located at: {}'.format(
                                                                     args.mcnp))
         MCNP_Settings.read_settings(mcnpSet, args.mcnp)
     else:
-        logger.info("\nNo user supplier MCNP settings file located.  \
-                                   Program default values to be used instead.")
+        logger.info('\nNo user supplier MCNP settings file located. '
+                    'Program default values to be used instead.')
 
     # Test path for source file. Call read_source if file exists
     if os.path.isfile(args.src):
-        logger.info("\nLoading source file located at: {}\n".format(args.src))
+        logger.info('\nLoading source file located at: {}\n'.format(args.src))
         MCNP_Settings.read_source(mcnpSet, args.src)
     else:
-        logger.info("\nNo user supplier source file located.  \
-                                 Program default values to be used instead.\n")
+        logger.info('\nNo user supplier source file located. '
+                    'Program default values to be used instead.\n')
 
     # Build Materials Library
     matLib = Build_Matlib(args.mat)
@@ -312,8 +311,8 @@ def main():
             pop.append(Parent(i, etaParams, baseEta, gSet, mcnpSet,
                               matLib, [etaParams.fissile_mat, 'Au'], i))
             pop[-1].geom.fin_geom(etaParams, matLib)
-    logger.info('Finished reading inputs and initializing settings in {} sec\
-                '.format(time.time() - startTime))
+    logger.info('Finished reading inputs and initializing settings in {} sec '
+                ''.format(time.time() - startTime))
 
     # Print initial MCNP input Files
     for i in range(0, gSet.p):
@@ -356,8 +355,8 @@ def main():
     # Create and store first event in timeline and MetaStats
     stats.write(header=True)
     pop = history.update(pop, 1, gSet.p)
-    logger.info('Calculated fitness, saved files, and added to timeline at {} \
-                sec\n'.format(time.time() - startTime))
+    logger.info('Calculated fitness, saved files, and added to timeline at {} '
+                'sec\n'.format(time.time() - startTime))
 
     #! Modify to remove PyNE dependence
     # Calculate Moderating ratios
@@ -367,7 +366,7 @@ def main():
     newPop = Partial_Inversion(pop, modRat, matLib, gSet)
     (ids, particles) = _print_transport_input('Partial Inversion', objFunc,
                                               radCode=inputs.code)
-    _run_transport_on_algo(args, "part_inv", 0, int(gSet.p), objFunc,
+    _run_transport_on_algo(batchArgs, "part_inv", 0, int(gSet.p), objFunc,
                            radCode=inputs.code)
 
     # Iterate until termination criterion met
@@ -375,71 +374,71 @@ def main():
     while history.tline[-1].g <= gSet.gm and history.tline[-1].e <= gSet.em \
           and not converge:
 
-        logger.info('Generation {} with {} function evaluations completed \
-                    started at {} sec\n'.format(history.tline[-1].g,
+        logger.info('Generation {} with {} function evaluations completed '
+                    'started at {} sec\n'.format(history.tline[-1].g,
                                                 history.tline[-1].e,
                                                 time.time() - startTime))
 
         ######## Levy flight permutation of materials ########
         newPop = Mat_Levy_Flights(pop, matLib, modRat, gSet,
                                  [etaParams.fissile_mat, 'Au'])
-        (ids, particles) = _print_transport_input("Levy flight permutation of \
-                                              materials", objFunc,
-                                              radCode=inputs.code)
-        _run_transport_on_algo(args, "mat_levy", 0, int(gSet.p*gSet.fl),
+        (ids, particles) = _print_transport_input('Levy flight permutation of '
+                                                  'materials', objFunc,
+                                                  radCode=inputs.code)
+        _run_transport_on_algo(batchArgs, "mat_levy", 0, int(gSet.p*gSet.fl),
                                objFunc, radCode=inputs.code)
 
         ######## Levy flight permutation of cells ########
         newPop = Cell_Levy_Flights(pop, etaParams, gSet)
-        (ids, particles) = _print_transport_input("Levy flight permutation of \
-                                              cells", objFunc,
-                                              radCode=inputs.code)
-        _run_transport_on_algo(args, "cell_levy", 0, int(gSet.p*gSet.fl),
+        (ids, particles) = _print_transport_input('Levy flight permutation of '
+                                                  'cells', objFunc,
+                                                  radCode=inputs.code)
+        _run_transport_on_algo(batchArgs, "cell_levy", 0, int(gSet.p*gSet.fl),
                                objFunc, radCode=inputs.code)
 
         ######## Elite_Crossover ########
         newPop = Elite_Crossover(pop, modRat, etaParams, matLib, gSet,
                                 [etaParams.fissile_mat, 'Au'])
-        (ids, particles) = _print_transport_input("Elite Crossover", objFunc,
+        (ids, particles) = _print_transport_input('Elite Crossover', objFunc,
                                                   radCode=inputs.code)
-        _run_transport_on_algo(args, "elite_cross", 0, 1, objFunc,
+        _run_transport_on_algo(batchArgs, "elite_cross", 0, 1, objFunc,
                                radCode=inputs.code)
 
         ######## Mutate ########
         newPop = Mutate(pop, etaParams, gSet)
-        (ids, particles) = _print_transport_input("Mutation Operator", objFunc,
+        (ids, particles) = _print_transport_input('Mutation Operator', objFunc,
                                                   radCode=inputs.code)
-        _run_transport_on_algo(args, "mutate", 0, int(gSet.p), objFunc,
+        _run_transport_on_algo(batchArgs, "mutate", 0, int(gSet.p), objFunc,
                                radCode=inputs.code)
 
         ######## Crossover ########
         newPop = Crossover(pop, gSet)
-        (ids, particles) = _print_transport_input("Crossover", objFunc,
+        (ids, particles) = _print_transport_input('Crossover', objFunc,
                                                   radCode=inputs.code)
-        _run_transport_on_algo(args, "crossover", 0, int(gSet.p*gSet.fe),
+        _run_transport_on_algo(batchArgs, "crossover", 0, int(gSet.p*gSet.fe),
                                objFunc, radCode=inputs.code)
 
         ######## 2-opt ########
         if etaParams.max_horiz >= 4:
             newPop = Two_opt(pop, gSet)
-            (ids, particles) = _print_transport_input("2-opt", objFunc,
+            (ids, particles) = _print_transport_input('2-opt', objFunc,
                                                       radCode=inputs.code)
-            _run_transport_on_algo(args, "two_opt", 0, int(gSet.p*gSet.fe),
+            _run_transport_on_algo(batchArgs, "two_opt", 0, int(gSet.p*gSet.fe),
                              objFunc, radCode=inputs.code)
 
         ######## 3-opt ########
         if etaParams.max_horiz >= 6:
             newPop = Three_opt(pop, gSet)
-            (ids, particles) = _print_transport_input("3-opt", objFunc,
+            (ids, particles) = _print_transport_input('3-opt', objFunc,
                                                       radCode=inputs.code)
-            _run_transport_on_algo(args, "three_op", 0, int(gSet.p), objFunc,
-                                   radCode=inputs.code)
+            _run_transport_on_algo(batchArgs, "three_op", 0, int(gSet.p),
+                                   objFunc, radCode=inputs.code)
 
         ######## Discard Cells ########
         newPop = Discard_Cells(pop, matLib, gSet)
-        (ids, particles) = _print_transport_input("Discard Cells", objFunc,
+        (ids, particles) = _print_transport_input('Discard Cells', objFunc,
                                                   radCode=inputs.code)
-        _run_transport_on_algo(args, "discard", 1, int(gSet.p*gSet.fd),
+        _run_transport_on_algo(batchArgs, "discard", 1, int(gSet.p*gSet.fd),
                                objFunc, radCode=inputs.code)
         stats.write()
 
@@ -448,18 +447,18 @@ def main():
         if history.tline[-1].g > gSet.sl:
             if history.tline[-1].g > history.tline[-2].g+gSet.sl:
                 converge = True
-                logger.info("Generational Stall {}".format(
+                logger.info('Generational Stall {}'.format(
                                                        str(history.tline[-1])))
             elif (history.tline[-2].f-history.tline[-1].f)/ \
                  history.tline[-2].f < gSet.ct:
                 if history.tline[-1].g > history.tline[-2].g+gSet.sl:
                     converge = True
-                    logger.info("Generational Convergence")
+                    logger.info('Generational Convergence')
 
         # Test fitness convergence
         if abs((history.tline[-1].f-gSet.of)/gSet.of) <= gSet.ot:
             converge = True
-            logger.info("Fitness Convergence {}".format(str(history.tline[-1])))
+            logger.info('Fitness Convergence {}'.format(str(history.tline[-1])))
 
         ######## Update weight window maps ########
         # Print MCNP input Files

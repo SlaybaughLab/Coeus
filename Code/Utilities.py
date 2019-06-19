@@ -8,7 +8,7 @@
 
 @author James Bevins
 
-@date 16June19
+@date 18June19
 """
 
 import os
@@ -97,8 +97,8 @@ class Event(object):
             The identifty of the current top solution. \n
         """
 
-        assert generation >= 0, "The # of generations cannot be negative."
-        assert evaluations >= 0, "The # of evaluations cannot be negative."
+        assert generation >= 0, 'The # of generations cannot be negative.'
+        assert evaluations >= 0, 'The # of evaluations cannot be negative.'
         assert isinstance(generation, int), 'Generation must be of type int.'
         assert isinstance(evaluations, int), 'Evaluations must be of type int.'
         assert isinstance(fitness, float), 'Fitness must be of type float.'
@@ -256,8 +256,8 @@ class MetaStats(object):
         @param self: \e pointer \n
             The MetaStats pointer. \n
         """
-        return "{:8d},{};  {:14d},{};  {:11d},{};  {:12d},{};  {:12d},{};  \
-                {:12d},{};  {:11d},{};  {:9d},{};  {:6d},{};\n".format(
+        return '{:8d},{};  {:14d},{};  {:11d},{};  {:12d},{};  {:12d},{}; ' \
+                '{:12d},{};  {:11d},{};  {:9d},{};  {:6d},{};\n'.format(
                 self.algorithms["mat_levy"][0], self.algorithms["mat_levy"][1],
                 self.algorithms["cell_levy"][0],
                 self.algorithms["cell_levy"][1],
@@ -388,18 +388,18 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
                 elif n > 1E8:
                     tasks.append(cores*14)
                 else:
-                    module_logger.error("\nThe nps condition wasn't covered. \
-                                        NPS = {}".format(n))
+                    module_logger.error('\nThe nps condition wasn't covered. '
+                                        'NPS = {}'.format(n))
 
-        module_logger.debug("Number of Cores = {}".format(cores))
-        module_logger.debug("Number of Tasks = {}\n".format(tasks))
+        module_logger.debug('Number of Cores = {}'.format(cores))
+        module_logger.debug('Number of Tasks = {}\n'.format(tasks))
 
         # Determine unique numbers of tasks to set number of batch files
         task_set = sorted(set(tasks), reverse=True)
-        module_logger.info("Unique Task Identifiers = {}\n".format(task_set))
-        module_logger.debug("lst = {}\n".format(lst))
-        module_logger.debug("nps = {}\n".format(nps))
-        module_logger.debug("tasks = {}\n".format(tasks))
+        module_logger.info('Unique Task Identifiers = {}\n'.format(task_set))
+        module_logger.debug('lst = {}\n'.format(lst))
+        module_logger.debug('nps = {}\n'.format(nps))
+        module_logger.debug('tasks = {}\n'.format(tasks))
 
         for t in task_set:
 
@@ -408,7 +408,7 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
             for i in range(0, len(tasks)):
                 if tasks[i] == t:
                     subLst.append(lst[i])
-            module_logger.info("For {} tasks, the sub list is = {}".format(t,
+            module_logger.info('For {} tasks, the sub list is = {}'.format(t,
                                subLst))
 
             # Build batch
@@ -433,7 +433,7 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
                           path+"/Results/Population/"+str(i)+"/tmp/"+fname),
                           cwd=path, stdout=sub.PIPE, shell=True)
             else:
-                module_logger.info("{}/{} doesnt exist. ".format(
+                module_logger.info('{}/{} doesnt exist.'.format(
                                    os.path.abspath(os.getcwd()), fname))
 
             runFiles.append(fname)
@@ -445,11 +445,11 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
                           +str(i)+"/tmp/runCADIS.adv"), cwd=path,
                           stdout=sub.PIPE, shell=True)
             else:
-                module_logger.info("{}/Results/Population/{}/runCADIS.adv \
-                                   doesn't exist. ".format(path, str(i)))
+                module_logger.info("{}/Results/Population/{}/runCADIS.adv "
+                                   "doesn't exist. ".format(path, str(i)))
     else:
-        module_logger.warning("Unknown code ({}) specified. Please try again.\
-                              \n".format(code))
+        module_logger.warning('Unknown code ({}) specified. Please try again.'
+                              '\n'.format(code))
 
     job_id_list = []
 
@@ -463,15 +463,15 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
             jobOut = sub.Popen(cmd, cwd=rundir, stdin=sub.PIPE,
                                stdout=sub.PIPE, stderr=sub.PIPE,
                                shell=True).communicate()[0].strip().split()
-            module_logger.info("ADVANTG job submission communication: {}\
-                               ".format(jobOut))
+            module_logger.info("ADVANTG job submission communication: {}"
+                               "".format(jobOut))
         elif code in ["mcnp", "mcnp6", "mcnp6.mpi"]:
             jobOut = sub.Popen(cmd, cwd=os.path.abspath(os.getcwd()),
                                stdin=sub.PIPE, stdout=sub.PIPE,
                                stderr=sub.PIPE,
                                shell=True).communicate()[0].strip().split()
-            module_logger.info("MCNP job submission communication: {}\
-                               ".format(jobOut))
+            module_logger.info("MCNP job submission communication: {}"
+                               "".format(jobOut))
         if jobOut:
             job_id_list.append(jobOut[3])
 
@@ -492,8 +492,8 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
     module_logger.info("monitor output={}\n".format(output))
     while output:
         output = monitor()
-        module_logger.debug("\n\n\nLen(full_out)={}, Line 1 of Squeue output \
-                            = {}".format(len(output), output))
+        module_logger.debug("\n\n\nLen(full_out)={}, Line 1 of Squeue output "
+                            "= {}".format(len(output), output))
         time.sleep(1)
 
     # Copy ADVANTG generated inputs to correct directory

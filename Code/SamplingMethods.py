@@ -44,12 +44,12 @@ def Initial_Samples(lb, ub, method, n=25):
     @return \e array: The list of coordinates for the sampled phase space. \n
     """
 
-    assert len(ub) == len(lb), 'Boundaries best have different # of design \
-                                variables in Initial_Samples function.'
+    assert len(ub) == len(lb), 'Boundaries best have different # of design ' \
+                               'variables in Initial_Samples function.'
     if method != "random":
-        assert len(ub) >= 2 and len(ub) <= 29, 'The Phase space dimensions \
-                                    are outside of the bounds for \
-                                    Initial_Samples.'
+        assert len(ub) >= 2 and len(ub) <= 29, 'The Phase space dimensions ' \
+                                               'are outside of the bounds ' \
+                                               'for Initial_Samples.'
     assert method in ['random', 'nolh', 'nolh-rp', 'nolh-cdr', 'lhc'], \
                     'An invalid method was specified for the initial sampling.'
 
@@ -112,9 +112,9 @@ def Initial_Samples(lb, ub, method, n=25):
 
         # Catch all
         if case():
-            module_logger.warning("Somehow you evaded my assert statement - \
-                                  good job!  However, you still need to use a \
-                                  valid method string.")
+            module_logger.warning('Somehow you evaded my assert statement - '
+                                  'good job!  However, you still need to use a'
+                                  ' valid method string.')
 
         module_logger.debug('Initial Samples: {}'.format(s))
     return s
@@ -138,8 +138,8 @@ def Levy_Function(bins, alpha=1.5, gamma=1):
     def _integrand(x, a, b, g):
         return np.exp(-g*x**(a))*np.cos(x*b)
 
-    assert len(bins) >= 1, 'The length of the bins must be positive and at \
-                            least one.'
+    assert len(bins) >= 1, 'The length of the bins must be positive and at ' \
+                            'least one.'
     assert 0.3 < alpha < 1.99, 'Valid range for alpha is [0.3:1.99].'
     assert gamma >= 0, 'Gamma must be positive'
 
@@ -203,9 +203,9 @@ def Levy(nc, nr=0, alpha=1.5, gamma=1, n=1):
     else:
         z = z.reshape(nc)
 
-    module_logger.debug("In Levy flight algorithm: \n 1/alpha: {}\n X \
-                        Standard Deviation: {}\n K(alpha): {}\n C(alpha):  \
-                        {}".format(invalpha, sigx, kappa, c))
+    module_logger.debug('In Levy flight algorithm: \n 1/alpha: {}\n X '
+                        'Standard Deviation: {}\n K(alpha): {}\n C(alpha):  '
+                        '{}'.format(invalpha, sigx, kappa, c))
 
     return z
 
@@ -233,8 +233,8 @@ def TLF(alpha=1.5, gamma=1., numSamp=1, cutPoint=20.):
     # Draw numSamp samples from the Levy distribution
     levy = abs(Levy(1, numSamp, alpha, gamma)/cutPoint).reshape(numSamp)
 
-    module_logger.debug("Prior to resampling, the maximum sampled value is: \
-                        {}. {} of the samples are above the cut point.".format(
+    module_logger.debug('Prior to resampling, the maximum sampled value is: {}'
+                        '. {} of the samples are above the cut point.'.format(
                         np.max(levy), (levy > 1.0).sum()/numSamp))
 
     # Resample values above the range (0,1)
@@ -385,8 +385,8 @@ def Get_CDR_Permutations(dim):
         removed from conf vector. \n
     """
 
-    assert 2 <= dim <= 29, 'The Phase space dimensions are outside of the \
-                                bounds for CDR Permutations.'
+    assert 2 <= dim <= 29, 'The Phase space dimensions are outside of the ' \
+                                'bounds for CDR Permutations.'
 
     # Permutation and columns to remove given by Cioppa
     C_CONF = {
