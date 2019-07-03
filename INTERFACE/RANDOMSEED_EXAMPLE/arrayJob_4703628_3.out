@@ -1,0 +1,14 @@
+ mcnp     ver=6.mpi, ld=01/12/18  07/03/19 13:01:58                   
+ mcnp_pop3.out already exists.  mcnp_pop4.out is created instead.
+ mcnp_pop4.out already exists.  mcnp_pop5.out is created instead.
+ mcnp_pop5.out already exists.  mcnp_pop6.out is created instead.
+ mcnp_pop6.out already exists.  mcnp_pop7.out is created instead.
+ mcnp_pop7.out already exists.  mcnp_pop8.out is created instead.
+ mcnp_pop8.out already exists.  mcnp_pop9.out is created instead.
+ mcnp_pop9.out already exists.  mcnp_pop0.out is created instead.
+ mcnp_pop0.out already exists.  mcnp_pop1.out is created instead.
+ Expire parameter is cannot create mcnp_pop3.out
+
+ bad trouble in subroutine unique of mcnp                             
+
+ cannot create mcnp_pop3.out

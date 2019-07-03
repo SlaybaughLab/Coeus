@@ -1,0 +1,81 @@
+ mcnp     ver=6.mpi, ld=01/12/18  07/03/19 13:01:52                   
+ mcnp_pop2.out already exists.  mcnp_pop3.out is created instead.
+ mcnp_pop3.out already exists.  mcnp_pop4.out is created instead.
+ mcnp_pop4.out already exists.  mcnp_pop5.out is created instead.
+ mcnp_pop5.out already exists.  mcnp_pop6.out is created instead.
+ mcnp_pop6.out already exists.  mcnp_pop7.out is created instead.
+ mcnp_pop7.out already exists.  mcnp_pop8.out is created instead.
+ mcnp_pop8.out already exists.  mcnp_pop9.out is created instead.
+ mcnp_pop9.out already exists.  mcnp_pop0.out is created instead.
+          Code Name & Version = MCNP6, 1.0
+          Copyright LANS/LANL/DOE - see output file
+  
+     _/      _/        _/_/_/       _/      _/       _/_/_/         _/_/_/
+    _/_/  _/_/      _/             _/_/    _/       _/    _/     _/       
+   _/  _/  _/      _/             _/  _/  _/       _/_/_/       _/_/_/    
+  _/      _/      _/             _/    _/_/       _/           _/    _/   
+ _/      _/        _/_/_/       _/      _/       _/             _/_/      
+  
+  warning.  Physics models disabled.
+ m4                                                                   
+  warning.  material        4 is not used in the problem.
+ m5                                                                   
+  warning.  material        5 is not used in the problem.
+ m7                                                                   
+  warning.  material        7 is not used in the problem.
+ m8                                                                   
+  warning.  material        8 is not used in the problem.
+ m9                                                                   
+  warning.  material        9 is not used in the problem.
+ m10                                                                  
+  warning.  material       10 is not used in the problem.
+ m11                                                                  
+  warning.  material       11 is not used in the problem.
+ 
+  comment.  total nubar used if fissionable isotopes are present.
+  comment.          14 surfaces were deleted for being the same as others.
+ comment. using random number generator  2, initial seed = 1                   
+ imcn   is done
+
+ runtpe already exists.  runtpf is created instead.
+ runtpf already exists.  runtpg is created instead.
+ runtpg already exists.  runtph is created instead.
+ runtph already exists.  runtpi is created instead.
+ runtpi already exists.  runtpj is created instead.
+ runtpj already exists.  runtpk is created instead.
+ runtpk already exists.  runtpl is created instead.
+ runtpl already exists.  runtpm is created instead.
+ runtpm already exists.  runtpn is created instead.
+ runtpn already exists.  runtpo is created instead.
+  warning.  neutron energy cutoff is below some cross-section tables.
+  comment.     1 cross sections modified by free gas thermal treatment.
+
+ ctm =        0.00   nrn =                 0
+ dump    1 on file runtpo   nps =           0   coll =                0
+ xact   is done
+
+ cp0 =   0.05
+ master starting      19 MPI slave tasks with       1 threads each  07/03/19 13:01:55 
+ master broadcasting static commons...
+ master broadcasting dynamic commons...
+ master broadcasting cross section data...
+ master completed initialization broadcasts.
+ master set rendezvous nps =      100000,  work chunks =    19    07/03/19 13:01:55 
+ master set rendezvous nps =      200000,  work chunks =    19    07/03/19 13:01:55 
+ master set rendezvous nps =      300000,  work chunks =    19    07/03/19 13:01:55 
+ master set rendezvous nps =      400000,  work chunks =    19    07/03/19 13:01:55 
+ master set rendezvous nps =      500000,  work chunks =    19    07/03/19 13:01:55 
+ master set rendezvous nps =      600000,  work chunks =    19    07/03/19 13:01:56 
+ master set rendezvous nps =      700000,  work chunks =    19    07/03/19 13:01:56 
+ master set rendezvous nps =      800000,  work chunks =    19    07/03/19 13:01:56 
+ master set rendezvous nps =      900000,  work chunks =    19    07/03/19 13:01:56 
+ master set rendezvous nps =     1000000,  work chunks =    19    07/03/19 13:01:56 
+      run terminated when     1000000  particle histories were done.
+  warning.  tally        4 tfc bin did not pass  1 of 10 statistical checks.
+  warning.     1 of   1 tallies did not pass all 10 statistical checks.
+  warning.     1 of   1 tallies had bins with large relative errors.
+
+ ctm =        0.42   nrn =          15704315
+ dump    2 on file runtpo   nps =     1000000   coll =           866207
+ mcrun  is done
+
