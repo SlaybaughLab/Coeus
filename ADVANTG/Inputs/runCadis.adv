@@ -3,9 +3,9 @@ variables defined in Section 2
 # <method = CADIS>
 # <output = MCNP>
 # <tally = 24 >
-# <z_1 = (h1+h2) 
-# <z_2 = (h1+h2+h3+h4)
-# <z_3 = (h1+h2+h3+h4+h5+h6+2)
+# <z_1 = (5+h1) 
+# <z_2 = (5+h1+h2+h3+h4)
+# <z_3 = (5+h1+h2+h3+h4+h5+h6+2)
 # <z_4 = (5+h1+h2+h3+h4+h5+h6+2+d1)
 # <z_5 = (5+h1+h2+h3+h4+h5+h6+2+d1+1)
 C
