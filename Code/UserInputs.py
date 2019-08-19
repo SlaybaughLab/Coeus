@@ -62,7 +62,7 @@ The allowed inputs for the OBJECTIVE FUCNTION PARAMETERS section are:
 
 @author James Bevins
 
-@date 16June19
+@date 18Aug19
 """
 
 import logging
@@ -95,7 +95,7 @@ class UserInputs(object):
         @param coeusInputPath: \e string \n
             The path to the coues input file. \n
         @param transInputPath: \e string \n
-            The path to the trans input file. \n
+            The path to the transport input file. \n
         @param advantgInputPath: \e string \n
             The path to the advantg input file. \n
         """
@@ -136,12 +136,12 @@ class UserInputs(object):
 
         header = ["UserInputs:"]
         header += ["Coeus Input File Path: {}".format(self.coeusInput)]
+        header += ["Transport Code Used: {}".format(self.code)]
         header += ["Transport Input File Path: {}".format(self.transInput)]
         header += ["ADVANTG Input File Path: {}".format(self.advantgInput)]
-        header += ["Transport Code Used: {}".format(self.code)]
         return "\n".join(header)+"\n"
 
-    def read_coeus_settings(self):
+    def read_inputs(self):
         """!
         Reads the input file and creates the corresponding objects and
         populates their attributes.
@@ -166,7 +166,7 @@ class UserInputs(object):
             # Read the file line by line and store the values
             for line in f:
                 if line.strip().lower() == 'PROBLEM DEFINITION'.lower():
-                    line = f.next().strip().lower()
+                    line = next(f).strip().lower()
                     while line not in sectionHeaders:
                         # Stop at end of block
                         try:
@@ -180,6 +180,12 @@ class UserInputs(object):
                             if case('transport-code'):
                                 self.code = splitList[1].strip()
                                 break
+                            if case('transport-file-name'):
+                                self.transInput = splitList[1].strip()
+                                break
+                            if case('advantg-file-name'):
+                                self.advantgInput = splitList[1].strip()
+                                break
                             if case():
                                 module_logger.warning("Unkown user input "
                                 "found: {} ".format(splitList[0].strip()))
@@ -187,13 +193,13 @@ class UserInputs(object):
 
                         # Stop at end of file
                         try:
-                            line = f.next().strip().lower()
+                            line = next(f).strip().lower()
                         except StopIteration:
                             break
 
                 if line.strip().lower() == \
                    'OBJECTIVE FUNCTION PARAMETERS'.lower():
-                    line = f.next().strip().lower()
+                    line = next(f).strip().lower()
                     while line not in sectionHeaders:
                         # Stop at end of file
                         try:
@@ -218,7 +224,7 @@ class UserInputs(object):
                                 objSet.objForm = int(splitList[2].strip())
                                 tmp = []
                                 while len(tmp) < num:
-                                    splitList = f.next().strip().split()
+                                    splitList = next(f).strip().split()
                                     for i in range(0, len(splitList), 2):
                                         tmp.append([float(splitList[i].strip()),
                                                 float(splitList[i+1].strip())])
@@ -231,7 +237,7 @@ class UserInputs(object):
 
                         # Stop at end of file
                         try:
-                            line = f.next().strip().lower()
+                            line = next(f).strip().lower()
                         except StopIteration:
                             break
                 else:
@@ -243,9 +249,6 @@ class UserInputs(object):
         except IOError as e:
             module_logger.error("I/O error({0}): {1}".format(e.errno,
                                                              e.strerror))
-
-        # Test that the file closed
-        assert f.closed, "File did not close properly."
 
         module_logger.info('The Objective Function: {}'.format(objSet))
 

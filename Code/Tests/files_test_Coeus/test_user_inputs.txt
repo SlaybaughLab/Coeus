@@ -1,6 +1,7 @@
 PROBLEM DEFINITION
 transport-code mcnp6
-transport-file-name mcnp6.inp
+transport-file-name test_mcnp.inp
+advantg-file-name test_advantg.inp
 
 OBJECTIVE FUNCTION PARAMETERS
 function relative_least_squares

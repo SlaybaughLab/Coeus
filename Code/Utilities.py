@@ -388,7 +388,7 @@ def run_transport(lst, batchArgs, nps=[], code='mcnp6'):
                 elif n > 1E8:
                     tasks.append(cores*14)
                 else:
-                    module_logger.error('\nThe nps condition wasn't covered. '
+                    module_logger.error('\nThe nps condition was not covered. '
                                         'NPS = {}'.format(n))
 
         module_logger.debug('Number of Cores = {}'.format(cores))

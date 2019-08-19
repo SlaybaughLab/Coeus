@@ -25,7 +25,7 @@ ommitted if desired. \n
 
 @author James Bevins
 
-@date 16Jun19
+@date 18Aug19
 """
 
 import time
@@ -233,7 +233,7 @@ def main():
     if os.path.isfile(args.inp):
         logger.info("\nLoading input file located at: {}".format(args.inp))
         inputs = UserInputs(coeusInputPath=args.inp)
-        objFunc = inputs.read_coeus_settings()
+        objFunc = inputs.read_inputs()
     else:
         logger.info('\nNo user supplier input file located.  Program default '
                     'values to be used instead.')
