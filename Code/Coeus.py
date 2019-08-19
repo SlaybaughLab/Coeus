@@ -50,8 +50,10 @@ from ADVANTG_Utilities import ADVANTG_Settings, Print_ADVANTG_Input
 
 # Delete in near future.  Maybe modify Build_Matlib for mat library
 from NuclearData import Build_Matlib, Calc_Moderating_Ratio
-
+# Delete in near future.
 from MCNP_Utilities import MCNP_Settings, MCNP_Geometry, Print_MCNP_Input
+
+from Transport import Transport
 
 from Utilities import run_transport, MetaStats
 
@@ -237,6 +239,15 @@ def main():
     else:
         logger.info('\nNo user supplier input file located.  Program default '
                     'values to be used instead.')
+
+    # Test path for user input file.  Create the object if file exists.
+    if os.path.isfile(inputs.transInput):
+        logger.info("\nLoading input file located at: {}".format(
+                                                            inputs.transInput))
+        trans = Transport(inputs.transInput)
+    else:
+        logger.info('\nUser supplier transport input file could not be found.')
+        sys.exit(0)
 
     # Test path for constraint file. Call read_constraint if file exists
     if os.path.isfile(args.eta):
