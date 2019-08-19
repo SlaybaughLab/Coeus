@@ -1,61 +1,65 @@
-#######################################################################################################
-#
-# Module : test_UserInputs.py
-#
-# Contains : Routines to test UserInputs module
-#
-# Author : James Bevins
-#
-# Last Modified: 18Aug19
-#
-#######################################################################################################
+"""!
+@file testUserInputs.py
+@package CoeusTesting
 
-import os 
+@defgroup testUserInputs testUserInputs
+
+@brief Routines to test UserInputs module.
+
+@author James Bevins
+
+@date 18Aug19
+"""
+
+import os
 
 import numpy as np
 
-from UserInputs import UserInputs
 from nose.tools import assert_equal
-    
-#-------------------------------------------------------------------------------------------------------------#         
-# Assumed inputs
-path = os.getcwd() +'\\Tests\\files_test_Coeus\\'
-inputFname = path + 'test_user_inputs.txt'
-print(inputFname)
+from UserInputs import UserInputs
 
-#-------------------------------------------------------------------------------------------------------------#     
-# Test the default object creation
+#-----------------------------------------------------------------------------#
+# Assumed inputs
+PATH = os.getcwd() +'\\Tests\\files_test_Coeus\\'
+INPUTFNAME = PATH + 'test_user_inputs.txt'
+
+#-----------------------------------------------------------------------------#
 def test_UserInputs():
-    inputs = UserInputs(coeusInputPath=inputFname)
-    assert_equal(inputs.coeusInput, path+"test_user_inputs.txt")
+    """
+    Test the default object creation.
+    """
+    inputs = UserInputs(coeusInputPath=INPUTFNAME)
+    assert_equal(inputs.coeusInput, PATH+"test_user_inputs.txt")
     if os.path.isfile(inputs.coeusInput):
         print("\nLoading Coeus input file located at: {}".format(
-                                                           inputs.coeusInput))
+                                                          inputs.coeusInput))
     else:
         print("\nNo user supplier input file located a: {}".format(
-                                                           inputs.coeusInput))
+                                                          inputs.coeusInput))
     assert_equal(inputs.transInput, None)
     assert_equal(inputs.advantgInput, None)
-    assert_equal(inputs.code,"mcnp6")
-   
-# Test the file read
+    assert_equal(inputs.code, "mcnp6")
+
 def test_read_inputs():
-    inputs = UserInputs(coeusInputPath=inputFname)
+    """
+    Test the input file read function.
+    """
+    inputs = UserInputs(coeusInputPath=INPUTFNAME)
     objFunc = inputs.read_inputs()
 
     # Test UserInputs object
-    assert_equal(inputs.coeusInput, path+"test_user_inputs.txt")
+    assert_equal(inputs.coeusInput, PATH+"test_user_inputs.txt")
     assert_equal(inputs.transInput, "test_mcnp.inp")
     assert_equal(inputs.advantgInput, "test_advantg.inp")
     assert_equal(inputs.code, "mcnp6")
 
     # Test Objectives object
     assert_equal(objFunc.func.__name__, "relative_least_squares")
-    assert_equal(objFunc.funcTally,"24")
+    assert_equal(objFunc.funcTally, "24")
     assert_equal(objFunc.objType, "spectrum")
     assert_equal(objFunc.objForm, 0)
     np.testing.assert_equal(objFunc.objective, np.asarray(
-                                    [[4.1399e-07, 4.6800e-15], 
+                                    [[4.1399e-07, 4.6800e-15],
                                      [1.1253e-06, 3.1300e-13],
                                      [3.0590e-06, 7.9900e-12],
                                      [1.0677e-05, 4.4200e-11],
@@ -101,5 +105,3 @@ def test_read_inputs():
                                      [1.4918e+01, 8.1900e-05],
                                      [1.6905e+01, 7.1500e-08],
                                      [1.9640e+01, 4.9100e-09]]))
-    
-   
