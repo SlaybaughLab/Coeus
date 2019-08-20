@@ -8,6 +8,7 @@
 * [Update: 2019/03/08](#update-20190308)
 * [Update: 2019/03/22](#update-20190322)
 * [Update: 2019/05/23](#update-20190523)
+* [Update: 2019/08/18](#update-20190818)
 
 ***
 
@@ -74,6 +75,15 @@
   - Add materials library to simplify material input
   - Add additional math functions
   - Add combinatorial variables: first material, then cell
+
+***
+[Index](#top)
+
+### Update 2019/08/18 
+
+#### Meeting Notes:
+  - Material input in mcnp.inp (line 10)
+  - Comment Transport 
 
 ***
 [Index](#top)
