@@ -1,0 +1,15 @@
+Library,DPLUS
+Method, CADIS
+Outputs, MCNP SILO
+Tally Number, 14
+Point Source, True
+Material Mix Tolerance, 0.1
+Scattering Order,1
+/
+ETA X Spacing Interval,2.0
+ETA Y Spacing Interval,2.0
+ETA Z Spacing Interval,2.0
+Foil X Spacing Interval,1
+Foil Y Spacing Interval,1
+Foil Z Spacing Interval,0.2
+External Spacing Interval,2.5
